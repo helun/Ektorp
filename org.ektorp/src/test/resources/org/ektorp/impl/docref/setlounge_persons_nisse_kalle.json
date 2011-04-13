@@ -1,0 +1,4 @@
+{"total_rows":2,"offset":0,"rows":[
+{"id":"kalle","key":["lounge_id","seatedPeople",48],"value":null,"doc":{"_id":"kalle", "_rev":"123D123", "shoeSize":48 }},
+{"id":"nisse","key":["lounge_id","seatedPeople",52],"value":null,"doc":{"_id":"nisse", "_rev":"123D123", "shoeSize":52 }}
+]}

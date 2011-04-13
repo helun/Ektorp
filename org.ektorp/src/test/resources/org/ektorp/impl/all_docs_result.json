@@ -1,0 +1,4 @@
+{"total_rows":3,"offset":0,"rows":[
+{"id":"bar","key":"bar","value":{"rev":"1-4057566831"},"doc":{"_id":"doc_id1", "_rev":"1-4057566831", "name":"foo", "age":12}},
+{"id":"baz","key":"baz","value":{"rev":"1-2842770487"},"doc":{"_id":"doc_id2", "_rev":"1-2842770487", "name":"bar", "age":99}}
+]}

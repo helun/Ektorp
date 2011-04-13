@@ -1,0 +1,3 @@
+{"total_rows":1,"offset":0,"rows":[
+{"id":"doc_id1","key":"key_value","value":null,"doc":{"_id":"doc_id1", "_rev":"rev1", "name":"foo", "age":12}}
+]}

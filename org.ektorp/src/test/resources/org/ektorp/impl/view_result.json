@@ -1,0 +1,4 @@
+{"total_rows":2,"offset":1,"rows":[
+{"id":"doc_id1","key":"key_value","value":"doc_value1"},
+{"id":"doc_id2","key":"key_value","value":"doc_value2"}
+]}

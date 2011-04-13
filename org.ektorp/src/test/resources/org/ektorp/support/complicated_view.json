@@ -1,0 +1,16 @@
+{
+"map": "function(doc) {
+  if(doc.tags.length > 0) {
+    for(var idx in doc.tags) {
+      emit(doc.tags[idx], null);
+    }
+  }
+}",
+"reduce": "function(keys, values) {
+  var sum = 0;
+  for(var idx in values) {
+    sum = sum + values[idx];
+  }
+  return sum;
+}"
+}

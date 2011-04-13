@@ -1,0 +1,9 @@
+{
+	"_id":"doc_id",
+	"_rev":"doc_rev",
+	"name":"foo",
+	"mysteryStringField":"unknown",
+	"mysteryIntegerField":12345,
+	"mysteryObjectField":{"nestedField1":"foo", "nestedField2":"bar"},
+	"mysteryArrayField":["a1","a2","a3"]
+}

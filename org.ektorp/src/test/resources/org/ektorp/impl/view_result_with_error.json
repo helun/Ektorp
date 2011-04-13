@@ -1,0 +1,4 @@
+{"total_rows":4,"offset":0,"rows":[
+{"id":"foo","key":"foo","value":{"rev":"1-bf5388e92408b2a32cea929323154679"},"doc":{"_id":"foo", "_rev":"1-bf5388e92408b2a32cea929323154679", "name":"bar", "age":12}},
+{"key":"not_in_db","error":"not_found"}
+]}

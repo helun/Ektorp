@@ -1,0 +1,10 @@
+@IMPORT url("http://yui.yahooapis.com/combo?3.0.0/build/cssfonts/fonts-min.css&3.0.0/build/cssreset/reset-min.css&3.0.0/build/cssbase/base-min.css");
+html, body {background: #fefefe;}
+.book { margin: 0 10%; font-size:123.1%; font-family: 'Lucida Grande', Calibri, Arial, Verdana, sans-serif;}
+.author, .pubdate { color: #aaa;}
+.programlisting { background: #eee; border: 1px solid #ccc; padding: 1em; font-size: 93%;}
+h2 { border-bottom: 1px solid #ccc; }
+.hl-keyword {color: #82075a; }
+.hl-string i {color: #2a00ff !important; font-weight: normal; font-style: normal;}
+.emphasis { font-family: monospace;}
+.emphasis em {  font-style: normal; }

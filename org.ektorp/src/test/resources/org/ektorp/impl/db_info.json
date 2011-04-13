@@ -1,0 +1,11 @@
+{
+    "compact_running": false, 
+    "db_name": "dj", 
+    "disk_format_version": 5, 
+    "disk_size": 12377, 
+    "doc_count": 1, 
+    "doc_del_count": 1, 
+    "instance_start_time": "1267612389906234", 
+    "purge_seq": 1, 
+    "update_seq": 4
+}

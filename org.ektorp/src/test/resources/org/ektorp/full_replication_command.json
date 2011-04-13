@@ -1,0 +1,9 @@
+{"source":"http://example.org/example-database",
+	"target":"http://admin:password@127.0.0.1:5984/example-database",
+	"filter":"myddoc/myfilter",
+	"create_target":true,
+	"cancel":true,
+	"continuous":true,
+	"doc_ids": ["foo","bar","baz"],
+	"proxy":"http://localhost:8888",
+	"query_params": {"key":"value"}}

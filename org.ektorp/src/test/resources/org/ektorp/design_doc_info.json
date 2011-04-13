@@ -1,0 +1,13 @@
+{"name":"exampleDesignDoc",
+	"view_index":{
+		"signature":"a5867518b6853fbfdf01dfe72b3b343d",
+		"language":"javascript",
+		"disk_size":12398,
+		"updater_running":true,
+		"compact_running":true,
+		"waiting_commit":true,
+		"waiting_clients":2,
+		"update_seq":14,
+		"purge_seq":1
+	}
+}

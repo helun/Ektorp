@@ -1,0 +1,17 @@
+{
+  "_id":"_design/TestDoc",
+  "_rev":"12345",
+  "language": "javascript",
+  "views":
+  {
+    "all": {
+      "map": "function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }"
+    },
+    "by_lastname": {
+      "map": "function(doc) { if (doc.Type == 'TestDoc')  emit(doc.LastName, doc) }"
+    }
+  },
+  "lists":{},
+  "shows":{},
+  "filters":{}
+}
