@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.ektorp</groupId>
+	<artifactId>documentation</artifactId>
+	<name>Ektorp Parent</name>
+	<version>1.0.2-SNAPSHOT</version>
+	<description>Documentation for Ektorp</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.agilejava.docbkx</groupId>
+				<artifactId>docbkx-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate-html</goal>
+						</goals>
+						<phase>pre-site</phase>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.docbook</groupId>
+						<artifactId>docbook-xml</artifactId>
+						<version>4.4</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<htmlCustomization>src/docbkx/customization.xsl</htmlCustomization>
+					<htmlStylesheet>docbook.css</htmlStylesheet>
+					<highlightSource>true</highlightSource>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
