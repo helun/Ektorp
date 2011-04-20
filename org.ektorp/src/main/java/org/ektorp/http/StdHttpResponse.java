@@ -1,12 +1,18 @@
 package org.ektorp.http;
 
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import org.apache.http.*;
-import org.apache.http.message.*;
-import org.apache.http.protocol.*;
-import org.ektorp.util.*;
-import org.slf4j.*;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
+import org.ektorp.util.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -72,7 +78,9 @@ public class StdHttpResponse implements HttpResponse {
 	
 	public void releaseConnection() {
 		try {
-			entity.consumeContent();
+			if (entity.getContent() != null) {
+				entity.getContent().close();
+			}; 
 		} catch (IOException e) {
 			LOG.error("caught exception while releasing connection: {}", e.getMessage());
 		}

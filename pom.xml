@@ -45,7 +45,7 @@
 		<jackson.version>1.7.3</jackson.version>
 		<spring.version>3.0.4.RELEASE</spring.version>
 		<commons.io.version>2.0.1</commons.io.version>
-		<httpclient.version>4.0.3</httpclient.version>
+		<httpclient.version>4.1.1</httpclient.version>
 		<aspectj.version>1.6.9</aspectj.version>
 	</properties>
 

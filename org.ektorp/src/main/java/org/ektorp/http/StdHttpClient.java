@@ -147,14 +147,10 @@ public class StdHttpClient implements HttpClient {
 				SchemeRegistry schemeRegistry = new SchemeRegistry();
 				schemeRegistry.register(configureScheme());
 
-				ConnManagerParams
-						.setMaxTotalConnections(params, maxConnections);
-				ConnManagerParams.setMaxConnectionsPerRoute(params,
-						new ConnPerRouteBean(maxConnections));
-				ConnManagerParams.setTimeout(params,
-						Long.valueOf(connectionTimeout));
-
-				conman = new ThreadSafeClientConnManager(params, schemeRegistry);
+				ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(schemeRegistry);
+				cm.setMaxTotal(maxConnections);
+				cm.setDefaultMaxPerRoute(maxConnections);
+				conman = cm;
 			}
 
 			if (cleanupIdleConnections) {
@@ -163,6 +159,7 @@ public class StdHttpClient implements HttpClient {
 			return conman;
 		}
 
+		@SuppressWarnings("deprecation")
 		private Scheme configureScheme() {
 			if (enableSSL) {
 				try {
@@ -189,14 +186,10 @@ public class StdHttpClient implements HttpClient {
 									} }, null);
 						}
 
-						sslSocketFactory = new SSLSocketFactory(context);
+						sslSocketFactory = relaxedSSLSettings ? new SSLSocketFactory(context, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER) : new SSLSocketFactory(context);
 
-						if (relaxedSSLSettings) {
-							sslSocketFactory
-									.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-						}
 					}
-					return new Scheme("https", sslSocketFactory, port);
+					return new Scheme("https", port, sslSocketFactory);
                 } catch (NoSuchMethodError e) {
                     try {
                         AndroidSSLSocketFactory androidSSLSocketFactory = new AndroidSSLSocketFactory((KeyStore)null);
@@ -209,8 +202,7 @@ public class StdHttpClient implements HttpClient {
 					throw Exceptions.propagate(e);
 				}
 			} else {
-				return new Scheme("http",
-						PlainSocketFactory.getSocketFactory(), port);
+				return new Scheme("http", port, PlainSocketFactory.getSocketFactory());
 			}
 		}
 
