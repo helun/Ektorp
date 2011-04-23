@@ -31,7 +31,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 			offset = resultNode.get(OFFSET_FIELD_NAME).getIntValue();
 		}
 		JsonNode rowsNode = resultNode.get("rows");
-		rows = totalRows > -1 ? new ArrayList<ViewResult.Row>(totalRows) : new ArrayList<ViewResult.Row>();
+		rows = new ArrayList<ViewResult.Row>(rowsNode.size());
 		for (JsonNode n : rowsNode) {
 			rows.add(new Row(n));
 		}
