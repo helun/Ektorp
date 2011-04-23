@@ -143,6 +143,7 @@ import org.apache.http.params.HttpParams;
  * @author Julius Davies
  */
 
+@SuppressWarnings("deprecation")
 public class AndroidSSLSocketFactory implements LayeredSocketFactory, SocketFactory {
 
     public static final String TLS   = "TLS";
