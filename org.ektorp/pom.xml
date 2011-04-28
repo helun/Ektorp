@@ -27,6 +27,11 @@
 			<version>${httpclient.version}</version>
 		</dependency>
 		<dependency>
+              		 <groupId>org.apache.httpcomponents</groupId>
+		         <artifactId>httpclient-cache</artifactId>
+	                 <version>${httpclient.version}</version>
+	        </dependency>
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>${commons.io.version}</version>

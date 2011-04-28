@@ -1,24 +1,44 @@
 package org.ektorp.http;
 
-import java.io.*;
+import java.io.InputStream;
 import java.security.KeyStore;
 
-import javax.net.ssl.*;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
-import org.apache.http.*;
-import org.apache.http.auth.*;
-import org.apache.http.client.methods.*;
-import org.apache.http.client.params.*;
-import org.apache.http.conn.*;
-import org.apache.http.conn.params.*;
-import org.apache.http.conn.scheme.*;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.params.ConnManagerParams;
+import org.apache.http.conn.params.ConnPerRouteBean;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.*;
-import org.apache.http.impl.client.*;
-import org.apache.http.impl.conn.tsccm.*;
-import org.apache.http.params.*;
-import org.ektorp.util.*;
-import org.slf4j.*;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.cache.CacheConfig;
+import org.apache.http.impl.client.cache.CachingHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
+import org.ektorp.util.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -36,31 +56,31 @@ public class StdHttpClient implements HttpClient {
 	}
 
 	public HttpResponse delete(String uri) {
-		return executeRequest(new HttpDelete(uri));
+		return executeRequest(new HttpDelete(appendDefaultHostToUri(uri)));
 	}
 
 	public HttpResponse get(String uri) {
-		return executeRequest(new HttpGet(uri));
+		return executeRequest(new HttpGet(appendDefaultHostToUri(uri)));
 	}
 
 	public HttpResponse post(String uri, String content) {
-		return executePutPost(new HttpPost(uri), content);
+		return executePutPost(new HttpPost(appendDefaultHostToUri(uri)), content);
 	}
 
 	public HttpResponse post(String uri, InputStream content) {
 		InputStreamEntity e = new InputStreamEntity(content, -1);
 		e.setContentType("application/json");
-		HttpPost post = new HttpPost(uri);
+		HttpPost post = new HttpPost(appendDefaultHostToUri(uri));
 		post.setEntity(e);
 		return executeRequest(post);
 	}
 
 	public HttpResponse put(String uri, String content) {
-		return executePutPost(new HttpPut(uri), content);
+		return executePutPost(new HttpPut(appendDefaultHostToUri(uri)), content);
 	}
 
 	public HttpResponse put(String uri) {
-		return executeRequest(new HttpPut(uri));
+		return executeRequest(new HttpPut(appendDefaultHostToUri(uri)));
 	}
 
 	public HttpResponse put(String uri, InputStream data, String contentType,
@@ -68,13 +88,25 @@ public class StdHttpClient implements HttpClient {
 		InputStreamEntity e = new InputStreamEntity(data, contentLength);
 		e.setContentType(contentType);
 
-		HttpPut hp = new HttpPut(uri);
+		HttpPut hp = new HttpPut(appendDefaultHostToUri(uri));
 		hp.setEntity(e);
 		return executeRequest(hp);
 	}
 
 	public HttpResponse head(String uri) {
-		return executeRequest(new HttpHead(uri));
+		return executeRequest(new HttpHead(appendDefaultHostToUri(uri)));
+	}
+	
+	private String appendDefaultHostToUri(String uri) {
+		HttpHost host = (HttpHost) client.getParams().getParameter(ClientPNames.DEFAULT_HOST);
+		StringBuilder hostBuilder = new StringBuilder();
+		hostBuilder.append(host.getSchemeName());
+		hostBuilder.append("://");
+		hostBuilder.append(host.getHostName());
+		hostBuilder.append(":");
+		hostBuilder.append(host.getPort());
+		hostBuilder.append(uri);
+		return hostBuilder.toString();
 	}
 
 	private HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,
@@ -125,6 +157,9 @@ public class StdHttpClient implements HttpClient {
 
 		boolean cleanupIdleConnections = true;
 		boolean useExpectContinue = true;
+		boolean caching = false;
+		int maxObjectSizeBytes = 8192;
+		int maxCacheEntries = 1000;
 
 		public Builder host(String s) {
 			host = s;
@@ -138,6 +173,20 @@ public class StdHttpClient implements HttpClient {
 
 		public Builder proxy(String s) {
 			proxy = s;
+			return this;
+		}
+		
+		public Builder caching(boolean b) {
+			caching = b;
+			return this;
+		}
+		
+		public Builder maxCacheEntries(int m) {
+			maxCacheEntries = m;
+			return this;
+		}
+		public Builder maxObjectSizeBytes(int m) {
+			maxObjectSizeBytes = m;
 			return this;
 		}
 
@@ -234,6 +283,17 @@ public class StdHttpClient implements HttpClient {
 				client.addRequestInterceptor(
 						new PreemptiveAuthRequestInterceptor(), 0);
 			}
+			
+			if (caching) {
+				CacheConfig cacheConfig = new CacheConfig();  
+				cacheConfig.setMaxCacheEntries(maxCacheEntries);
+				cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
+				
+				CachingHttpClient cachingHttpClient = new CachingHttpClient(client, cacheConfig);
+				
+				return cachingHttpClient;
+			}
+			
 			return client;
 		}
 
