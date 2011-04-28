@@ -195,6 +195,13 @@ public interface CouchDbConnector {
 	 * @return
 	 */
 	ViewResult queryView(ViewQuery query);
+	
+	/**
+	 *
+	 * @param query
+	 * @return the view result as a iterable stream.
+	 */
+	StreamingViewResult queryForStreamingView(ViewQuery query);
 	/**
 	 *
 	 * @param query
