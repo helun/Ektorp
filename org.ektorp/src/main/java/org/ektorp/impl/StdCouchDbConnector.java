@@ -492,7 +492,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		ChangesCommand actualCmd = new ChangesCommand.Builder().merge(cmd)
 				.continuous(true).heartbeat(heartbeat).since(since).build();
 
-		return new ContinuousChangesFeed(dbName, changesAsStream(actualCmd));
+		return new ContinuousChangesFeed(dbName, restTemplate.get(dbURI.append(actualCmd.toString()).toString()));
 	}
 
 }

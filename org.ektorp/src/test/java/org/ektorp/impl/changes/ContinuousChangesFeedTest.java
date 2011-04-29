@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.concurrent.*;
 
 import org.ektorp.changes.*;
+import org.ektorp.impl.ResponseOnFileStub;
 import org.junit.*;
 
 public class ContinuousChangesFeedTest {
@@ -23,7 +24,7 @@ public class ContinuousChangesFeedTest {
 		writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
 		
 		testStream = new TestStream(in);
-		feed = new ContinuousChangesFeed("testDB", testStream);
+		feed = new ContinuousChangesFeed("testDB", ResponseOnFileStub.newInstance(200, testStream, "application/json", change.length()));
 	}
 
 	@Test

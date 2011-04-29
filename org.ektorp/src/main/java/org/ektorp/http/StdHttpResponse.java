@@ -4,7 +4,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -27,15 +27,17 @@ public class StdHttpResponse implements HttpResponse {
 	private final HttpEntity entity;
 	private final StatusLine status;
 	private final String requestURI;
+	private final HttpRequestBase httpRequest;
 	
-	public static StdHttpResponse of(org.apache.http.HttpResponse rsp, String requestURI) {
-		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), requestURI);
+	public static StdHttpResponse of(org.apache.http.HttpResponse rsp, HttpRequestBase httpRequest) {
+		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest);
 	}
 	
-	private StdHttpResponse(HttpEntity e, StatusLine status, String requestURI) {
+	private StdHttpResponse(HttpEntity e, StatusLine status, HttpRequestBase httpRequest) {
+		this.httpRequest = httpRequest;
 		this.entity = e != null ? e : NULL_ENTITY;
 		this.status = status;
-		this.requestURI = requestURI;
+		this.requestURI = httpRequest.getURI().toString();
 	}
 	
 	
@@ -85,7 +87,11 @@ public class StdHttpResponse implements HttpResponse {
 			LOG.error("caught exception while releasing connection: {}", e.getMessage());
 		}
 	}
-
+	
+	public void abort() {
+		httpRequest.abort();
+	}
+	
 	
 	public String toString() {
 		return status.getStatusCode() + ":" + status.getReasonPhrase();

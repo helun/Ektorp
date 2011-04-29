@@ -132,7 +132,7 @@ public class StdHttpClient implements HttpClient {
 						request.getURI(), rsp.getStatusLine().getStatusCode(),
 						rsp.getStatusLine().getReasonPhrase()));
 			}
-			return StdHttpResponse.of(rsp, request.getURI().toString());
+			return StdHttpResponse.of(rsp, request);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}
