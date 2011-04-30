@@ -45,6 +45,10 @@ public class HttpResponseStub implements HttpResponse {
 		return 0;
 	}
 	
+	public void abort() {
+		// TODO Auto-generated method stub	
+	}
+	
 	public String getRequestURI() {
 		return "static/test/path";
 	}

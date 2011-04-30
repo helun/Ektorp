@@ -9,6 +9,7 @@ import org.codehaus.jackson.*;
 import org.codehaus.jackson.map.*;
 import org.codehaus.jackson.node.*;
 import org.ektorp.changes.*;
+import org.ektorp.http.HttpResponse;
 import org.ektorp.util.*;
 import org.slf4j.*;
 /**
@@ -32,10 +33,12 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
 	private final BufferedReader reader;
 	private final Thread thread = new Thread(this);
 	private volatile boolean shouldRun = true;
+	private final HttpResponse httpResponse;
 	
-	public ContinuousChangesFeed(String dbName, InputStream changesStream) {
+	public ContinuousChangesFeed(String dbName, HttpResponse httpResponse) {
+		this.httpResponse = httpResponse;
 		try {
-			reader = new BufferedReader(new InputStreamReader(changesStream, "UTF-8"));
+			reader = new BufferedReader(new InputStreamReader(httpResponse.getContent(), "UTF-8"));
 			thread.setName(String.format("ektorp-%s-changes-listening-thread-%s", dbName, THREAD_COUNT.getAndIncrement()));
 			thread.start();
 		} catch (UnsupportedEncodingException e) {
@@ -46,6 +49,13 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
 	public DocumentChange next() throws InterruptedException {
 		assertRunningState();
 		DocumentChange c = changes.take();
+		checkIfInterrupted(c);
+		return c;
+	}
+	
+	public DocumentChange poll() throws InterruptedException {
+		assertRunningState();
+		DocumentChange c = changes.poll();
 		checkIfInterrupted(c);
 		return c;
 	}
@@ -67,7 +77,7 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
 	}
 	
 	private void checkIfInterrupted(DocumentChange c) throws InterruptedException {
-		if (c == INTERRUPT_MARKER) {
+		if (c == INTERRUPT_MARKER || (!shouldRun && changes.isEmpty())) {
 			throw new InterruptedException();
 		}
 	}
@@ -78,9 +88,9 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
 		thread.interrupt();
 	}
 
-	private void sendInterruptMarker() {
+	private void sendInterruptMarker()  {
 		LOG.debug("Sending interrupt marker in order to interrupt feed consumer");
-		changes.add(INTERRUPT_MARKER);
+		changes.offer(INTERRUPT_MARKER);
 	}
 
 	public boolean isAlive() {
@@ -108,6 +118,10 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
 			handleException(e);
 		} finally {
 			sendInterruptMarker();
+			httpResponse.abort();
+			try {
+				reader.close();
+			} catch (IOException e) {}
 		}
 	}
 

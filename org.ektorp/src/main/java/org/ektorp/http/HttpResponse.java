@@ -11,5 +11,5 @@ public interface HttpResponse {
 	int getContentLength();
 	InputStream getContent();
 	void releaseConnection();
-	
+	void abort();
 }

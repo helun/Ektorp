@@ -289,6 +289,10 @@ public class StdCouchDbConnector implements CouchDbConnector {
 				query.buildQuery(), rh);
 	}
 
+	public StreamingViewResult queryForStreamingView(ViewQuery query) {
+		return new StreamingViewResult(objectMapper,queryForStream(query));
+	}
+	
 	public InputStream queryForStream(ViewQuery query) {
 		Assert.notNull(query, "query cannot be null");
 		query.dbPath(dbURI.toString());
@@ -488,7 +492,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		ChangesCommand actualCmd = new ChangesCommand.Builder().merge(cmd)
 				.continuous(true).heartbeat(heartbeat).since(since).build();
 
-		return new ContinuousChangesFeed(dbName, changesAsStream(actualCmd));
+		return new ContinuousChangesFeed(dbName, restTemplate.get(dbURI.append(actualCmd.toString()).toString()));
 	}
 
 }
