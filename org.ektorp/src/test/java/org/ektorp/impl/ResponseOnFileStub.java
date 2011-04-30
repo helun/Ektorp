@@ -38,6 +38,16 @@ public class ResponseOnFileStub implements HttpResponse {
 		r.contentType = contentType;
 		return r;
 	}
+	
+	public static ResponseOnFileStub newInstance(int code, InputStream in,
+			String contentType, int contentLength) {
+		ResponseOnFileStub r = new ResponseOnFileStub();
+		r.code = code;
+		r.in = in;
+		r.contentLength = contentLength;
+		r.contentType = contentType;
+		return r;
+	}
 
 	public int getCode() {
 		return code;
@@ -55,6 +65,10 @@ public class ResponseOnFileStub implements HttpResponse {
 		return code < 300;
 	}
 
+	public void abort() {
+		releaseConnection();
+	}
+	
 	public void releaseConnection() {
 		connectionReleased = true;
 		IOUtils.closeQuietly(in);

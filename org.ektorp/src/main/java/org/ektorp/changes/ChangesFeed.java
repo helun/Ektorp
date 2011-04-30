@@ -18,6 +18,12 @@ public interface ChangesFeed {
 	 */
 	DocumentChange next() throws InterruptedException;
 	/**
+	 * Retrieves and removes the head of this changes feed, do not wait until an element becomes available. returns null if empty
+	 * @return
+	 * @throws InterruptedException when this changes feed is closed or otherwise is interrupted
+	 */
+	DocumentChange poll() throws InterruptedException;
+	/**
 	 * Retrieves and  removes the head of this changes feed, waiting up to the specified wait time if necessary for an element to become available.
 	 * @param timeout
 	 * @param unit
