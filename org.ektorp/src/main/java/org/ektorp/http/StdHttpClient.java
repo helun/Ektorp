@@ -19,8 +19,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.params.ConnPerRouteBean;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -48,11 +46,17 @@ import org.slf4j.LoggerFactory;
 public class StdHttpClient implements HttpClient {
 
 	private final org.apache.http.client.HttpClient client;
+	private final org.apache.http.client.HttpClient backend;
 	private final static Logger LOG = LoggerFactory
 			.getLogger(StdHttpClient.class);
 
 	public StdHttpClient(org.apache.http.client.HttpClient hc) {
-		client = hc;
+		this(hc, hc);
+	}
+	public StdHttpClient(org.apache.http.client.HttpClient hc, 
+			org.apache.http.client.HttpClient cachingClient) {
+		client = cachingClient;
+		backend = hc;
 	}
 
 	public HttpResponse delete(String uri) {
@@ -62,9 +66,17 @@ public class StdHttpClient implements HttpClient {
 	public HttpResponse get(String uri) {
 		return executeRequest(new HttpGet(appendDefaultHostToUri(uri)));
 	}
+	
+	public HttpResponse getUncached(String uri) {
+		return executeRequest(new HttpGet(appendDefaultHostToUri(uri)), true);
+	}
+
+	public HttpResponse postUncached(String uri, String content) {
+		return executePutPost(new HttpPost(appendDefaultHostToUri(uri)), content, true);
+	}
 
 	public HttpResponse post(String uri, String content) {
-		return executePutPost(new HttpPost(appendDefaultHostToUri(uri)), content);
+		return executePutPost(new HttpPost(appendDefaultHostToUri(uri)), content, false);
 	}
 
 	public HttpResponse post(String uri, InputStream content) {
@@ -76,7 +88,7 @@ public class StdHttpClient implements HttpClient {
 	}
 
 	public HttpResponse put(String uri, String content) {
-		return executePutPost(new HttpPut(appendDefaultHostToUri(uri)), content);
+		return executePutPost(new HttpPut(appendDefaultHostToUri(uri)), content, false);
 	}
 
 	public HttpResponse put(String uri) {
@@ -110,7 +122,7 @@ public class StdHttpClient implements HttpClient {
 	}
 
 	private HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,
-			String content) {
+			String content, boolean useBackend) {
 		try {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Content: {}", content);
@@ -118,15 +130,20 @@ public class StdHttpClient implements HttpClient {
 			StringEntity e = new StringEntity(content, "UTF-8");
 			e.setContentType("application/json");
 			request.setEntity(e);
-			return executeRequest(request);
+			return executeRequest(request, useBackend);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}
 	}
 
-	private HttpResponse executeRequest(HttpRequestBase request) {
+	private HttpResponse executeRequest(HttpRequestBase request, boolean useBackend) {
 		try {
-			org.apache.http.HttpResponse rsp = client.execute(request);
+			org.apache.http.HttpResponse rsp;
+			if (useBackend) {
+				rsp = backend.execute(request);
+			} else {
+				rsp = client.execute(request);				
+			}
 			if (LOG.isTraceEnabled()) {
 				LOG.trace(String.format("%s %s %s %s", request.getMethod(),
 						request.getURI(), rsp.getStatusLine().getStatusCode(),
@@ -135,7 +152,11 @@ public class StdHttpClient implements HttpClient {
 			return StdHttpResponse.of(rsp, request);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
-		}
+		}		
+	}
+	
+	private HttpResponse executeRequest(HttpRequestBase request) {
+		return executeRequest(request, false);
 	}
 
 	public static class Builder {
@@ -284,15 +305,7 @@ public class StdHttpClient implements HttpClient {
 						new PreemptiveAuthRequestInterceptor(), 0);
 			}
 			
-			if (caching) {
-				CacheConfig cacheConfig = new CacheConfig();  
-				cacheConfig.setMaxCacheEntries(maxCacheEntries);
-				cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
-				
-				CachingHttpClient cachingHttpClient = new CachingHttpClient(client, cacheConfig);
-				
-				return cachingHttpClient;
-			}
+			
 			
 			return client;
 		}
@@ -403,7 +416,17 @@ public class StdHttpClient implements HttpClient {
 		}
 
 		public HttpClient build() {
-			return new StdHttpClient(configureClient());
+			org.apache.http.client.HttpClient client = configureClient();
+			org.apache.http.client.HttpClient cachingHttpClient = client;
+
+			if (caching) {
+				CacheConfig cacheConfig = new CacheConfig();  
+				cacheConfig.setMaxCacheEntries(maxCacheEntries);
+				cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
+				
+				cachingHttpClient = new CachingHttpClient(client, cacheConfig);
+			}
+			return new StdHttpClient(cachingHttpClient, client);
 		}
 
 	}
