@@ -54,45 +54,45 @@ public class StdHttpClient implements HttpClient {
 		this(hc, hc);
 	}
 	public StdHttpClient(org.apache.http.client.HttpClient hc, 
-			org.apache.http.client.HttpClient cachingClient) {
-		client = cachingClient;
-		backend = hc;
+			org.apache.http.client.HttpClient backend) {
+		this.client = hc;
+		this.backend = backend;
 	}
 
 	public HttpResponse delete(String uri) {
-		return executeRequest(new HttpDelete(appendDefaultHostToUri(uri)));
+		return executeRequest(new HttpDelete(uri));
 	}
 
 	public HttpResponse get(String uri) {
-		return executeRequest(new HttpGet(appendDefaultHostToUri(uri)));
+		return executeRequest(new HttpGet(uri));
 	}
 	
 	public HttpResponse getUncached(String uri) {
-		return executeRequest(new HttpGet(appendDefaultHostToUri(uri)), true);
+		return executeRequest(new HttpGet(uri), true);
 	}
 
 	public HttpResponse postUncached(String uri, String content) {
-		return executePutPost(new HttpPost(appendDefaultHostToUri(uri)), content, true);
+		return executePutPost(new HttpPost(uri), content, true);
 	}
 
 	public HttpResponse post(String uri, String content) {
-		return executePutPost(new HttpPost(appendDefaultHostToUri(uri)), content, false);
+		return executePutPost(new HttpPost(uri), content, false);
 	}
 
 	public HttpResponse post(String uri, InputStream content) {
 		InputStreamEntity e = new InputStreamEntity(content, -1);
 		e.setContentType("application/json");
-		HttpPost post = new HttpPost(appendDefaultHostToUri(uri));
+		HttpPost post = new HttpPost(uri);
 		post.setEntity(e);
 		return executeRequest(post);
 	}
 
 	public HttpResponse put(String uri, String content) {
-		return executePutPost(new HttpPut(appendDefaultHostToUri(uri)), content, false);
+		return executePutPost(new HttpPut(uri), content, false);
 	}
 
 	public HttpResponse put(String uri) {
-		return executeRequest(new HttpPut(appendDefaultHostToUri(uri)));
+		return executeRequest(new HttpPut(uri));
 	}
 
 	public HttpResponse put(String uri, InputStream data, String contentType,
@@ -100,26 +100,16 @@ public class StdHttpClient implements HttpClient {
 		InputStreamEntity e = new InputStreamEntity(data, contentLength);
 		e.setContentType(contentType);
 
-		HttpPut hp = new HttpPut(appendDefaultHostToUri(uri));
+		HttpPut hp = new HttpPut(uri);
 		hp.setEntity(e);
 		return executeRequest(hp);
 	}
 
 	public HttpResponse head(String uri) {
-		return executeRequest(new HttpHead(appendDefaultHostToUri(uri)));
+		return executeRequest(new HttpHead(uri));
 	}
 	
-	private String appendDefaultHostToUri(String uri) {
-		HttpHost host = (HttpHost) client.getParams().getParameter(ClientPNames.DEFAULT_HOST);
-		StringBuilder hostBuilder = new StringBuilder();
-		hostBuilder.append(host.getSchemeName());
-		hostBuilder.append("://");
-		hostBuilder.append(host.getHostName());
-		hostBuilder.append(":");
-		hostBuilder.append(host.getPort());
-		hostBuilder.append(uri);
-		return hostBuilder.toString();
-	}
+	
 
 	private HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,
 			String content, boolean useBackend) {
@@ -142,7 +132,7 @@ public class StdHttpClient implements HttpClient {
 			if (useBackend) {
 				rsp = backend.execute(request);
 			} else {
-				rsp = client.execute(request);				
+				rsp = client.execute((HttpHost)client.getParams().getParameter(ClientPNames.DEFAULT_HOST), request);				
 			}
 			if (LOG.isTraceEnabled()) {
 				LOG.trace(String.format("%s %s %s %s", request.getMethod(),
