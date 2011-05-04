@@ -297,7 +297,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	public InputStream queryForStream(ViewQuery query) {
 		Assert.notNull(query, "query cannot be null");
 		query.dbPath(dbURI.toString());
-		return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
+		return query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(),
 				query.getKeysAsJson()).getContent() : restTemplate.getUncached(
 				query.buildQuery()).getContent();
 	}

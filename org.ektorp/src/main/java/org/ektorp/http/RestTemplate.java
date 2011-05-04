@@ -65,6 +65,10 @@ public class RestTemplate {
 	public HttpResponse post(String path, String content ) {
 		return handleRawResponse(client.post(path,content));
 	}
+	
+	public HttpResponse postUncached(String path, String content ) {
+		return handleRawResponse(client.postUncached(path,content));
+	}
 
 	public <T> T delete(String path, ResponseCallback<T> callback) {
 		return handleResponse(callback, client.delete(path));
