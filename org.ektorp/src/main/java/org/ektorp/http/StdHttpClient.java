@@ -19,8 +19,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.params.ConnPerRouteBean;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -48,39 +46,53 @@ import org.slf4j.LoggerFactory;
 public class StdHttpClient implements HttpClient {
 
 	private final org.apache.http.client.HttpClient client;
+	private final org.apache.http.client.HttpClient backend;
 	private final static Logger LOG = LoggerFactory
 			.getLogger(StdHttpClient.class);
 
 	public StdHttpClient(org.apache.http.client.HttpClient hc) {
-		client = hc;
+		this(hc, hc);
+	}
+	public StdHttpClient(org.apache.http.client.HttpClient hc, 
+			org.apache.http.client.HttpClient backend) {
+		this.client = hc;
+		this.backend = backend;
 	}
 
 	public HttpResponse delete(String uri) {
-		return executeRequest(new HttpDelete(appendDefaultHostToUri(uri)));
+		return executeRequest(new HttpDelete(uri));
 	}
 
 	public HttpResponse get(String uri) {
-		return executeRequest(new HttpGet(appendDefaultHostToUri(uri)));
+		return executeRequest(new HttpGet(uri));
+	}
+	
+	public HttpResponse getUncached(String uri) {
+		return executeRequest(new HttpGet(uri), true);
+	}
+
+	public HttpResponse postUncached(String uri, String content) {
+		return executePutPost(new HttpPost(uri), content, true);
 	}
 
 	public HttpResponse post(String uri, String content) {
-		return executePutPost(new HttpPost(appendDefaultHostToUri(uri)), content);
+		return executePutPost(new HttpPost(uri), content, false);
 	}
 
 	public HttpResponse post(String uri, InputStream content) {
 		InputStreamEntity e = new InputStreamEntity(content, -1);
 		e.setContentType("application/json");
-		HttpPost post = new HttpPost(appendDefaultHostToUri(uri));
+		HttpPost post = new HttpPost(uri);
 		post.setEntity(e);
 		return executeRequest(post);
 	}
 
 	public HttpResponse put(String uri, String content) {
-		return executePutPost(new HttpPut(appendDefaultHostToUri(uri)), content);
+		return executePutPost(new HttpPut(uri), content, false);
 	}
 
 	public HttpResponse put(String uri) {
-		return executeRequest(new HttpPut(appendDefaultHostToUri(uri)));
+		return executeRequest(new HttpPut(uri));
 	}
 
 	public HttpResponse put(String uri, InputStream data, String contentType,
@@ -88,29 +100,19 @@ public class StdHttpClient implements HttpClient {
 		InputStreamEntity e = new InputStreamEntity(data, contentLength);
 		e.setContentType(contentType);
 
-		HttpPut hp = new HttpPut(appendDefaultHostToUri(uri));
+		HttpPut hp = new HttpPut(uri);
 		hp.setEntity(e);
 		return executeRequest(hp);
 	}
 
 	public HttpResponse head(String uri) {
-		return executeRequest(new HttpHead(appendDefaultHostToUri(uri)));
+		return executeRequest(new HttpHead(uri));
 	}
 	
-	private String appendDefaultHostToUri(String uri) {
-		HttpHost host = (HttpHost) client.getParams().getParameter(ClientPNames.DEFAULT_HOST);
-		StringBuilder hostBuilder = new StringBuilder();
-		hostBuilder.append(host.getSchemeName());
-		hostBuilder.append("://");
-		hostBuilder.append(host.getHostName());
-		hostBuilder.append(":");
-		hostBuilder.append(host.getPort());
-		hostBuilder.append(uri);
-		return hostBuilder.toString();
-	}
+	
 
 	private HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,
-			String content) {
+			String content, boolean useBackend) {
 		try {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Content: {}", content);
@@ -118,15 +120,20 @@ public class StdHttpClient implements HttpClient {
 			StringEntity e = new StringEntity(content, "UTF-8");
 			e.setContentType("application/json");
 			request.setEntity(e);
-			return executeRequest(request);
+			return executeRequest(request, useBackend);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}
 	}
 
-	private HttpResponse executeRequest(HttpRequestBase request) {
+	private HttpResponse executeRequest(HttpRequestBase request, boolean useBackend) {
 		try {
-			org.apache.http.HttpResponse rsp = client.execute(request);
+			org.apache.http.HttpResponse rsp;
+			if (useBackend) {
+				rsp = backend.execute(request);
+			} else {
+				rsp = client.execute((HttpHost)client.getParams().getParameter(ClientPNames.DEFAULT_HOST), request);				
+			}
 			if (LOG.isTraceEnabled()) {
 				LOG.trace(String.format("%s %s %s %s", request.getMethod(),
 						request.getURI(), rsp.getStatusLine().getStatusCode(),
@@ -135,7 +142,11 @@ public class StdHttpClient implements HttpClient {
 			return StdHttpResponse.of(rsp, request);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
-		}
+		}		
+	}
+	
+	private HttpResponse executeRequest(HttpRequestBase request) {
+		return executeRequest(request, false);
 	}
 
 	public static class Builder {
@@ -284,15 +295,7 @@ public class StdHttpClient implements HttpClient {
 						new PreemptiveAuthRequestInterceptor(), 0);
 			}
 			
-			if (caching) {
-				CacheConfig cacheConfig = new CacheConfig();  
-				cacheConfig.setMaxCacheEntries(maxCacheEntries);
-				cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
-				
-				CachingHttpClient cachingHttpClient = new CachingHttpClient(client, cacheConfig);
-				
-				return cachingHttpClient;
-			}
+			
 			
 			return client;
 		}
@@ -403,7 +406,17 @@ public class StdHttpClient implements HttpClient {
 		}
 
 		public HttpClient build() {
-			return new StdHttpClient(configureClient());
+			org.apache.http.client.HttpClient client = configureClient();
+			org.apache.http.client.HttpClient cachingHttpClient = client;
+
+			if (caching) {
+				CacheConfig cacheConfig = new CacheConfig();  
+				cacheConfig.setMaxCacheEntries(maxCacheEntries);
+				cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
+				
+				cachingHttpClient = new CachingHttpClient(client, cacheConfig);
+			}
+			return new StdHttpClient(cachingHttpClient, client);
 		}
 
 	}

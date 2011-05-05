@@ -3,6 +3,7 @@ package org.ektorp.impl;
 import java.io.*;
 import java.util.*;
 
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jackson.*;
 import org.codehaus.jackson.map.*;
 import org.ektorp.*;
@@ -296,8 +297,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	public InputStream queryForStream(ViewQuery query) {
 		Assert.notNull(query, "query cannot be null");
 		query.dbPath(dbURI.toString());
-		return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
-				query.getKeysAsJson()).getContent() : restTemplate.get(
+		return query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(),
+				query.getKeysAsJson()).getContent() : restTemplate.getUncached(
 				query.buildQuery()).getContent();
 	}
 
@@ -492,7 +493,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		ChangesCommand actualCmd = new ChangesCommand.Builder().merge(cmd)
 				.continuous(true).heartbeat(heartbeat).since(since).build();
 
-		return new ContinuousChangesFeed(dbName, restTemplate.get(dbURI.append(actualCmd.toString()).toString()));
+		return new ContinuousChangesFeed(dbName, restTemplate.getUncached(dbURI.append(actualCmd.toString()).toString()));
 	}
 
 }
