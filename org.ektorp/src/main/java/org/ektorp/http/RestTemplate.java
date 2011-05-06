@@ -2,6 +2,7 @@ package org.ektorp.http;
 
 import java.io.*;
 
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.ektorp.*;
 import org.ektorp.util.*;
 /**
@@ -24,6 +25,10 @@ public class RestTemplate {
 
 	public HttpResponse get(String path) {
 		return handleRawResponse(client.get(path));
+	}
+	
+	public HttpResponse getUncached(String path) {
+		return handleRawResponse(client.getUncached(path));
 	}
 
 	public void put(String path) {
@@ -59,6 +64,10 @@ public class RestTemplate {
 	
 	public HttpResponse post(String path, String content ) {
 		return handleRawResponse(client.post(path,content));
+	}
+	
+	public HttpResponse postUncached(String path, String content ) {
+		return handleRawResponse(client.postUncached(path,content));
 	}
 
 	public <T> T delete(String path, ResponseCallback<T> callback) {

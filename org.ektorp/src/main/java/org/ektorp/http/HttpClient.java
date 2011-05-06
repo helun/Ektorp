@@ -21,5 +21,9 @@ public interface HttpClient {
 	HttpResponse delete(String uri);
 	
 	HttpResponse head(String uri);
+	
+	HttpResponse getUncached(String uri);
+	
+	HttpResponse postUncached(String uri, String content);
 
 }

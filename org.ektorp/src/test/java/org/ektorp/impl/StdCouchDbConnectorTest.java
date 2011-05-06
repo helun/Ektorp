@@ -362,9 +362,9 @@ public class StdCouchDbConnectorTest {
 			.viewName("test_view")
 			.keys(keys);
 		
-		when(httpClient.post(anyString(), anyString())).thenReturn(ResponseOnFileStub.newInstance(200, "view_result.json"));
+		when(httpClient.postUncached(anyString(), anyString())).thenReturn(ResponseOnFileStub.newInstance(200, "view_result.json"));
 		dbCon.queryForStream(query).close();
-		verify(httpClient).post(query.buildQuery(), query.getKeysAsJson());
+		verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
 	}
 	
 	@Test
