@@ -33,6 +33,10 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 	public @Value("#{couchdbProperties['cleanupIdleConnections']?:true}") 	boolean cleanupIdleConnections;
 	public @Value("#{couchdbProperties['enableSSL']?:false}") 				boolean enableSSL;
 	public @Value("#{couchdbProperties['relaxedSSLSettings']?:false}") 		boolean relaxedSSLSettings;
+	public @Value("#{couchdbProperties['caching']?:true}")		 			boolean caching;
+	public @Value("#{couchdbProperties['maxCacheEntries']?:1000}")			int maxCacheEntries;
+	public @Value("#{couchdbProperties['maxObjectSizeBytes']?:8192}")		int maxObjectSizeBytes;
+	
 	
 	private SSLSocketFactory sslSocketFactory;
 	
@@ -60,6 +64,9 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 								.enableSSL(enableSSL)
 								.relaxedSSLSettings(relaxedSSLSettings)
 								.sslSocketFactory(sslSocketFactory)
+								.caching(caching)
+								.maxCacheEntries(maxCacheEntries)
+								.maxObjectSizeBytes(maxObjectSizeBytes)
 								.build();
 		
 		if (testConnectionAtStartup) {
