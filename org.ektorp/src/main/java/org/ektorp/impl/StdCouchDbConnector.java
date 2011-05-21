@@ -1,17 +1,49 @@
 package org.ektorp.impl;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
-import org.ektorp.*;
-import org.ektorp.changes.*;
-import org.ektorp.http.*;
-import org.ektorp.impl.changes.*;
-import org.ektorp.util.*;
-import org.slf4j.*;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.ektorp.AttachmentInputStream;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.CouchDbInstance;
+import org.ektorp.DbAccessException;
+import org.ektorp.DbInfo;
+import org.ektorp.DbPath;
+import org.ektorp.DesignDocInfo;
+import org.ektorp.DocumentOperationResult;
+import org.ektorp.Page;
+import org.ektorp.PageRequest;
+import org.ektorp.ReplicationCommand;
+import org.ektorp.ReplicationStatus;
+import org.ektorp.Revision;
+import org.ektorp.StreamingViewResult;
+import org.ektorp.UpdateConflictException;
+import org.ektorp.ViewQuery;
+import org.ektorp.ViewResult;
+import org.ektorp.changes.ChangesCommand;
+import org.ektorp.changes.ChangesFeed;
+import org.ektorp.changes.DocumentChange;
+import org.ektorp.http.HttpClient;
+import org.ektorp.http.HttpResponse;
+import org.ektorp.http.HttpStatus;
+import org.ektorp.http.ResponseCallback;
+import org.ektorp.http.RestTemplate;
+import org.ektorp.http.StdResponseHandler;
+import org.ektorp.http.URI;
+import org.ektorp.impl.changes.ContinuousChangesFeed;
+import org.ektorp.impl.changes.StdDocumentChange;
+import org.ektorp.util.Assert;
+import org.ektorp.util.Documents;
+import org.ektorp.util.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -273,6 +305,24 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
 				query.getKeysAsJson(), rh) : restTemplate.get(
 				query.buildQuery(), rh);
+	}
+	
+	@Override
+	public <T> Page<T> queryForPage(ViewQuery query, PageRequest pr, Class<T> type) {
+		Assert.notNull(query, "query may not be null");
+		Assert.notNull(pr, "PageRequest may not be null");
+		Assert.notNull(type, "type may not be null");
+		
+		query.dbPath(dbURI.toString());
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("startKey: {}", pr.getStartKey());
+			LOG.debug("startDocId: {}", pr.getStartKeyDocId());
+		}
+		PageResponseHandler<T> ph = new PageResponseHandler<T>(pr, type, objectMapper, query.isIgnoreNotFound());
+		query = PageRequest.applyPagingParameters(query, pr);
+		return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
+				query.getKeysAsJson(), ph) : restTemplate.get(
+				query.buildQuery(), ph);
 	}
 
 	public ViewResult queryView(ViewQuery query) {

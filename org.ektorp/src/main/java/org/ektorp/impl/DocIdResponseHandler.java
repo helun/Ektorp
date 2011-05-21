@@ -1,10 +1,15 @@
 package org.ektorp.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
-import org.ektorp.http.*;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonToken;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.ektorp.DbAccessException;
+import org.ektorp.http.HttpResponse;
+import org.ektorp.http.StdResponseHandler;
 /**
  * 
  * @author henrik lundgren
@@ -22,7 +27,7 @@ public class DocIdResponseHandler extends StdResponseHandler<List<String>> {
 	public List<String> success(HttpResponse hr) throws Exception {
 		JsonParser jp = jsonFactory.createJsonParser(hr.getContent());
 		if (jp.nextToken() != JsonToken.START_OBJECT) {
-			throw new RuntimeException("Expected data to start with an Object");
+			throw new DbAccessException("Expected data to start with an Object");
 		}
 		boolean inRow = false;
 		List<String> result = null;

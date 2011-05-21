@@ -9,14 +9,7 @@ import org.ektorp.http.*;
 /**
  * Primary interface for working with Objects mapped as documents in CouchDb.
  *
- * Mapped Objects must have getters and setters for id and revision.
- *
- * public String getId()
- * public void setId(String s)
- * public String getRevision()
- * public void setRevision(String s)
- *
- * Reflection is used to access these methods.
+ * The Id and revision of mapped Objects must be accessible by org.ektorp.util.Documents class.
  *
  * @author henrik lundgren
  *
@@ -189,6 +182,7 @@ public interface CouchDbConnector {
 	 */
 	<T> List<T> queryView(ViewQuery query, Class<T> type);
 
+	<T> Page<T> queryForPage(ViewQuery query, PageRequest pr, Class<T> type);
 	/**
 	 *
 	 * @param query
@@ -197,7 +191,7 @@ public interface CouchDbConnector {
 	ViewResult queryView(ViewQuery query);
 	
 	/**
-	 *
+	 * Please note that the StreamingViewResult need to be closed after usage.
 	 * @param query
 	 * @return the view result as a iterable stream.
 	 */

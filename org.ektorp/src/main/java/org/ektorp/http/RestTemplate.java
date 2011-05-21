@@ -1,10 +1,9 @@
 package org.ektorp.http;
 
-import java.io.*;
+import java.io.InputStream;
 
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.ektorp.*;
-import org.ektorp.util.*;
+import org.ektorp.DbAccessException;
+import org.ektorp.util.Exceptions;
 /**
  * 
  * @author Henrik Lundgren
