@@ -25,7 +25,7 @@ public class ReplicationStatus implements Serializable {
 	String sessionId;
 	
 	@JsonProperty("source_last_seq")
-	int sourceLastSequence;
+	String sourceLastSequence;
 	
 	@JsonProperty("history")
 	List<History> history;
@@ -44,7 +44,7 @@ public class ReplicationStatus implements Serializable {
 		return sessionId;
 	}
 
-	public int getSourceLastSequence() {
+	public String getSourceLastSequence() {
 		return sourceLastSequence;
 	}
 

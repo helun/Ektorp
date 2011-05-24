@@ -13,7 +13,7 @@ public class ReplicationStatusTest {
 		ObjectMapper mapper = new ObjectMapper();
 		ReplicationStatus rs = mapper.readValue(getClass().getResourceAsStream("replication_response.json"), ReplicationStatus.class);
 		assertNotNull(rs.getSessionId());
-		assertTrue(rs.getSourceLastSequence() > 0);
+		assertNotNull(rs.getSourceLastSequence());
 		assertFalse(rs.getHistory().isEmpty());
 		
 		ReplicationStatus.History h = rs.getHistory().get(0);
