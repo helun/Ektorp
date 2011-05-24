@@ -2,20 +2,21 @@ package org.ektorp.util;
 /**
  * Interface for accessing id and rev fields in a document of unknown type. 
  * @author henrik lundgren
+ * @author Pascal G√©linas (issue 99)
  *
  */
-public interface DocumentAccessor {
+public interface DocumentAccessor<T> {
 	/**
 	 * @return true if document type's id field can be mutated.
 	 */
 	boolean hasIdMutator();
 
-	String getId(Object o);
+	String getId(T o);
 
-	void setId(Object o, String id);
+	void setId(T o, String id);
 
-	String getRevision(Object o);
+	String getRevision(T o);
 
-	void setRevision(Object o, String rev);
+	void setRevision(T o, String rev);
 
 }
