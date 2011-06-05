@@ -20,19 +20,6 @@ public class ReflectionUtils {
 		return null;
 	}
 	
-//	public static void eachAnnotatedMethod(Class<?> clazz, Class<? extends Annotation> annotationClass, Predicate<Method> p) {
-//		for (Method me : clazz.getDeclaredMethods()) {
-//			Annotation a = me.getAnnotation(annotationClass);
-//			if (a != null) {
-//				p.apply(me);
-//			}
-//		}
-//		
-//		if (clazz.getSuperclass() != null) {
-//			eachAnnotatedMethod(clazz.getSuperclass(), annotationClass, p);
-//		}
-//	}
-	
 	public static Collection<Field> eachField(Class<?> clazz, Predicate<Field> p) {
 		List<Field> result = new ArrayList<Field>();
 		for (Field f : clazz.getDeclaredFields()) {

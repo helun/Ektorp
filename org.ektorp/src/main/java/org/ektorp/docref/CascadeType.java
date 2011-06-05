@@ -25,6 +25,15 @@ public enum CascadeType {
 	 */
 	NONE;
 	
+	public static boolean intersects(CascadeType[] anyOf, EnumSet<CascadeType> types) {
+		for (CascadeType ct : anyOf) {
+			if (types.contains(ct)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public final static EnumSet<CascadeType> DELETE_TYPES = EnumSet.of(ALL, DELETE);
 	public final static EnumSet<CascadeType> PERSIST_TYPES = EnumSet.of(ALL, SAVE_UPDATE);
 	

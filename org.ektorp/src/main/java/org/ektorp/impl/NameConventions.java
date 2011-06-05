@@ -1,6 +1,7 @@
 package org.ektorp.impl;
 
 import static java.lang.String.format;
+import static java.util.Locale.ENGLISH;
 
 public class NameConventions {
 
@@ -24,5 +25,19 @@ public class NameConventions {
 	public static String designDocName(Class<?> klass) {
 		return format(DESIGN_DOC_NAME_FOR_TYPE, klass.getSimpleName());
 	}
+	
+	public static String getterName(String property) {
+		return "get" + capitalize(property);
+	}
+	
+	/**
+     * Returns a String which capitalizes the first letter of the string.
+     */
+    public static String capitalize(String name) { 
+	if (name == null || name.length() == 0) { 
+	    return name; 
+        }
+	return name.substring(0, 1).toUpperCase(ENGLISH) + name.substring(1);
+    }
 	
 }

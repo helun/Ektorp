@@ -1,11 +1,12 @@
 package org.ektorp.impl.docref;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.util.Collection;
 
-import org.codehaus.jackson.map.deser.*;
-import org.codehaus.jackson.map.introspect.*;
-import org.codehaus.jackson.map.type.*;
+import org.codehaus.jackson.map.deser.SettableBeanProperty;
+import org.codehaus.jackson.map.introspect.AnnotatedField;
+import org.codehaus.jackson.map.type.CollectionType;
 
 /**
  * 
@@ -15,24 +16,23 @@ import org.codehaus.jackson.map.type.*;
 public class ConstructibleAnnotatedCollection {
 
 	private final Constructor<Collection<Object>> constructor;
-	private final AnnotatedField field;
+	private final Field field;
 	private final SettableBeanProperty setter;
 	private final CollectionType collectionType;
 
-	public ConstructibleAnnotatedCollection(AnnotatedField field,
-			Constructor<Collection<Object>> ctor, SettableBeanProperty setter) {
+	public ConstructibleAnnotatedCollection(Field field,
+			Constructor<Collection<Object>> ctor, SettableBeanProperty setter, CollectionType ctype) {
 		this.field = field;
 		this.constructor = ctor;
 		this.setter = setter;
-		this.collectionType = (CollectionType) field.getType(new TypeBindings(
-				field.getDeclaringClass()));
+		this.collectionType = ctype;
 	}
 
 	public Constructor<Collection<Object>> getConstructor() {
 		return constructor;
 	}
 
-	public AnnotatedField getField() {
+	public Field getField() {
 		return field;
 	}
 

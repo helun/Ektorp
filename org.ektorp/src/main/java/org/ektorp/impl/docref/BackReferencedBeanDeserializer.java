@@ -25,7 +25,7 @@ public class BackReferencedBeanDeserializer extends StdDeserializer<Object>
 	private final Class<?> clazz;
 	private final ObjectMapper objectMapper;
 
-	BackReferencedBeanDeserializer(BeanDeserializer deserializer,
+	public BackReferencedBeanDeserializer(BeanDeserializer deserializer,
 			List<ConstructibleAnnotatedCollection> fields,
 			CouchDbConnector couchDbConnector, Class<?> clazz,
 			ObjectMapper objectMapper) {

@@ -67,12 +67,12 @@ public class DocumentReferenceTest {
 		assertNotNull(ektorp);
 		assertEquals(TEST_LOUNGE_ID, ektorp.getId());
 
+		assertEquals(2, ektorp.getSeatedPeople().size());
+
 		Person nisse = new Person("nisse");
 		nisse.setShoeSize(52);
 		nisse.setRevision("123D123");
-
-		assertEquals(2, ektorp.getSeatedPeople().size());
-
+		
 		assertEquals(true, ektorp.getSeatedPeople().contains(nisse));
 
 		verify(httpClient)

@@ -6,6 +6,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.codehaus.jackson.map.deser.*;
 import org.ektorp.*;
 import org.ektorp.impl.docref.*;
+import org.ektorp.impl.jackson.EktorpJacksonModule;
 import org.ektorp.util.*;
 
 /**
@@ -29,26 +30,7 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 	public ObjectMapper createObjectMapper(CouchDbConnector connector) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		applyDefaultConfiguration(objectMapper);
-
-		DocumentReferenceDeserializerFactory dsf;
-		try {
-			dsf = new DocumentReferenceDeserializerFactory(connector,
-					objectMapper);
-		} catch (JsonMappingException e) {
-			throw Exceptions.propagate(e);
-		}
-		DeserializerProvider dp = new StdDeserializerProvider(dsf);
-		objectMapper.setDeserializerProvider(dp);
-		DocumentReferenceSerializerFactory sf = new DocumentReferenceSerializerFactory(
-				connector);
-
-		DocumentReferenceSerializerProvider dsp = new DocumentReferenceSerializerProvider(
-				objectMapper.getSerializationConfig(), sf,
-				objectMapper.getSerializerProvider());
-
-		objectMapper.setSerializerProvider(dsp);
-		objectMapper.setSerializerFactory(sf);
-
+		objectMapper.registerModule(new EktorpJacksonModule(connector, objectMapper));
 		return objectMapper;
 	}
 

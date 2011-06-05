@@ -1,25 +1,33 @@
 package org.ektorp.impl.docref;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.map.introspect.*;
-import org.codehaus.jackson.map.ser.*;
-import org.codehaus.jackson.map.type.*;
-import org.ektorp.*;
-import org.ektorp.docref.*;
-import org.ektorp.util.*;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.map.JsonSerializer;
+import org.codehaus.jackson.map.SerializerProvider;
+import org.codehaus.jackson.map.ser.BeanPropertyWriter;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.DbAccessException;
+import org.ektorp.DocumentOperationResult;
+import org.ektorp.docref.CascadeType;
+import org.ektorp.docref.DocumentReferences;
+import org.ektorp.util.Predicate;
+import org.ektorp.util.ReflectionUtils;
 
-public class BackReferencedBeanSerializer extends JsonSerializer<Object> {
+public class BackReferencedBeanSerializer<T> extends JsonSerializer<T> {
 
-	private final JsonSerializer<Object> delegate;
+	private final JsonSerializer<T> delegate;
 	private final List<BeanPropertyWriter> documentReferenceFields;
 	private final CouchDbConnector couchDbConnector;
 
-	public BackReferencedBeanSerializer(JsonSerializer<Object> delegate,
+	public BackReferencedBeanSerializer(JsonSerializer<T> delegate,
 			List<BeanPropertyWriter> list, CouchDbConnector couchDbConnector) {
 		this.delegate = delegate;
 		this.documentReferenceFields = list;
@@ -27,21 +35,17 @@ public class BackReferencedBeanSerializer extends JsonSerializer<Object> {
 	}
 
 	@Override
-	public void serialize(Object value, JsonGenerator jgen,
+	public void serialize(T value, JsonGenerator jgen,
 			SerializerProvider provider) throws IOException,
 			JsonProcessingException {
 
-		String id = Documents.getId(value);
 		Set<Object> docsToSave = new LinkedHashSet<Object>();
 		try {
-
-			BasicBeanDescription beanDesc = provider.getConfig().introspect(
-					TypeFactory.type(value.getClass()));
 
 			for (BeanPropertyWriter writer : documentReferenceFields) {
 				if (!cascadeUpdates(writer.getName(), value)) { continue; }
 				Object o = writer.get(value);
-				findDocumentsToSave(value, id, docsToSave, beanDesc, writer, o);
+				findDocumentsToSave(docsToSave, o);
 			}
 			if (docsToSave.size() > 0) {
 				List<DocumentOperationResult> res = couchDbConnector
@@ -93,9 +97,7 @@ public class BackReferencedBeanSerializer extends JsonSerializer<Object> {
 		throw new DbAccessException(sb.toString());
 	}
 
-	private void findDocumentsToSave(Object value, String id,
-			Set<Object> docsToSave, BasicBeanDescription beanDesc,
-			BeanPropertyWriter writer, Object o) {
+	private void findDocumentsToSave(Set<Object> docsToSave, Object o) {
 		if (o == null) {
 			return;
 		}
