@@ -82,6 +82,10 @@ public class URI {
 		return param(name, Integer.toString(value));
 	}
 	
+	public URI param(String name, long value) {
+		return param(name, Long.toString(value));
+	}
+	
 	private StringBuilder params() {
 		if (params == null) {
 			params = new StringBuilder();

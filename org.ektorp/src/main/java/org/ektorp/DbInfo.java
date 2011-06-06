@@ -17,21 +17,21 @@ public class DbInfo implements Serializable {
 	private final String dbName;
 	
 	@JsonProperty("compact_running")
-	private boolean compactRunning;	 
+	boolean compactRunning;	 
 	@JsonProperty("disk_format_version")
-    private int diskFormatVersion;
+    int diskFormatVersion;
 	@JsonProperty("disk_size")
-	private long diskSize;
+	long diskSize;
 	@JsonProperty("doc_count")
-	private long docCount;
+	long docCount;
 	@JsonProperty("doc_del_count")
-	private int docDelCount;
+	int docDelCount;
 	@JsonProperty("instance_start_time")
-	private long instanceStartTime;
+	long instanceStartTime;
 	@JsonProperty("purge_seq")
-	private int purgeSeq;
+	int purgeSeq;
 	@JsonProperty("update_seq")
-	private int updateSeq;
+	String updateSeq;
 	/**
 	 * Used to future proof this class, if new fields are added by CouchDb they will be found here.
 	 */
@@ -85,8 +85,21 @@ public class DbInfo implements Serializable {
 	/**
 	 * @return Current number of updates to the database
 	 */
-	public int getUpdateSeq() {
+	public long getUpdateSeq() {
+		return Long.parseLong(updateSeq);
+	}
+	/**
+	 * Cloudant uses generated strings for update sequence.
+	 * @return
+	 */
+	public String getUpdateSeqAsString() {
 		return updateSeq;
+	}
+	/**
+	 * @return false if db is an Cloudant instance.
+	 */
+	public boolean isUpdateSeqNumeric() {
+		return updateSeq != null && updateSeq.matches("^\\d*$");
 	}
 	
 	@JsonCreator

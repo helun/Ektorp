@@ -9,7 +9,7 @@ import org.ektorp.http.*;
  */
 public class ChangesCommand {
 
-	public final int since;
+	public final String since;
 	public final boolean continuous;
 	public final String filter;
 	public final boolean includeDocs;
@@ -19,7 +19,7 @@ public class ChangesCommand {
 	
 	private ChangesCommand(Builder b) {
 		continuous = b.continuous;
-		since = b.since > -1 ? b.since : -1;
+		since = b.since;
 		filter = b.filter;
 		includeDocs = b.includeDocs;
 		heartbeat = b.heartbeat;
@@ -33,7 +33,7 @@ public class ChangesCommand {
 				uri.param("feed", "continuous");
 			}
 			
-			if (since > -1) {
+			if (since != null) {
 				uri.param("since", since);
 			}
 			
@@ -61,7 +61,7 @@ public class ChangesCommand {
 	 */
 	public static class Builder {
 		
-		private int since = -1;
+		private String since;
 		private boolean continuous;
 		private String filter;
 		private boolean includeDocs;
@@ -69,11 +69,21 @@ public class ChangesCommand {
 		
 		/**
 		 * Start the results from the change immediately after the given sequence number.
-		 * @param i
+		 * @param l
 		 * @return
 		 */
-		public Builder since(int i) {
-			this.since = i;
+		public Builder since(long l) {
+			this.since = Long.toString(l);
+			return this;
+		}
+		
+		/**
+		 * Start the results from the change immediately after the given sequence number.
+		 * @param l
+		 * @return
+		 */
+		public Builder since(String s) {
+			this.since = s;
 			return this;
 		}
 		

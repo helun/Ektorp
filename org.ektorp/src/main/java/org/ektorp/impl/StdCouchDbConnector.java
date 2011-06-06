@@ -113,7 +113,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		Documents.setRevision(o, result.getRevision());
 	}
 
-	public void create(String id, JsonNode node) {
+	public void create(String id, Object node) {
 		assertDocIdHasValue(id);
 		Assert.notNull(node, "node may not be null");
 		restTemplate.put(URIWithDocId(id), jsonSerializer.toJson(node));
@@ -538,7 +538,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	public ChangesFeed changesFeed(ChangesCommand cmd) {
 		int heartbeat = cmd.heartbeat > 0 ? cmd.heartbeat
 				: DEFAULT_HEARTBEAT_INTERVAL;
-		int since = cmd.since > -1 ? cmd.since : getDbInfo().getUpdateSeq();
+		
+		String since = cmd.since != null ? cmd.since : getDbInfo().getUpdateSeqAsString();
 
 		ChangesCommand actualCmd = new ChangesCommand.Builder().merge(cmd)
 				.continuous(true).heartbeat(heartbeat).since(since).build();

@@ -1,13 +1,11 @@
 package org.ektorp.impl;
 
-import org.codehaus.jackson.map.*;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-import org.codehaus.jackson.map.deser.*;
-import org.ektorp.*;
-import org.ektorp.impl.docref.*;
+import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.jackson.EktorpJacksonModule;
-import org.ektorp.util.*;
+import org.ektorp.util.Assert;
 
 /**
  *
