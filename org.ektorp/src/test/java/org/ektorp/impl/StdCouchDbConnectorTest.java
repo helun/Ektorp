@@ -177,7 +177,7 @@ public class StdCouchDbConnectorTest {
 	
 	@Test
 	public void should_create_db_if_missing() {
-		when(httpClient.get("/_all_dbs")).thenReturn(HttpResponseStub.valueOf(200, "[\"users\", \"accounts\"]"));
+		when(httpClient.get("/test_db/")).thenReturn(HttpResponseStub.valueOf(404, "{\"error\":\"not_found\",\"reason\":\"no_db_file\"}"));
 		
 		dbCon.createDatabaseIfNotExists();
 		verify(httpClient).put("/test_db/");
@@ -185,7 +185,7 @@ public class StdCouchDbConnectorTest {
 	
 	@Test
 	public void should_not_create_db_if_already_exists() {
-		when(httpClient.get("/_all_dbs")).thenReturn(HttpResponseStub.valueOf(200, "[\"test_db\", \"users\", \"accounts\"]"));
+		when(httpClient.get("/test_db/")).thenReturn(HttpResponseStub.valueOf(200, "{\"test_db\":\"global\",\"doc_count\":1,\"doc_del_count\":0,\"update_seq\":3,\"purge_seq\":0,\"compact_running\":false,\"disk_size\":100,\"instance_start_time\":\"130\",\"disk_format_version\":5,\"committed_update_seq\":3}"));
 		
 		dbCon.createDatabaseIfNotExists();
 		verify(httpClient, VerificationModeFactory.times(0)).put(anyString());
