@@ -18,7 +18,7 @@ public class StdCouchDbInstanceTest {
 
 	@Test
 	public void testCreateDatabase() {
-		when(client.get("/_all_dbs")).thenReturn(HttpResponseStub.valueOf(200, "[\"somedatabase\", \"anotherdatabase\"]"));
+		when(client.get("/testdb/")).thenReturn(HttpResponseStub.valueOf(404, "{\"error\":\"not_found\",\"reason\":\"no_db_file\"}"));
 		when(client.put(anyString())).thenReturn(HttpResponseStub.valueOf(201, "{\"ok\": true}"));
 		instance.createDatabase("testdb/");
 		verify(client).put("/testdb/");
@@ -26,7 +26,7 @@ public class StdCouchDbInstanceTest {
 	
 	@Test
 	public void testDatabaseWithSlashInPath() {
-		when(client.get("/_all_dbs")).thenReturn(HttpResponseStub.valueOf(200, "[\"somedatabase\", \"anotherdatabase\"]"));
+		when(client.get("/test_inv%2Fqaz/")).thenReturn(HttpResponseStub.valueOf(404, "{\"error\":\"not_found\",\"reason\":\"no_db_file\"}"));
 		when(client.put(anyString())).thenReturn(HttpResponseStub.valueOf(201, "{\"ok\": true}"));
 		instance.createDatabase("test_inv/qaz/");
 		verify(client).put("/test_inv%2Fqaz/");

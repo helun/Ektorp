@@ -16,7 +16,14 @@ public interface CouchDbInstance {
 	 * @return the names of all databases residing in this instance.
 	 */
 	List<String> getAllDatabases();
-	
+
+	/**
+	 * 
+	 * @param db
+	 * @return true if the database exists.
+	 */
+	boolean checkIfDbExists(DbPath db);
+
 	void createDatabase(DbPath path);
 	void createDatabase(String path);
 	
