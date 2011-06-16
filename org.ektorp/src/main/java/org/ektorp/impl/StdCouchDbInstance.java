@@ -44,8 +44,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	}
 	
 	public void createDatabase(DbPath db) {
-		List<String> all = getAllDatabases();
-		if (all.contains(db.getDbName())) {
+		if (checkIfDbExists(db)) {
 			throw new DbAccessException(format("A database with path %s already exists", db.getPath()));
 		}
 		LOG.debug("creating db path: {}", db.getPath());
@@ -55,6 +54,20 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	public void deleteDatabase(String path) {
 		Assert.notNull(path);
 		restTemplate.delete(DbPath.fromString(path).getPath());
+	}
+
+	@Override
+	public boolean checkIfDbExists(DbPath db) {
+	    return restTemplate.get(db.getPath(), new StdResponseHandler<Boolean>() {
+		@Override
+		public Boolean error(HttpResponse hr) {
+		    return false;
+		}
+		@Override
+		public Boolean success(HttpResponse hr) throws Exception {
+		    return true;
+		}
+	    });
 	}
 
 	public List<String> getAllDatabases() {

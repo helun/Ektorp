@@ -286,7 +286,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	}
 
 	public void createDatabaseIfNotExists() {
-		if (!dbInstance.getAllDatabases().contains(dbName)) {
+		if (!dbInstance.checkIfDbExists(new DbPath(dbName))) {
 			dbInstance.createDatabase(dbName);
 		}
 	}
