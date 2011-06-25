@@ -21,21 +21,22 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 
 	private final static Logger LOG = LoggerFactory.getLogger(HttpClientFactoryBean.class);
 	
+	public @Value("#{couchdbProperties['url']?:'http://localhost:5984'}")	String url = "http://localhost:5984";
 	public @Value("#{couchdbProperties['host']?:'localhost'}")				String host;
 	public @Value("#{couchdbProperties['port']?:5984}")						int port;
-	public @Value("#{couchdbProperties['maxConnections']?:20}") 			int maxConnections;
-	public @Value("#{couchdbProperties['connectionTimeout']?:1000}") 		int connectionTimeout;
-	public @Value("#{couchdbProperties['socketTimeout']?:10000}")			int socketTimeout;
+	public @Value("#{couchdbProperties['maxConnections']?:20}") 			int maxConnections = 20;
+	public @Value("#{couchdbProperties['connectionTimeout']?:1000}") 		int connectionTimeout = 1000;
+	public @Value("#{couchdbProperties['socketTimeout']?:10000}")			int socketTimeout = 10000;
 	public @Value("#{couchdbProperties['autoUpdateViewOnChange']?:false}") 	boolean autoUpdateViewOnChange;
 	public @Value("#{couchdbProperties['username']}")						String username;
 	public @Value("#{couchdbProperties['password']}")						String password;
 	public @Value("#{couchdbProperties['testConnectionAtStartup']?:false}") boolean testConnectionAtStartup;
-	public @Value("#{couchdbProperties['cleanupIdleConnections']?:true}") 	boolean cleanupIdleConnections;
+	public @Value("#{couchdbProperties['cleanupIdleConnections']?:true}") 	boolean cleanupIdleConnections = true;
 	public @Value("#{couchdbProperties['enableSSL']?:false}") 				boolean enableSSL;
 	public @Value("#{couchdbProperties['relaxedSSLSettings']?:false}") 		boolean relaxedSSLSettings;
-	public @Value("#{couchdbProperties['caching']?:true}")		 			boolean caching;
-	public @Value("#{couchdbProperties['maxCacheEntries']?:1000}")			int maxCacheEntries;
-	public @Value("#{couchdbProperties['maxObjectSizeBytes']?:8192}")		int maxObjectSizeBytes;
+	public @Value("#{couchdbProperties['caching']?:true}")		 			boolean caching = true;
+	public @Value("#{couchdbProperties['maxCacheEntries']?:1000}")			int maxCacheEntries = 1000;
+	public @Value("#{couchdbProperties['maxObjectSizeBytes']?:8192}")		int maxObjectSizeBytes = 8192;
 	
 	
 	private SSLSocketFactory sslSocketFactory;
@@ -67,6 +68,7 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 								.caching(caching)
 								.maxCacheEntries(maxCacheEntries)
 								.maxObjectSizeBytes(maxObjectSizeBytes)
+								.url(url)
 								.build();
 		
 		if (testConnectionAtStartup) {
@@ -117,6 +119,54 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 	
 	public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
 		this.sslSocketFactory = sslSocketFactory;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public void setMaxConnections(int maxConnections) {
+		this.maxConnections = maxConnections;
+	}
+
+	public void setConnectionTimeout(int connectionTimeout) {
+		this.connectionTimeout = connectionTimeout;
+	}
+
+	public void setSocketTimeout(int socketTimeout) {
+		this.socketTimeout = socketTimeout;
+	}
+
+	public void setCleanupIdleConnections(boolean cleanupIdleConnections) {
+		this.cleanupIdleConnections = cleanupIdleConnections;
+	}
+
+	public void setEnableSSL(boolean enableSSL) {
+		this.enableSSL = enableSSL;
+	}
+
+	public void setRelaxedSSLSettings(boolean relaxedSSLSettings) {
+		this.relaxedSSLSettings = relaxedSSLSettings;
+	}
+
+	public void setCaching(boolean caching) {
+		this.caching = caching;
+	}
+
+	public void setMaxCacheEntries(int maxCacheEntries) {
+		this.maxCacheEntries = maxCacheEntries;
+	}
+
+	public void setMaxObjectSizeBytes(int maxObjectSizeBytes) {
+		this.maxObjectSizeBytes = maxObjectSizeBytes;
+	}
+	
+	public void setUrl(String url) {
+		this.url = url;
 	}
 	
 }

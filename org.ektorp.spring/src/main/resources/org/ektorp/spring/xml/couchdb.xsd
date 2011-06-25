@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.ektorp.org/schema/couchdb"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://www.ektorp.org/schema/couchdb" elementFormDefault="qualified">
+
+    <xsd:element name="database">
+        <xsd:complexType>
+            <xsd:attribute name="url" type="xsd:string" />
+            <xsd:attribute name="name" type="xsd:string" />
+            <xsd:attribute name="instanceRef" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:element name="instance">
+        <xsd:complexType>
+            <xsd:attribute name="url" type="xsd:string" />
+            <xsd:attribute name="id" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
+    
+</xsd:schema>

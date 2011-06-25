@@ -58,7 +58,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 
 	@Override
 	public boolean checkIfDbExists(DbPath db) {
-	    return restTemplate.get(db.getPath(), new StdResponseHandler<Boolean>() {
+	    return restTemplate.head(db.getPath(), new StdResponseHandler<Boolean>() {
 		@Override
 		public Boolean error(HttpResponse hr) {
 		    return false;

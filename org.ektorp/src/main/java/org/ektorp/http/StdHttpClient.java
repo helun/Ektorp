@@ -1,6 +1,8 @@
 package org.ektorp.http;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
@@ -172,6 +174,23 @@ public class StdHttpClient implements HttpClient {
 		int maxObjectSizeBytes = 8192;
 		int maxCacheEntries = 1000;
 
+		public Builder url(String s) throws MalformedURLException {
+			if (s == null) return this;
+			return this.url(new URL(s));
+		}
+		/**
+		 * Will set host, port and possible enables SSL based on the properties if the supplied URL.
+		 * This method overrides the properties: host, port and enableSSL. 
+		 * @param url
+		 * @return
+		 */
+		public Builder url(URL url){
+			this.host = url.getHost();
+			this.port = url.getPort();
+			enableSSL("https".equals(url.getProtocol()));
+			return this;
+		}
+		
 		public Builder host(String s) {
 			host = s;
 			return this;

@@ -14,6 +14,7 @@ public class ChangesCommand {
 	public final String filter;
 	public final boolean includeDocs;
 	public final int heartbeat;
+	public final int limit;
 	
 	private String queryString; 
 	
@@ -23,6 +24,7 @@ public class ChangesCommand {
 		filter = b.filter;
 		includeDocs = b.includeDocs;
 		heartbeat = b.heartbeat;
+		limit = b.limit;
 	}
 	
 	@Override
@@ -49,6 +51,10 @@ public class ChangesCommand {
 				uri.param("heartbeat", heartbeat);
 			}
 			
+			if (limit > -1){
+			    	uri.param("limit", limit);
+			}
+			
 			queryString = uri.toString();
 		}
 		return queryString;
@@ -66,6 +72,7 @@ public class ChangesCommand {
 		private String filter;
 		private boolean includeDocs;
 		private int heartbeat = -1;
+		private int limit = -1;
 		
 		/**
 		 * Start the results from the change immediately after the given sequence number.
@@ -113,6 +120,11 @@ public class ChangesCommand {
 		public Builder heartbeat(int i) {
 			this.heartbeat = i;
 			return this;
+		}
+		
+		public Builder limit(int i) {
+		    	this.limit = i;
+		    	return this;
 		}
 		
 		public Builder merge(ChangesCommand other) {
