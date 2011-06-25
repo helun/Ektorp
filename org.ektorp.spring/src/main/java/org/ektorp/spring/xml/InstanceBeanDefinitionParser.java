@@ -13,15 +13,23 @@ public class InstanceBeanDefinitionParser implements BeanDefinitionParser {
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		String url = element.getAttribute("url");
 		String id = element.getAttribute("id");
-		BeanDefinition httpClient = buildHttpClientDef(url);
+		String propertiesRef = element.getAttribute("properties");
+		BeanDefinition httpClient = buildHttpClientDef(url, propertiesRef);
 		BeanDefinition dbInstance = buildCouchDBInstance(httpClient);
 		parserContext.getRegistry().registerBeanDefinition(id, dbInstance);
 		return dbInstance;
 	}
 	
 	public static BeanDefinition buildHttpClientDef(String url) {
+		return buildHttpClientDef(url, null);
+	}
+	
+	public static BeanDefinition buildHttpClientDef(String url, String propertiesRef) {
 		BeanDefinitionBuilder httpClientFactory = BeanDefinitionBuilder.rootBeanDefinition(HttpClientFactoryBean.class);
 		httpClientFactory.addPropertyValue("url", url);
+		if (propertiesRef != null) {
+			httpClientFactory.addPropertyReference("properties", propertiesRef);	
+		}
 		return httpClientFactory.getBeanDefinition();
 	}
 	

@@ -11,8 +11,8 @@
 	
 	<util:properties id="couchdbProperties" location="classpath:/couchdb.properties"/>
 	
-	<couchdb:instance id="localCouchDB" url="http://localhost:5984/" />
+	<couchdb:instance id="localCouchDB" url="http://localhost:5984/" properties="couchdbProperties"/>
 	
-	<couchdb:database name="testDatabase" instanceRef="localCouchDB" />
+	<couchdb:database name="testDatabase" instance-ref="localCouchDB" />
 	
 </beans>

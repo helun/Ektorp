@@ -15,6 +15,7 @@ public class DatabaseBeanDefinitionParser implements BeanDefinitionParser {
 		GenericBeanDefinition bdef = new GenericBeanDefinition();
 		bdef.setBeanClass(StdCouchDbConnector.class);
 		
+		String id = element.getAttribute("id");
 		String name = element.getAttribute("name");
 		String url = element.getAttribute("url");
 		
@@ -26,13 +27,17 @@ public class DatabaseBeanDefinitionParser implements BeanDefinitionParser {
 			BeanDefinition dbInstance = InstanceBeanDefinitionParser.buildCouchDBInstance(httpClient);
 			cav.addGenericArgumentValue(dbInstance);
 		} else {
-			String instanceRef = element.getAttribute("instanceRef");
+			String instanceRef = element.getAttribute("instance-ref");
 			cav.addGenericArgumentValue(new RuntimeBeanReference(instanceRef));
 		}
 		
 		bdef.setConstructorArgumentValues(cav);
-		parserContext.getRegistry().registerBeanDefinition(name, bdef);
-		return null;
+		if (id != null && id.length() > 0) {
+			parserContext.getRegistry().registerBeanDefinition(id, bdef);	
+		} else {
+			parserContext.getRegistry().registerBeanDefinition(name, bdef);
+		}
+		return bdef;
 	}
 
 }

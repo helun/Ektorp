@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 
 import org.codehaus.jackson.map.deser.SettableBeanProperty;
-import org.codehaus.jackson.map.introspect.AnnotatedField;
 import org.codehaus.jackson.map.type.CollectionType;
 
 /**

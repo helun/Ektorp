@@ -1,11 +1,16 @@
 package org.ektorp.spring;
 
-import org.apache.http.conn.ssl.*;
-import org.ektorp.http.*;
-import org.ektorp.support.*;
-import org.slf4j.*;
-import org.springframework.beans.factory.*;
-import org.springframework.beans.factory.annotation.*;
+import java.util.Properties;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.ektorp.http.HttpClient;
+import org.ektorp.http.StdHttpClient;
+import org.ektorp.support.CouchDbRepositorySupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.FactoryBean;
 /**
  * FactoryBean that produces a HttpClient.
  * Configuration parameters are set through @Value annotations.
@@ -21,27 +26,32 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 
 	private final static Logger LOG = LoggerFactory.getLogger(HttpClientFactoryBean.class);
 	
-	public @Value("#{couchdbProperties['url']?:'http://localhost:5984'}")	String url = "http://localhost:5984";
-	public @Value("#{couchdbProperties['host']?:'localhost'}")				String host;
-	public @Value("#{couchdbProperties['port']?:5984}")						int port;
-	public @Value("#{couchdbProperties['maxConnections']?:20}") 			int maxConnections = 20;
-	public @Value("#{couchdbProperties['connectionTimeout']?:1000}") 		int connectionTimeout = 1000;
-	public @Value("#{couchdbProperties['socketTimeout']?:10000}")			int socketTimeout = 10000;
-	public @Value("#{couchdbProperties['autoUpdateViewOnChange']?:false}") 	boolean autoUpdateViewOnChange;
-	public @Value("#{couchdbProperties['username']}")						String username;
-	public @Value("#{couchdbProperties['password']}")						String password;
-	public @Value("#{couchdbProperties['testConnectionAtStartup']?:false}") boolean testConnectionAtStartup;
-	public @Value("#{couchdbProperties['cleanupIdleConnections']?:true}") 	boolean cleanupIdleConnections = true;
-	public @Value("#{couchdbProperties['enableSSL']?:false}") 				boolean enableSSL;
-	public @Value("#{couchdbProperties['relaxedSSLSettings']?:false}") 		boolean relaxedSSLSettings;
-	public @Value("#{couchdbProperties['caching']?:true}")		 			boolean caching = true;
-	public @Value("#{couchdbProperties['maxCacheEntries']?:1000}")			int maxCacheEntries = 1000;
-	public @Value("#{couchdbProperties['maxObjectSizeBytes']?:8192}")		int maxObjectSizeBytes = 8192;
-	
+	public String url = "http://localhost:5984";
+	public String host;
+	public int port;
+	public int maxConnections = 20;
+	public int connectionTimeout = 1000;
+	public int socketTimeout = 10000;
+	public boolean autoUpdateViewOnChange;
+	public String username;
+	public String password;
+	public boolean testConnectionAtStartup;
+	public boolean cleanupIdleConnections = true;
+	public boolean enableSSL;
+	public boolean relaxedSSLSettings;
+	public boolean caching = true;
+	public int maxCacheEntries = 1000;
+	public int maxObjectSizeBytes = 8192;
 	
 	private SSLSocketFactory sslSocketFactory;
 	
+	private Properties couchDBProperties;
+	
 	public HttpClient getObject() throws Exception {
+		if (couchDBProperties != null) {
+			BeanUtils.populate(this, couchDBProperties);
+		}
+		
 		LOG.debug("host: {}", host);
 		LOG.debug("port: {}", port);
 		LOG.debug("maxConnections: {}", maxConnections);
@@ -74,6 +84,8 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 		if (testConnectionAtStartup) {
 			testConnect(client);
 		}
+		
+		
 		
 		configureAutoUpdateViewOnChange();
 		return client;
@@ -167,6 +179,10 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 	
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	public void setProperties(Properties p) {
+		this.couchDBProperties = p;
 	}
 	
 }

@@ -1,21 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns="http://www.ektorp.org/schema/couchdb"
-			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-			targetNamespace="http://www.ektorp.org/schema/couchdb" elementFormDefault="qualified">
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.ektorp.org/schema/couchdb"
+	elementFormDefault="qualified">
 
-    <xsd:element name="database">
-        <xsd:complexType>
-            <xsd:attribute name="url" type="xsd:string" />
-            <xsd:attribute name="name" type="xsd:string" />
-            <xsd:attribute name="instanceRef" type="xsd:string" />
-        </xsd:complexType>
-    </xsd:element>
-    
-    <xsd:element name="instance">
-        <xsd:complexType>
-            <xsd:attribute name="url" type="xsd:string" />
-            <xsd:attribute name="id" type="xsd:string" />
-        </xsd:complexType>
-    </xsd:element>
-    
+	<xsd:element name="database">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+			Configures a org.ektorp.CouchDbConnector in the application context.
+		]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+					The bean id registered in the application context.
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="url" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+					The URL to the CouchDB instance.
+					example: http://localhost:5984
+					Use this parameter if you want to set up a single connector to a CouchDB instance.
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="name" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+					The database name
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="instance-ref" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+					Reference to a common CouchDb instance configured on the application context.
+					Use this parameter instead of url if you have multiple database connector pointing to the same CouchDB instance.
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="instance">
+		<xsd:complexType>
+			<xsd:attribute name="url" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+					The URL to the CouchDB instance.
+					example: http://localhost:5984
+					For an SSL/TLS connection: https://localhost:5984 
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="id" type="xsd:string" />
+			<xsd:attribute name="properties" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+					Bean name of configuration properties 
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
 </xsd:schema>
