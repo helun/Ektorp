@@ -116,6 +116,17 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		return db.get(type, id);
 	}
 	/**
+	 * Will load the object with any conflicts included.
+	 * The type must support a "_conflicts" field.
+	 * @param <T>
+	 * @param id the id of the document in the database.
+	 * @return
+	 * @throws DocumentNotFoundException if the document was not found.
+	 */
+	public T getWithConflicts(String id) {
+		return db.getWithConflicts(type, id);
+	}
+	/**
 	 * 
 	 * @param id
 	 * @param rev
