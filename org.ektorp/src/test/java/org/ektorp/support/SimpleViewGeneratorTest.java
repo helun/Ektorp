@@ -37,7 +37,7 @@ public class SimpleViewGeneratorTest {
 	@Test
 	public void views_should_be_generated_for_all_annotations() {
 		Map<String, DesignDocument.View> result = gen.generateViews(new TestRepo());
-		assertEquals(10, result.size());
+		assertEquals(11, result.size());
 		assertTrue(result.containsKey("view_1"));
 		assertTrue(result.containsKey("view_2"));
 		assertTrue(result.containsKey("view_3"));
@@ -53,7 +53,9 @@ public class SimpleViewGeneratorTest {
 		DesignDocument.View all = result.get("all");
 		assertEquals(ALL_VIEW_FUNCTION, all.getMap());
 		assertTrue(result.containsKey("by_special"));
-		
+		assertTrue(result.containsKey("by_special2"));
+		assertFalse("map function should be loaded from file in classpath", result.get("by_special2").getMap().startsWith("classpath:"));
+		assertFalse("reduce function should be loaded from file in classpath", result.get("by_special2").getReduce().startsWith("classpath:"));
 		assertTrue(result.containsKey("by_complicated"));
 		assertEquals(expectedComplicatedMapFunction, result.get("by_complicated").getMap());
 		assertEquals(expectedComplicatedReduceFunction, result.get("by_complicated").getReduce());
@@ -190,6 +192,11 @@ public class SimpleViewGeneratorTest {
 		@View(name = "by_complicated", file="complicated_view.json")
 		public String findByComplicatedView(String input) {
 			return "";
+		}
+	
+		@View(name = "by_special2", map = "classpath:map.js", reduce = "classpath:reduce.js")
+		public List<String> findBySpecialView2() {
+			return null;
 		}
 		
 		public List<String> findBySomethingElse() {
