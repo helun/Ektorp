@@ -29,12 +29,11 @@ import org.slf4j.*;
 public final class Documents {
 
 	private final static Logger LOG = LoggerFactory.getLogger(Documents.class);
-	private final static ConcurrentMap<Class<?>, DocumentAccessor<?>> accessors = new ConcurrentHashMap<Class<?>, DocumentAccessor<?>>();
+	private final static ConcurrentMap<Class<?>, DocumentAccessor> accessors = new ConcurrentHashMap<Class<?>, DocumentAccessor>();
 	private static final String ID_FIELD_NAME = "_id";
 	private static final String REV_FIELD_NAME = "_rev";
 
 	static {
-		// MapAccessor is an unchecked implementation of DocumentAccessor and as such we cannot guarantee proper type safety.
 		accessors.put(Map.class, new MapAccessor());
 		putAccessor(ObjectNode.class, new ObjectNodeAccessor());
 	}
@@ -45,11 +44,11 @@ public final class Documents {
 	 * @param documentType
 	 * @param accessor
 	 */
-	public static <T> void registerAccessor(Class<? extends T> documentType, DocumentAccessor<T> accessor) {
+	public static void registerAccessor(Class<?> documentType, DocumentAccessor accessor) {
 		Assert.notNull(documentType, "documentType may not be null");
 		Assert.notNull(accessor, "accessor may not be null");
 		if (accessors.containsKey(documentType)) {
-			DocumentAccessor<T> existing = getAccessor(documentType);
+			DocumentAccessor existing = getAccessor(documentType);
 			LOG.warn(String.format("DocumentAccessor for class %s already exists: %s will be overridden by %s", documentType, existing.getClass(), accessor.getClass()));
 		}
 		putAccessor(documentType, accessor);
@@ -68,7 +67,7 @@ public final class Documents {
 	 * @param id
 	 */
 	public static void setId(Object document, String id) {
-		DocumentAccessor<? super Object> d = getAccessor(document);
+		DocumentAccessor d = getAccessor(document);
 		if (d.hasIdMutator()) {
 			d.setId(document, id);
 		}
@@ -86,20 +85,17 @@ public final class Documents {
 		return getRevision(document) == null;
 	}
 	
-	private static <T> void putAccessor(Class<? extends T> documentType, DocumentAccessor<T> accessor){
+	private static <T> void putAccessor(Class<? extends T> documentType, DocumentAccessor accessor){
 		accessors.put(documentType, accessor);
 	}
 	
-	// Unchecked cast is ok here since we ensure proper type safety during put operation.
-	@SuppressWarnings("unchecked")
-	private static <E, T extends E> DocumentAccessor<E> getAccessor(Class<T> documentType){
-		return (DocumentAccessor<E>) accessors.get(documentType);
+	private static DocumentAccessor getAccessor(Class<?> documentType){
+		return accessors.get(documentType);
 	}
 
-	private static <T> DocumentAccessor<? super T> getAccessor(T document) {
-		@SuppressWarnings("unchecked")
-		Class<? extends T> clazz = (Class< ? extends T>) document.getClass();
-		DocumentAccessor<? super T> accessor = getAccessor(clazz);
+	private static DocumentAccessor getAccessor(Object document) {
+		Class<?> clazz = document.getClass();
+		DocumentAccessor accessor = getAccessor(clazz);
 		if (accessor == null) {
 			if (document instanceof Map<?, ?>) {
 				accessor = getAccessor(Map.class);
@@ -109,12 +105,12 @@ public final class Documents {
 				putAccessor(clazz, accessor);
 			} else {
 				try {
-					accessor = new AnnotatedMethodAccessor<T>(clazz);
+					accessor = new AnnotatedMethodAccessor(clazz);
 				} catch (InvalidDocumentException eAnnotatedMethod) {
 					try {
-						accessor = new AnnotatedFieldAccessor<T>(clazz);
+						accessor = new AnnotatedFieldAccessor(clazz);
 					} catch (InvalidDocumentException eAnnotatedField) {
-						accessor = new MethodAccessor<T>(clazz);
+						accessor = new MethodAccessor(clazz);
 					}
 				}
 				accessors.putIfAbsent(clazz, accessor);
@@ -124,7 +120,7 @@ public final class Documents {
 		return accessor;
 	}
 
-	private static class MethodAccessor<T> implements DocumentAccessor<T> {
+	private static class MethodAccessor implements DocumentAccessor {
 
 		private final Class<?>[] NO_PARAMS = new Class<?>[0];
 		private final Object[] NO_ARGS = new Object[0];
@@ -134,7 +130,7 @@ public final class Documents {
 		Method revisionAccessor;
 		Method revisionMutator;
 
-		MethodAccessor(Class<? extends T> clazz) {
+		MethodAccessor(Class<?> clazz) {
 			try {
 				idAccessor = resolveIdAccessor(clazz);
 				assertMethodFound(clazz, idAccessor, "id accessor");
@@ -204,7 +200,7 @@ public final class Documents {
 		 * 
 		 * @see org.ektorp.util.DocumentAccessor#getId(java.lang.Object)
 		 */
-		public String getId(T o) {
+		public String getId(Object o) {
 			try {
 				return (String) idAccessor.invoke(o, NO_ARGS);
 			} catch (Exception e) {
@@ -218,7 +214,7 @@ public final class Documents {
 		 * @see org.ektorp.util.DocumentAccessor#setId(java.lang.Object,
 		 * java.lang.String)
 		 */
-		public void setId(T o, String id) {
+		public void setId(Object o, String id) {
 			try {
 				idMutator.invoke(o, id);
 			} catch (Exception e) {
@@ -231,7 +227,7 @@ public final class Documents {
 		 * 
 		 * @see org.ektorp.util.DocumentAccessor#getRevision(java.lang.Object)
 		 */
-		public String getRevision(T o) {
+		public String getRevision(Object o) {
 			try {
 				return (String) revisionAccessor.invoke(o, NO_ARGS);
 			} catch (Exception e) {
@@ -245,7 +241,7 @@ public final class Documents {
 		 * @see org.ektorp.util.DocumentAccessor#setRevision(java.lang.Object,
 		 * java.lang.String)
 		 */
-		public void setRevision(T o, String rev) {
+		public void setRevision(Object o, String rev) {
 			try {
 				revisionMutator.invoke(o, rev);
 			} catch (Exception e) {
@@ -254,9 +250,9 @@ public final class Documents {
 		}
 	}
 
-	private final static class AnnotatedMethodAccessor<T> extends MethodAccessor<T> {
+	private final static class AnnotatedMethodAccessor extends MethodAccessor {
 
-		AnnotatedMethodAccessor(Class<? extends T> clazz) {
+		AnnotatedMethodAccessor(Class<?> clazz) {
 			super(clazz);
 		}
 
@@ -297,14 +293,14 @@ public final class Documents {
 		}
 	}
 
-	private final static class AnnotatedFieldAccessor<T> implements DocumentAccessor<T> {
+	private final static class AnnotatedFieldAccessor implements DocumentAccessor {
 
 		Field idAccessor;
 		Field idMutator;
 		Field revisionAccessor;
 		Field revisionMutator;
 
-		AnnotatedFieldAccessor(Class<? extends T> clazz) {
+		AnnotatedFieldAccessor(Class<?> clazz) {
 			try {
 				idAccessor = resolveIdAccessor(clazz);
 				assertFieldFound(clazz, idAccessor, "id accessor");
@@ -383,7 +379,7 @@ public final class Documents {
 		 * 
 		 * @see org.ektorp.util.DocumentAccessor#getId(java.lang.Object)
 		 */
-		public String getId(T o) {
+		public String getId(Object o) {
 			try {
 				return (String) idAccessor.get(o);
 			} catch (Exception e) {
@@ -397,7 +393,7 @@ public final class Documents {
 		 * @see org.ektorp.util.DocumentAccessor#setId(java.lang.Object,
 		 * java.lang.String)
 		 */
-		public void setId(T o, String id) {
+		public void setId(Object o, String id) {
 			try {
 				idMutator.set(o, id);
 			} catch (Exception e) {
@@ -410,7 +406,7 @@ public final class Documents {
 		 * 
 		 * @see org.ektorp.util.DocumentAccessor#getRevision(java.lang.Object)
 		 */
-		public String getRevision(T o) {
+		public String getRevision(Object o) {
 			try {
 				return (String) revisionAccessor.get(o);
 			} catch (Exception e) {
@@ -424,7 +420,7 @@ public final class Documents {
 		 * @see org.ektorp.util.DocumentAccessor#setRevision(java.lang.Object,
 		 * java.lang.String)
 		 */
-		public void setRevision(T o, String rev) {
+		public void setRevision(Object o, String rev) {
 			try {
 				revisionMutator.set(o, rev);
 			} catch (Exception e) {
@@ -433,54 +429,60 @@ public final class Documents {
 		}
 	}
 
-	private final static class MapAccessor implements DocumentAccessor<Map<String, String>> {
+	private final static class MapAccessor implements DocumentAccessor {
 
-		public String getId(Map<String, String> o) {
-			return o.get(ID_FIELD_NAME);
+		public String getId(Object o) {
+			return cast(o).get(ID_FIELD_NAME);
 		}
 
-		public String getRevision(Map<String, String> o) {
-			return o.get(REV_FIELD_NAME);
+		public String getRevision(Object o) {
+			return cast(o).get(REV_FIELD_NAME);
 		}
 
 		public boolean hasIdMutator() {
 			return true;
 		}
 
-		public void setId(Map<String, String> o, String id) {
-			o.put(ID_FIELD_NAME, id);
+		public void setId(Object o, String id) {
+			cast(o).put(ID_FIELD_NAME, id);
 		}
 
-		public void setRevision(Map<String, String> o, String rev) {
-			o.put(REV_FIELD_NAME, rev);
+		public void setRevision(Object o, String rev) {
+			cast(o).put(REV_FIELD_NAME, rev);
+		}
+		
+		@SuppressWarnings("unchecked")
+		private Map<String, String> cast(Object o) {
+			return (Map<String, String>)o;
 		}
 
 	}
 
-	private final static class ObjectNodeAccessor implements DocumentAccessor<ObjectNode> {
+	private final static class ObjectNodeAccessor implements DocumentAccessor {
 
 		public boolean hasIdMutator() {
 			return true;
 		}
 
-		public String getId(ObjectNode o) {
+		public String getId(Object o) {
 			return getFieldValue(o, ID_FIELD_NAME);
 		}
 
-		public void setId(ObjectNode o, String id) {
+		public void setId(Object o, String id) {
 			setField(o, ID_FIELD_NAME, id);
 		}
 
-		public String getRevision(ObjectNode o) {
+		public String getRevision(Object o) {
 			return getFieldValue(o, REV_FIELD_NAME);
 		}
 
-		public void setRevision(ObjectNode o, String rev) {
+		public void setRevision(Object o, String rev) {
 			setField(o, REV_FIELD_NAME, rev);
 		}
 
 
-		private String getFieldValue(ObjectNode target, String fieldName) {
+		private String getFieldValue(Object o, String fieldName) {
+			JsonNode target = (JsonNode)o;
 			JsonNode field = target.get(fieldName);
 			if (field == null) {
 				return null;
@@ -492,8 +494,8 @@ public final class Documents {
 			return field.getTextValue();
 		}
 
-		private void setField(ObjectNode target, String fieldName, String fieldValue) {
-			target.put(fieldName, fieldValue);
+		private void setField(Object o, String fieldName, String fieldValue) {
+			((ObjectNode)o).put(fieldName, fieldValue);
 		}
 
 	}
