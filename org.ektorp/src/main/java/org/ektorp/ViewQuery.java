@@ -33,7 +33,7 @@ public class ViewQuery {
 	private String endKey;
 	private String endDocId;
 	private int limit = NOT_SET;
-	private boolean staleOk;
+	private String staleOk;
 	private boolean descending;
 	private int skip = NOT_SET;
 	private boolean group;
@@ -84,7 +84,7 @@ public class ViewQuery {
     }
 
     public boolean isStaleOk() {
-        return staleOk;
+        return staleOk != null && ("ok".equals(staleOk) || "update_after".equals(staleOk));
     }
 
     public boolean isDescending() {
@@ -393,7 +393,17 @@ public class ViewQuery {
 	 */
 	public ViewQuery staleOk(boolean b) {
 		reset();
-		staleOk = b;
+		staleOk = "ok";
+		return this;
+	}
+	/**
+	 * Same as staleOk(true) but will also trigger a rebuild of the view index after the results of the view have been retrieved.
+	 * (since CouchDB 1.1.0)
+	 * @return
+	 */
+	public ViewQuery staleOkUpdateAfter() {
+		reset();
+		staleOk = "update_after";
 		return this;
 	}
 	/**
@@ -530,8 +540,8 @@ public class ViewQuery {
 			query.param("limit", limit);
 		}
 
-		if (staleOk) {
-			query.param("stale", "ok");
+		if (staleOk != null) {
+			query.param("stale", staleOk);
 		}
 
 		if (descending) {
@@ -606,10 +616,14 @@ public class ViewQuery {
 		return s != null && s.length() > 0;
 	}
 
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result
+				+ ((cachedQuery == null) ? 0 : cachedQuery.hashCode());
 		result = prime * result + ((dbPath == null) ? 0 : dbPath.hashCode());
 		result = prime * result + (descending ? 1231 : 1237);
 		result = prime * result
@@ -619,13 +633,18 @@ public class ViewQuery {
 		result = prime * result + ((endKey == null) ? 0 : endKey.hashCode());
 		result = prime * result + (group ? 1231 : 1237);
 		result = prime * result + groupLevel;
+		result = prime * result + (ignoreNotFound ? 1231 : 1237);
 		result = prime * result + (includeDocs ? 1231 : 1237);
 		result = prime * result + (inclusiveEnd ? 1231 : 1237);
 		result = prime * result + ((key == null) ? 0 : key.hashCode());
 		result = prime * result + limit;
+		result = prime * result
+				+ ((listName == null) ? 0 : listName.hashCode());
+		result = prime * result
+				+ ((queryParams == null) ? 0 : queryParams.hashCode());
 		result = prime * result + (reduce ? 1231 : 1237);
 		result = prime * result + skip;
-		result = prime * result + (staleOk ? 1231 : 1237);
+		result = prime * result + ((staleOk == null) ? 0 : staleOk.hashCode());
 		result = prime * result
 				+ ((startDocId == null) ? 0 : startDocId.hashCode());
 		result = prime * result
@@ -634,7 +653,6 @@ public class ViewQuery {
 				+ ((viewName == null) ? 0 : viewName.hashCode());
 		return result;
 	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -644,6 +662,11 @@ public class ViewQuery {
 		if (getClass() != obj.getClass())
 			return false;
 		ViewQuery other = (ViewQuery) obj;
+		if (cachedQuery == null) {
+			if (other.cachedQuery != null)
+				return false;
+		} else if (!cachedQuery.equals(other.cachedQuery))
+			return false;
 		if (dbPath == null) {
 			if (other.dbPath != null)
 				return false;
@@ -670,6 +693,8 @@ public class ViewQuery {
 			return false;
 		if (groupLevel != other.groupLevel)
 			return false;
+		if (ignoreNotFound != other.ignoreNotFound)
+			return false;
 		if (includeDocs != other.includeDocs)
 			return false;
 		if (inclusiveEnd != other.inclusiveEnd)
@@ -681,11 +706,24 @@ public class ViewQuery {
 			return false;
 		if (limit != other.limit)
 			return false;
+		if (listName == null) {
+			if (other.listName != null)
+				return false;
+		} else if (!listName.equals(other.listName))
+			return false;
+		if (queryParams == null) {
+			if (other.queryParams != null)
+				return false;
+		} else if (!queryParams.equals(other.queryParams))
+			return false;
 		if (reduce != other.reduce)
 			return false;
 		if (skip != other.skip)
 			return false;
-		if (staleOk != other.staleOk)
+		if (staleOk == null) {
+			if (other.staleOk != null)
+				return false;
+		} else if (!staleOk.equals(other.staleOk))
 			return false;
 		if (startDocId == null) {
 			if (other.startDocId != null)
@@ -704,8 +742,6 @@ public class ViewQuery {
 			return false;
 		return true;
 	}
-
-
 	public void setIgnoreNotFound(boolean ignoreNotFound) {
 		this.ignoreNotFound = ignoreNotFound;
 	}
@@ -751,5 +787,7 @@ public class ViewQuery {
 			}
 		}
 	}
+
+	
 
 }

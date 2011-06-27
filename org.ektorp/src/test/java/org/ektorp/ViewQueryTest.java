@@ -197,6 +197,14 @@ public class ViewQueryTest {
 	}
 	
 	@Test
+	public void stale_ok_update_after() {
+		String url = query
+			.staleOkUpdateAfter()
+			.buildQuery();
+		assertTrue(contains(url, "?stale=update_after"));
+	}
+	
+	@Test
 	public void reduce_parameter_added() {
 		String url = query
 			.reduce(false)
