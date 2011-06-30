@@ -1,5 +1,6 @@
 package org.ektorp;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
@@ -343,5 +344,13 @@ public interface CouchDbConnector {
 	 * @return a running changes feed that buffers incoming changes in a unbounded queue (will grow until OutOfMemoryException if not polled).
 	 */
 	ChangesFeed changesFeed(ChangesCommand cmd);
+
+	/**
+	 * Calls a document update handler
+	 * 
+	 * @return
+	 */
+	String callUpdate(String designDoc, String function, String docId)
+			throws IOException;
 
 }

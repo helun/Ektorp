@@ -2,13 +2,16 @@ package org.ektorp.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
@@ -307,7 +310,6 @@ public class StdCouchDbConnector implements CouchDbConnector {
 				query.buildQuery(), rh);
 	}
 	
-	@Override
 	public <T> Page<T> queryForPage(ViewQuery query, PageRequest pr, Class<T> type) {
 		Assert.notNull(query, "query may not be null");
 		Assert.notNull(pr, "PageRequest may not be null");
@@ -546,5 +548,30 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
 		return new ContinuousChangesFeed(dbName, restTemplate.getUncached(dbURI.append(actualCmd.toString()).toString()));
 	}
+	
+	public String callUpdate(String designDoc, String function, String docId, String val)
+ 			throws JsonProcessingException, IOException {
+ 		URI uri = dbURI.append(designDoc).append("_update").append(function)
+ 				.append(docId);
+ 
+ 		return restTemplate.put(uri.toString(), val != null ? val : "", new ResponseCallback<String>() {
+ 
+ 			public String success(HttpResponse hr)
+ 					throws JsonProcessingException, IOException {
+ 				StringWriter writer = new StringWriter();
+ 				IOUtils.copy(hr.getContent(), writer, "utf-8");
+ 				return writer.toString();
+ 			}
+ 
+ 			public String error(HttpResponse hr) {
+ 				LOG.error("Error calling update "
+ 						+ hr.getRequestURI().toString() + " got HTTP "
+ 						+ hr.getCode());
+ 				return null;
+ 
+ 			}
+ 		});
+ 
+ 	}
 
 }
