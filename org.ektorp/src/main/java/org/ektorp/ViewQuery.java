@@ -393,7 +393,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery staleOk(boolean b) {
 		reset();
-		staleOk = "ok";
+		staleOk = b ? "ok" : null;
 		return this;
 	}
 	/**

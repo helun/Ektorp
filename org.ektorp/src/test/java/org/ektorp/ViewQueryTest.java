@@ -197,6 +197,15 @@ public class ViewQueryTest {
 	}
 	
 	@Test
+	public void stale_ok_set_to_false() {
+		String url = query
+			.staleOk(true)
+			.staleOk(false)
+			.buildQuery();
+		assertFalse(contains(url, "?stale=ok"));
+	}
+	
+	@Test
 	public void stale_ok_update_after() {
 		String url = query
 			.staleOkUpdateAfter()
