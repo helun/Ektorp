@@ -579,5 +579,10 @@ public class StdCouchDbConnector implements CouchDbConnector {
  		});
  
  	}
+	
+	@Override
+	public void ensureFullCommit() {
+		restTemplate.post(dbURI.append("_ensure_full_commit").toString(), "");
+	}
 
 }

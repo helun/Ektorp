@@ -522,6 +522,13 @@ public class StdCouchDbConnectorTest {
 		assertEquals("response string", dbCon.callUpdateHandler("_design/designDocID", "functionName", "docID", params));
 	}
 	
+	@Test
+	public void testEnsureFullCommit() {
+		when(httpClient.post("/test_db/_ensure_full_commit", "")).thenReturn(HttpResponseStub.valueOf(200, "{\"ok\" : true, \"instance_start_time\" : \"1288186189373361\"}"));
+		dbCon.ensureFullCommit();
+		verify(httpClient).post("/test_db/_ensure_full_commit", "");
+	}
+	
 	@SuppressWarnings("serial")
 	static class DateDoc extends CouchDbDocument {
 		
