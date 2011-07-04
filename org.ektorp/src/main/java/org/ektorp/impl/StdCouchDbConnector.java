@@ -2,12 +2,12 @@ package org.ektorp.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
@@ -90,6 +90,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		this.dbInstance = dbi;
 		this.objectMapper = om.createObjectMapper(this);
 
+		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
+		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
 		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
 		this.restTemplate = new RestTemplate(dbi.getConnection());
 		this.revisionHandler = new RevisionResponseHandler(objectMapper);
@@ -549,27 +551,31 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		return new ContinuousChangesFeed(dbName, restTemplate.getUncached(dbURI.append(actualCmd.toString()).toString()));
 	}
 	
-	public String callUpdate(String designDoc, String function, String docId, String val)
- 			throws JsonProcessingException, IOException {
- 		URI uri = dbURI.append(designDoc).append("_update").append(function)
- 				.append(docId);
- 
- 		return restTemplate.put(uri.toString(), val != null ? val : "", new ResponseCallback<String>() {
+	@Override
+	public String callUpdateHandler(String designDocID, String function,
+			String docID) {
+		return callUpdateHandler(designDocID, function, docID, null);
+	}
+	
+	public String callUpdateHandler(String designDocID, String function, String docID, Map<String, String> params) {
+		Assert.hasText(designDocID, "designDocID may not be null or empty");
+		Assert.hasText(function, "functionName may not be null or empty");
+		Assert.hasText(docID, "docId may not be null or empty");
+ 		URI uri = dbURI.append(designDocID).append("_update").append(function)
+ 				.append(docID);
+ 		if(params != null && !params.isEmpty()) {
+ 			for (Map.Entry<String, String> p : params.entrySet()) {
+ 	 			uri.param(p.getKey(), p.getValue());
+ 	 		}	
+ 		}
+ 		
+ 		return restTemplate.put(uri.toString(), "", new StdResponseHandler<String>() {
  
  			public String success(HttpResponse hr)
  					throws JsonProcessingException, IOException {
- 				StringWriter writer = new StringWriter();
- 				IOUtils.copy(hr.getContent(), writer, "utf-8");
- 				return writer.toString();
+ 				return IOUtils.toString(hr.getContent(), "UTF-8");
  			}
  
- 			public String error(HttpResponse hr) {
- 				LOG.error("Error calling update "
- 						+ hr.getRequestURI().toString() + " got HTTP "
- 						+ hr.getCode());
- 				return null;
- 
- 			}
  		});
  
  	}

@@ -515,6 +515,13 @@ public class StdCouchDbConnectorTest {
 		assertNotNull(info);
 	}
 	
+	@Test
+	public void testCallUpdateHandler() {
+		when(httpClient.put("/test_db/_design/designDocID/_update/functionName/docID?key=value", "")).thenReturn(HttpResponseStub.valueOf(201, "response string"));
+		Map<String, String> params = Collections.singletonMap("key", "value");
+		assertEquals("response string", dbCon.callUpdateHandler("_design/designDocID", "functionName", "docID", params));
+	}
+	
 	@SuppressWarnings("serial")
 	static class DateDoc extends CouchDbDocument {
 		

@@ -32,9 +32,9 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	public static final String AUTO_UPDATE_VIEW_ON_CHANGE = "org.ektorp.support.AutoUpdateViewOnChange";
 	protected static final Logger log = LoggerFactory.getLogger(CouchDbRepositorySupport.class);
 	protected final CouchDbConnector db;
-	private final Class<T> type;
+	protected final Class<T> type;
 	
-	private final String stdDesignDocumentId;
+	protected final String stdDesignDocumentId;
 	
 	private DesignDocumentFactory designDocumentFactory; 
 	
