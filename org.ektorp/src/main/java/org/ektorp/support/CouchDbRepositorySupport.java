@@ -39,11 +39,17 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	private DesignDocumentFactory designDocumentFactory; 
 	
 	protected CouchDbRepositorySupport(Class<T> type, CouchDbConnector db) {
+		this(type, db, true);
+	}
+	
+	protected CouchDbRepositorySupport(Class<T> type, CouchDbConnector db, boolean createIfNotExists) {
 		Assert.notNull(db, "CouchDbConnector may not be null");
 		Assert.notNull(type);
 		this.db = db;
 		this.type = type;
-		db.createDatabaseIfNotExists();
+		if (createIfNotExists) {
+			db.createDatabaseIfNotExists();	
+		}
 		stdDesignDocumentId = NameConventions.designDocName(type);
 	}
 	/**
