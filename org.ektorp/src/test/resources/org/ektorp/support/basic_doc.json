@@ -1,0 +1,22 @@
+{
+    "_id":"some_id",
+    "_rev":"3-a1a9b39ee3cc39181b796a69cb48521c",
+    "field":"value",
+    "_revisions" : {
+      "ids" : [
+         "a1a9b39ee3cc39181b796a69cb48521c",
+         "7c4740b4dcf26683e941d6641c00c39d",
+         "9c65296036141e575d32ba9c034dd3ee"
+      ],
+      "start" : 3
+    },
+    "_attachments" : {
+      "styling.css" : {
+         "stub" : true,
+         "content-type" : "text/css",
+         "length" : 783426,
+         "digest":"md5digest"
+         }
+    },
+    "_conflicts":["some-conflicting-rev"]
+}

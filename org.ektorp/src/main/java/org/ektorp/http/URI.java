@@ -2,6 +2,7 @@ package org.ektorp.http;
 
 import java.io.*;
 import java.net.*;
+import java.util.Map;
 
 import org.ektorp.util.*;
 
@@ -96,5 +97,11 @@ public class URI {
 	@Override
 	public String toString() {
 		return params != null ? path.append(params).toString() : path.toString();
+	}
+
+	public void params(Map<String, String> params) { 
+		for (Map.Entry<String, String> e : params.entrySet()) {
+			param(e.getKey(), e.getValue());
+		}
 	}
 }

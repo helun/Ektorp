@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.ektorp</groupId>
 	<artifactId>org.ektorp.parent</artifactId>
@@ -7,11 +8,14 @@
 	<version>1.2.0-SNAPSHOT</version>
 	<description>a Java CouchDB persistence library</description>
 	<scm>
-		<url>scm:svn:http://ektorp.googlecode.com/svn/trunk/</url>
-		<connection>scm:svn:http://ektorp.googlecode.com/svn/trunk/</connection>
-		<developerConnection>scm:svn:https://ektorp.googlecode.com/svn/trunk/</developerConnection>
+		<!-- <url>scm:svn:http://ektorp.googlecode.com/svn/trunk/</url> -->
+		<!-- <connection>scm:svn:http://ektorp.googlecode.com/svn/trunk/</connection> -->
+		<!-- <developerConnection>scm:svn:https://ektorp.googlecode.com/svn/trunk/</developerConnection> -->
+		<connection>scm:git:git@github.com:helun/Ektorp.git</connection>
+		<url>scm:git:git@github.com:helun/Ektorp.git</url>
+		<developerConnection>scm:git:git@github.com:helun/Ektorp.git</developerConnection>
 	</scm>
-	<url>http://code.google.com/p/ektorp/</url>
+	<url>http://www.ektorp.org</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -99,8 +103,8 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>1.6</source>
+					<target>1.6</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
@@ -117,6 +121,7 @@
 				<version>2.0</version>
 				<configuration>
 					<mavenExecutorId>forked-path</mavenExecutorId>
+					<localCheckout>true</localCheckout>
 				</configuration>
 			</plugin>
 		</plugins>

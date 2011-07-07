@@ -67,6 +67,30 @@ public interface CouchDbConnector {
 	 */
 	<T> T get(Class<T> c, String id);
 	/**
+	 * 
+	 * @param c the target class to map to.
+	 * @param id the id of the document in the database.
+	 * @param options
+	 * @return the document mapped as the specified class.
+	 * @throws DocumentNotFoundException if the document was not found.
+	 */
+	<T> T get(Class<T> c, String id, Options options);
+	/**
+	 * Same as get(Class<T> c, String id) with the difference that null is return if the document was not found.
+	 * @param c
+	 * @param id
+	 * @return null if the document was not found.
+	 */
+	<T> T find(Class<T> c, String id);
+	/**
+	 * Same as get(Class<T> c, String id, Options options) with the difference that null is return if the document was not found.
+	 * @param c
+	 * @param id
+	 * @param options
+	 * @return null if the document was not found.
+	 */
+	<T> T find(Class<T> c, String id, Options options);
+	/**
 	 *
 	 * @param <T>
 	 * @param c the target class to map to.
@@ -74,6 +98,7 @@ public interface CouchDbConnector {
 	 * @param rev of the object.
 	 * @return the document mapped as the specified class.
 	 * @throws DocumentNotFoundException if the document was not found.
+	 * @deprecated use get(Class<T> c, String id, Options options)
 	 */
 	<T> T get(Class<T> c, String id, String rev);
 	/**
@@ -83,6 +108,7 @@ public interface CouchDbConnector {
 	 * @param id the id of the document in the database.
 	 * @return the document mapped as the specified class.
 	 * @throws DocumentNotFoundException if the document was not found.
+	 * @deprecated use get(Class<T> c, String id, Options options)
 	 */
 	<T> T getWithConflicts(Class<T> c, String id);
 	/**
@@ -110,8 +136,20 @@ public interface CouchDbConnector {
 	 * @param rev
 	 * @return the document as raw json in an InputStream, don't forget to close the stream when finished.
 	 * @throws DocumentNotFoundException if the document was not found.
+	 * @deprecated use getAsStream(String id, Options options)
 	 */
 	InputStream getAsStream(String id, String rev);
+	/**
+	 * Please note that the stream has to be closed after usage,
+	 * otherwise http connection leaks will occur and the system will eventually hang due
+	 * to connection starvation.
+	 * 
+	 * @param id
+	 * @param options
+	 * @return the document as raw json in an InputStream, don't forget to close the stream when finished.
+	 * @throws DocumentNotFoundException if the document was not found.
+	 */
+	InputStream getAsStream(String id, Options options);
 	/**
 	 *
 	 * @param id

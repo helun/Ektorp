@@ -21,6 +21,7 @@ import org.ektorp.DbInfo;
 import org.ektorp.DbPath;
 import org.ektorp.DesignDocInfo;
 import org.ektorp.DocumentOperationResult;
+import org.ektorp.Options;
 import org.ektorp.Page;
 import org.ektorp.PageRequest;
 import org.ektorp.ReplicationCommand;
@@ -74,6 +75,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	
 	private final ThreadLocalBulkBufferHolder bulkBufferManager = new ThreadLocalBulkBufferHolder();
 
+	private final static Options EMPTY_OPTIONS = new Options();
+	
 	public StdCouchDbConnector(String databaseName, CouchDbInstance dbInstance) {
 		this(databaseName, dbInstance, new StdObjectMapperFactory());
 	}
@@ -181,20 +184,16 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	}
 
 	public <T> T get(final Class<T> c, String id) {
-		Assert.notNull(c, "Class may not be null");
-		assertDocIdHasValue(id);
-		return restTemplate.get(URIWithDocId(id), new StdResponseHandler<T>() {
-			public T success(HttpResponse hr) throws Exception {
-				return objectMapper.readValue(hr.getContent(), c);
-			}
-		});
+		return get(c, id, EMPTY_OPTIONS);
 	}
-
-	public <T> T get(final Class<T> c, String id, String rev) {
+	
+	@Override
+	public <T> T get(final Class<T> c, String id, Options options) {
 		Assert.notNull(c, "Class may not be null");
 		assertDocIdHasValue(id);
-		Assert.hasText(rev, "Revision may not be null or empty");
-		return restTemplate.get(dbURI.append(id).param("rev", rev).toString(),
+		URI uri = dbURI.append(id);
+		applyOptions(options, uri);
+		return restTemplate.get(uri.toString(),
 				new StdResponseHandler<T>() {
 					public T success(HttpResponse hr) throws Exception {
 						return objectMapper.readValue(hr.getContent(), c);
@@ -202,17 +201,48 @@ public class StdCouchDbConnector implements CouchDbConnector {
 				});
 	}
 	
+	public <T> T get(final Class<T> c, String id, String rev) {
+		Assert.notNull(c, "Class may not be null");
+		assertDocIdHasValue(id);
+		Assert.hasText(rev, "Revision may not be null or empty");
+		return get(c, id, new Options().revision(rev));
+	}
+	
 	public <T> T getWithConflicts(final Class<T> c, String id) {
 		Assert.notNull(c, "Class may not be null");
 		assertDocIdHasValue(id);
-		return restTemplate.get(dbURI.append(id).param("conflicts", "true").toString(),
+		return get(c, id, new Options().includeConflicts());
+	}
+
+	@Override
+	public <T> T find(Class<T> c, String id) {
+		return find(c, id, EMPTY_OPTIONS);
+	}
+	
+	@Override
+	public <T> T find(final Class<T> c, String id, Options options) {
+		Assert.notNull(c, "Class may not be null");
+		assertDocIdHasValue(id);
+		URI uri = dbURI.append(id);
+		applyOptions(options, uri);
+		return restTemplate.get(uri.toString(),
 				new StdResponseHandler<T>() {
 					public T success(HttpResponse hr) throws Exception {
 						return objectMapper.readValue(hr.getContent(), c);
 					}
+			
+					public T error(HttpResponse hr) {
+						return hr.getCode() == HttpStatus.NOT_FOUND ? null : super.error(hr);
+					}
 				});
 	}
 
+	private void applyOptions(Options options, URI uri) {
+		if (options != null && !options.isEmpty()) {
+			uri.params(options.getOptions());
+		}
+	}
+	
 	public List<Revision> getRevisions(String id) {
 		assertDocIdHasValue(id);
 		return restTemplate.get(dbURI.append(id).param("revs_info", "true")
@@ -242,16 +272,21 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
 	public InputStream getAsStream(String id) {
 		assertDocIdHasValue(id);
-		HttpResponse r = restTemplate.get(dbURI.append(id).toString());
+		return getAsStream(id, EMPTY_OPTIONS);
+	}
+	
+	@Override
+	public InputStream getAsStream(String id, Options options) {
+		URI uri = dbURI.append(id);
+		applyOptions(options, uri);
+		HttpResponse r = restTemplate.get(uri.toString());
 		return r.getContent();
 	}
 
 	public InputStream getAsStream(String id, String rev) {
 		assertDocIdHasValue(id);
 		Assert.hasText(rev, "Revision may not be null or empty");
-		HttpResponse r = restTemplate.get(dbURI.append(id).param("rev", rev)
-				.toString());
-		return r.getContent();
+		return getAsStream(id, new Options().revision(rev));
 	}
 
 	public void update(final Object o) {
@@ -585,4 +620,5 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		restTemplate.post(dbURI.append("_ensure_full_commit").toString(), "");
 	}
 
+	
 }

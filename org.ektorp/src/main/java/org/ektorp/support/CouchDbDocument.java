@@ -22,6 +22,7 @@ public class CouchDbDocument implements Serializable {
 	private String revision;
 	private Map<String, Attachment> attachments;
 	private List<String> conflicts;
+	private Revisions revisions;
 	
 	@JsonProperty("_id")
 	public String getId() {
@@ -73,6 +74,21 @@ public class CouchDbDocument implements Serializable {
 	void setConflicts(List<String> conflicts) {
 		this.conflicts = conflicts;
 	}
+	
+	@JsonProperty("_revisions")
+	void setRevisions(Revisions r) {
+		this.revisions = r;
+	}
+	
+	/**
+	 * Note: Will only be populated if this document has been loaded with the revisions option = true.
+	 * @return
+	 */
+	@JsonIgnore
+	public Revisions getRevisions() {
+		return revisions;
+	}
+	
 	/**
 	 * 
 	 * @return a list of conflicting revisions. Note: Will only be populated if this document has been loaded through the CouchDbConnector.getWithConflicts method.

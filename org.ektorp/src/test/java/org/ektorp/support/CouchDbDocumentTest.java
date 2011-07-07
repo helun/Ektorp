@@ -7,20 +7,22 @@ import org.junit.*;
 
 public class CouchDbDocumentTest {
 
+	ObjectMapper mapper = new ObjectMapper();
+	
 	@Test
-	public void testSetId() throws Exception {
-		String json = "{\"field\":\"nisse\",\"_id\":\"some_id\",\"_rev\":\"123D123\",\"_attachments\":{\"name\":{\"stub\":true,\"content_type\":\"text/plain\",\"length\":29}},\"_conflicts\":[\"some-conflicting-rev\"]}";
-		ObjectMapper map = new ObjectMapper();
-		TestDoc td = map.readValue(json, TestDoc.class);
+	public void loadBasicDoc() throws Exception {
+		TestDoc td = mapper.readValue(getClass().getResourceAsStream("basic_doc.json"), TestDoc.class);
 		assertNotNull(td);
 		assertEquals("some_id", td.getId());
-		assertEquals("123D123", td.getRevision());
+		assertEquals("3-a1a9b39ee3cc39181b796a69cb48521c", td.getRevision());
 		assertFalse(td.getAttachments().isEmpty());
 		assertTrue(td.hasConflict());
 		assertFalse(td.getConflicts().isEmpty());
-		
+		Revisions r = td.getRevisions();
+		assertNotNull(r);
+		assertEquals(3, r.getStart());
 		// serialize just to provoke any serialization errors
-		map.writeValueAsString(td);
+		mapper.writeValueAsString(td);
 	}
 	
 	public static class TestDoc extends CouchDbDocument {

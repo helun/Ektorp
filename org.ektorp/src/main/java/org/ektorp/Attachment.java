@@ -1,6 +1,8 @@
 package org.ektorp;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.codehaus.jackson.annotate.*;
 import org.codehaus.jackson.map.annotate.*;
@@ -22,6 +24,8 @@ public class Attachment implements Serializable {
 	private String dataBase64;
 	private boolean stub;
 	private int revpos;
+	private String digest;
+	private Map<String, Object> anonymous;
 	
 	/**
 	 * Constructor that takes data as String.
@@ -98,4 +102,35 @@ public class Attachment implements Serializable {
 		this.revpos = revpos;
 	}
 	
+	public String getDigest() {
+		return digest;
+	}
+
+	/** 
+	 * @return a Map containing fields that did not map to any other field in the class during object deserializarion from a JSON document.
+	 */
+	@JsonAnyGetter
+	public Map<String, Object> getAnonymous() {
+		return anonymous();
+	}
+	
+	/**
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	@JsonAnySetter
+	public void setAnonymous(String key, Object value) {
+		anonymous().put(key, value);
+	}
+	/**
+	 * Provides lay init for the anonymous Map
+	 * @return
+	 */
+	private Map<String, Object> anonymous() {
+		if (anonymous == null) {
+			anonymous = new HashMap<String, Object>();
+		}
+		return anonymous;
+	}
 }
