@@ -24,6 +24,7 @@ import org.ektorp.DocumentOperationResult;
 import org.ektorp.Options;
 import org.ektorp.Page;
 import org.ektorp.PageRequest;
+import org.ektorp.PurgeResult;
 import org.ektorp.ReplicationCommand;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.Revision;
@@ -183,6 +184,16 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		return delete(Documents.getId(o), Documents.getRevision(o));
 	}
 
+	@Override
+	public PurgeResult purge(Map<String, List<String>> revisionsToPurge) {
+		return restTemplate.post(dbURI.append("_purge").toString(), jsonSerializer.toJson(revisionsToPurge), new StdResponseHandler<PurgeResult>() {
+			@Override
+			public PurgeResult success(HttpResponse hr) throws Exception {
+				return objectMapper.readValue(hr.getContent(), PurgeResult.class);
+			}
+		});
+	}
+	
 	public <T> T get(final Class<T> c, String id) {
 		return get(c, id, EMPTY_OPTIONS);
 	}

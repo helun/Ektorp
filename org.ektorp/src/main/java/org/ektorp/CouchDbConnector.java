@@ -58,6 +58,12 @@ public interface CouchDbConnector {
 	 */
 	String delete(String id, String revision);
 	/**
+	 * Permanently removes the references to deleted documents from the database.
+	 * @param revisionsToPurge document IDs &amp; revisions to be purged
+	 * @return contains the purge sequence number, and a list of the document IDs and revisions successfully purged.
+	 */
+	PurgeResult purge(Map<String, List<String>> revisionsToPurge);
+	/**
 	 *
 	 * @param <T>
 	 * @param c the target class to map to.

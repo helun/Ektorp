@@ -529,6 +529,17 @@ public class StdCouchDbConnectorTest {
 		verify(httpClient).post("/test_db/_ensure_full_commit", "");
 	}
 	
+	@Test
+	public void testPurge() {
+		String rsp = "{\"purged\" : { \"Billy\" : [ \"17-b3eb5ac6fbaef4428d712e66483dcb79\"]},\"purge_seq\" : 11}";
+		when(httpClient.post(eq("/test_db/_purge"), anyString())).thenReturn(HttpResponseStub.valueOf(200, rsp));
+		Map<String, List<String>> revisionsToPurge = new HashMap<String, List<String>>();
+		revisionsToPurge.put("Billy", Collections.singletonList("17-b3eb5ac6fbaef4428d712e66483dcb79"));
+		PurgeResult r = dbCon.purge(revisionsToPurge);
+		assertEquals(11, r.getPurgeSeq());
+		assertTrue(r.getPurged().containsKey("Billy"));
+	}
+	
 	@SuppressWarnings("serial")
 	static class DateDoc extends CouchDbDocument {
 		
