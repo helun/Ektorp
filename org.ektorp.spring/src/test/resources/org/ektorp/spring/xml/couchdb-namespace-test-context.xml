@@ -9,8 +9,10 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.ektorp.org/schema/couchdb http://www.ektorp.org/schema/couchdb/couchdb.xsd">
 	
-	<util:properties id="couchdbProperties" location="classpath:/couchdb.properties"/>
-	
-	<couchdb:database name="testDatabase" url="http://localhost:5984/testDatabase" />
+	<couchdb:database name="testDatabase" url="http://localhost:5984/testDatabase">
+<!-- 		<couchdb:bootstrap path="classpath:myViews.json"/> -->
+<!-- 		<couchdb:load path="classpath:myViews.json"/> -->
+<!-- 		<couchdb:dataload path="classpath:myViews.json"/> -->
+	</couchdb:database>
 	
 </beans>

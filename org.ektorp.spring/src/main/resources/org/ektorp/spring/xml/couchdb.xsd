@@ -10,6 +10,9 @@
 		]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
+<!-- 			<xsd:sequence> -->
+<!-- 				<xsd:element name="load" type="bootstrapResourceType" minOccurs="0" maxOccurs="unbounded"/> -->
+<!-- 			</xsd:sequence> -->
 			<xsd:attribute name="id" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
@@ -43,6 +46,21 @@
 			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
+
+<!-- 	<xsd:complexType name="bootstrapResourceType"> -->
+<!-- 		<xsd:annotation> -->
+<!-- 			<xsd:documentation><![CDATA[ -->
+<!-- 				Element defining a resource that should be loaded into the database at application startup -->
+<!-- 			]]></xsd:documentation> -->
+<!-- 		</xsd:annotation> -->
+<!-- 		<xsd:attribute name="path" type="xsd:string" use="required"> -->
+<!-- 			<xsd:annotation> -->
+<!-- 				<xsd:documentation><![CDATA[ -->
+<!-- 					The path to the resource -->
+<!-- 				]]></xsd:documentation> -->
+<!-- 			</xsd:annotation> -->
+<!-- 		</xsd:attribute> -->
+<!-- 	</xsd:complexType> -->
 
 	<xsd:element name="instance">
 		<xsd:complexType>
