@@ -11,6 +11,7 @@ public class URI {
 	private final StringBuilder path;
 	private final boolean prototype;
 	private StringBuilder params;
+	private String uri;
 	
 	private URI(String path) {
 		this.path = new StringBuilder(path);
@@ -59,6 +60,7 @@ public class URI {
 		} catch (UnsupportedEncodingException e) {
 			throw Exceptions.propagate(e);
 		}
+		uri = null;
 		return this;
 	}
 	
@@ -76,6 +78,7 @@ public class URI {
 		} catch (UnsupportedEncodingException e) {
 			throw Exceptions.propagate(e);
 		}
+		uri = null;
 		return this;
 	}
 	
@@ -96,7 +99,10 @@ public class URI {
 	
 	@Override
 	public String toString() {
-		return params != null ? path.append(params).toString() : path.toString();
+		if (uri == null) {
+			uri = params != null ? path.append(params).toString() : path.toString(); 
+		}
+		return uri;
 	}
 
 	public void params(Map<String, String> params) { 

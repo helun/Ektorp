@@ -37,4 +37,15 @@ public class URITest {
 															.param("endKey", "\"test\"")
 															.toString());
 	}
+	
+	@Test
+	public void multiCallToString() {
+		URI uri = URI.of("http://example.com:4510")
+		.append("my_db")
+		.append("my_doc")
+		.param("startKey", "\"test\"")
+		.param("endKey", "\"test\"");
+		uri.toString();
+		assertEquals("http://example.com:4510/my_db/my_doc?startKey=%22test%22&endKey=%22test%22", uri.toString());
+	}
 }
