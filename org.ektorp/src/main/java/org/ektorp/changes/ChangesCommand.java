@@ -1,6 +1,10 @@
 package org.ektorp.changes;
 
-import org.ektorp.http.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.ektorp.http.URI;
 
 /**
  * 
@@ -15,6 +19,7 @@ public class ChangesCommand {
 	public final boolean includeDocs;
 	public final int heartbeat;
 	public final int limit;
+	public final Map<String,String> extraQueryParams;
 	
 	private String queryString; 
 	
@@ -25,6 +30,11 @@ public class ChangesCommand {
 		includeDocs = b.includeDocs;
 		heartbeat = b.heartbeat;
 		limit = b.limit;
+		if (b.extraQueryParams != null) {
+			extraQueryParams = Collections.unmodifiableMap(new LinkedHashMap<String, String>(b.extraQueryParams));	
+		} else {
+			extraQueryParams = null;
+		}
 	}
 	
 	@Override
@@ -52,7 +62,11 @@ public class ChangesCommand {
 			}
 			
 			if (limit > -1){
-			    	uri.param("limit", limit);
+				uri.param("limit", limit);
+			}
+			
+			if (extraQueryParams != null) {
+				uri.params(extraQueryParams);
 			}
 			
 			queryString = uri.toString();
@@ -73,6 +87,7 @@ public class ChangesCommand {
 		private boolean includeDocs;
 		private int heartbeat = -1;
 		private int limit = -1;
+		private Map<String,String> extraQueryParams;
 		
 		/**
 		 * Start the results from the change immediately after the given sequence number.
@@ -91,6 +106,21 @@ public class ChangesCommand {
 		 */
 		public Builder since(String s) {
 			this.since = s;
+			return this;
+		}
+		
+		/**
+		 * Adds a parameter to the GET request sent to the database.
+		 * This is mainly used for supplying parameters to filter functions.
+		 * @param name
+		 * @param value
+		 * @return
+		 */
+		public Builder param(String name, String value) {
+			if (extraQueryParams == null) {
+				extraQueryParams = new LinkedHashMap<String, String>();
+			}
+			extraQueryParams.put(name, value);
 			return this;
 		}
 		
@@ -132,6 +162,7 @@ public class ChangesCommand {
 			filter = other.filter;
 			includeDocs = other.includeDocs;
 			since = other.since;
+			extraQueryParams = new LinkedHashMap<String, String>(other.extraQueryParams);
 			return this;
 		}
 		
