@@ -228,7 +228,16 @@ public interface CouchDbConnector {
 	 * @return the view result mapped as the specified class.
 	 */
 	<T> List<T> queryView(ViewQuery query, Class<T> type);
-
+	/**
+	 * Provides paged view results. Implementation based on the recipe described in the book "CouchDB The Definitive Guide" 
+	 * http://guide.couchdb.org/editions/1/en/recipes.html#pagination
+	 * 
+	 * This method has the same requirements for the view as the method queryView(ViewQuery query, Class<T> type).
+	 * @param query
+	 * @param pr
+	 * @param type
+	 * @return
+	 */
 	<T> Page<T> queryForPage(ViewQuery query, PageRequest pr, Class<T> type);
 	/**
 	 *

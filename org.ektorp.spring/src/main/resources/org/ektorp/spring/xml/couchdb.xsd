@@ -63,6 +63,11 @@
 <!-- 	</xsd:complexType> -->
 
 	<xsd:element name="instance">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+			Configures a org.ektorp.CouchDbInstance in the application context.
+		]]></xsd:documentation>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="url" type="xsd:string">
 				<xsd:annotation>
@@ -73,7 +78,13 @@
 				]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="id" type="xsd:string" />
+			<xsd:attribute name="id" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+					The bean id registered in the application context. 
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="properties" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[

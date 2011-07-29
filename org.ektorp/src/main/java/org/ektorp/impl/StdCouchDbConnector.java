@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StdCouchDbConnector implements CouchDbConnector {
 
-	private static final int DEFAULT_HEARTBEAT_INTERVAL = 10000;
+	private static final int DEFAULT_HEARTBEAT_INTERVAL = 9000;
 	private static final Logger LOG = LoggerFactory
 			.getLogger(StdCouchDbConnector.class);
 	private static final ResponseCallback<Void> VOID_RESPONSE_HANDLER = new StdResponseHandler<Void>();
