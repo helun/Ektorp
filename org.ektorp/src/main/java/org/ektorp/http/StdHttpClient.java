@@ -170,7 +170,7 @@ public class StdHttpClient implements HttpClient {
 
 		boolean cleanupIdleConnections = true;
 		boolean useExpectContinue = true;
-		boolean caching = false;
+		boolean caching = true;
 		int maxObjectSizeBytes = 8192;
 		int maxCacheEntries = 1000;
 
@@ -205,7 +205,12 @@ public class StdHttpClient implements HttpClient {
 			proxy = s;
 			return this;
 		}
-		
+		/**
+		 * Controls if the http client should cache response entities.
+		 * Default is true.
+		 * @param b
+		 * @return
+		 */
 		public Builder caching(boolean b) {
 			caching = b;
 			return this;

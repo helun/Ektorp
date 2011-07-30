@@ -9,7 +9,7 @@
   <info>
     <title>Ektorp Reference Documentation</title>
 
-    <releaseinfo>Version: 1.1.1</releaseinfo>
+    <releaseinfo>Version: 1.2.0</releaseinfo>
 
     <author>
       <personname><firstname>Henrik</firstname><surname>Lundgren</surname></personname>
@@ -92,7 +92,7 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp&lt;/artifactId&gt;
-    &lt;version&gt;1.1.0&lt;/version&gt;
+    &lt;version&gt;1.2.0&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
         <para>Spring support module:</para>
@@ -100,7 +100,7 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp.spring&lt;/artifactId&gt;
-    &lt;version&gt;1.1.0&lt;/version&gt;
+    &lt;version&gt;1.2.0&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
       </section>
 
@@ -112,14 +112,14 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp&lt;/artifactId&gt;
-    &lt;version&gt;1.1.1-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;1.2.1-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;
 
 
 &lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp.spring&lt;/artifactId&gt;
-    &lt;version&gt;1.1.1-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;1.2.1-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
         <para>You can find the snapshots at
@@ -187,8 +187,7 @@
       through a nested builder class:
       <emphasis>StdHttpClient.Builder</emphasis><programlisting
       language="java">HttpClient authenticatedHttpClient = new StdHttpClient?.Builder()
-                                .host("mychouchdbhost")
-                                .port(4455)
+                                .url("http://mychouchdbhost:5984")
                                 .username("admin")
                                 .password("secret")
                                 .build();</programlisting></para>
@@ -212,15 +211,9 @@
 
           <tbody>
             <row>
-              <entry>host</entry>
+              <entry>url</entry>
 
-              <entry>localhost</entry>
-            </row>
-
-            <row>
-              <entry>port</entry>
-
-              <entry>5984</entry>
+              <entry>http://localhost:5984</entry>
             </row>
 
             <row>
@@ -256,7 +249,8 @@
             <row>
               <entry>enableSSL</entry>
 
-              <entry>false</entry>
+              <entry>false (will automatically be enabled if url begins with
+              https)</entry>
             </row>
 
             <row>
@@ -271,6 +265,36 @@
 
               <entry>false</entry>
             </row>
+
+            <row>
+              <entry>caching</entry>
+
+              <entry>true</entry>
+            </row>
+
+            <row>
+              <entry>maxCacheEntries</entry>
+
+              <entry>1000</entry>
+            </row>
+
+            <row>
+              <entry>maxObjectSizeBytes</entry>
+
+              <entry>8192</entry>
+            </row>
+
+            <row>
+              <entry>useExpectContinue</entry>
+
+              <entry>true</entry>
+            </row>
+
+			<row>
+			  <entry>cleanupIdleConnections</entry>
+
+			  <entry>true</entry>
+			</row>
           </tbody>
         </tgroup>
       </table>
@@ -283,8 +307,8 @@
         <title>Enabling SSL/TLS Connections</title>
 
         <para>If you want the http client to connector to CouchDB with a
-        SSL/TLS connection, create the client with the parameter enableSSL =
-        true.</para>
+        SSL/TLS connection, specify an url that begins with "https" or create
+        the client with the parameter enableSSL = true.</para>
 
         <para>You can bring your own SSLSocketFactory if you have configured
         special trust stores etc. The factory can be specified through the
@@ -293,6 +317,16 @@
         <para>If you are lazy and want the trust manager to trust any host and
         certificate, relaxed SSL settings can be enabled through the
         relaxedSSLSettings parameter.</para>
+      </section>
+
+      <section>
+        <title>Caching</title>
+
+        <para>Caching is enabled by default. This means that when you load a
+        document from the database, it will be loaded from the http client's
+        cache if it exists in the cache and the revision has not changed since
+        the last access. This can speed up database access
+        significantly.</para>
       </section>
     </section>
 
@@ -347,7 +381,7 @@
         </listitem>
       </itemizedlist>
 
-      <para>The third constructor allows you to bring your own
+      <para>The second constructor allows you to bring your own
       ObjectMapperFactory if you want full control on how Jackson is
       configured.</para>
 
@@ -1586,6 +1620,71 @@ ViewQuery query = new ViewQuery()
       <programlisting language="java">    // will render to [2010, {}]
     ComplexKey allOf2010 = ComplexKey.of(2010, ComplexKey.emptyObject());</programlisting>
     </section>
+
+    <section>
+      <title>Pagination</title>
+
+      <para>CouchDbConnector provides a method for querying views for paged
+      results. The implementation is based on the recipe described in the book
+      <link
+      xlink:href="http://guide.couchdb.org/editions/1/en/recipes.html#pagination">"CouchDB
+      The Definitive Guide"</link></para>
+
+      <para>Querying a view for a page starts with the querying for the first
+      page:<programlisting language="java">// create a page request with a page size of 5 
+PageRequest pageRequest = PageRequest.firstPage(5);
+
+ViewQuery query = new ViewQuery()
+                       .designDocId("_design/Order")
+                       .viewName("by_orderDate")
+                       .includeDocs(true);
+
+Page&lt;Order&gt; result = db.queryForPage(query, pageRequest, Order.class);
+
+// Page is iterable
+for (Order o : result) {
+    // do something here
+}</programlisting><parameter>Requesting the next page is a simple
+      affair:</parameter></para>
+
+      <programlisting language="java">Page&lt;Order&gt; previousPage = ...
+PageRequest nextPageRequest = previousPage.getNextPageRequest();
+
+Page&lt;Order&gt; nextPage = db.queryForPage(query, nextPageRequest, Order.class);
+
+// requesting the previous page:
+PageRequest prevPageRequest = nextPage.getPreviousPageRequest();</programlisting>
+
+      <section>
+        <title>PageRequest as a text link</title>
+
+        <para>In order to simplify state handling between separate http
+        requests the page request can be serialized into an URL-safe
+        string.</para>
+
+        <para>Given that the Page object is available in the model in the jsp
+        page below, a link to the previous page can be constructed like this:
+        </para>
+
+        <programlisting language="html">&lt;c:if test="${page.hasPrevious}"&gt;
+    &lt;a href="/blog/posts/?p=${page.previousLink}"&gt;Previous page&lt;/a&gt;
+&lt;/c:if&gt;</programlisting>
+
+        <para>When the request is handled in a controller the page request can
+        be recreated from the request parameter. Here is an example snippet
+        from a controller created in Spring MVC </para>
+
+        <programlisting language="java">@RequestMapping( value = "/posts/", method = RequestMethod.GET)
+public String viewAll(Model m, @RequestParam(value = "p", required = false) String pageLink) {
+    PageRequest pr = pageLink != null ? PageRequest.fromLink(pageLink) : PageRequest.firstPage(5);
+    m.addAttribute(blogPostRepo.getAll(pr));
+    return "/posts/index";
+}</programlisting>
+
+        <para>Handlig the page state as text links eliminates the need for
+        storing data in the session.</para>
+      </section>
+    </section>
   </chapter>
 
   <chapter>
@@ -1673,6 +1772,18 @@ for(DocumentChange change : changes) {
   </chapter>
 
   <chapter>
+    <title>Calling Update Handlers</title>
+
+    <para>CouchDB provides the ability to define functions that clients can
+    request to invoke server-side logic that will create or update a
+    document.</para>
+
+    <para>CouchDbConnector provides a method for calling update
+    handlers:<programlisting language="java">CouchDbConnector db = ...
+String responseString = db.callUpdateHandler("_design/designDocID", "functionName", "docID");</programlisting></para>
+  </chapter>
+
+  <chapter>
     <title>Admin Functions</title>
 
     <para></para>
@@ -1746,10 +1857,65 @@ ReplicationStatus status2 = db.replicateTo("http://example.org/example-database"
     <para></para>
 
     <section>
+      <title>XML Schema-based configuration</title>
+
+      <para>Ektorp Spring module comes with a Spring XML namespace that
+      simplifies the Ektorp configuration in an application context.</para>
+
+      <para>The following xml-snippet will create an CouchDbConnector
+      connected to the database named "myDatabase". If an id is not declared
+      the connector will be registered with the same id as the database name
+      in the application context:</para>
+
+      <para><programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:couchdb="http://www.ektorp.org/schema/couchdb"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.ektorp.org/schema/couchdb http://www.ektorp.org/schema/couchdb/couchdb.xsd"&gt;
+
+    &lt;couchdb:database name="myDatabase" url="http://localhost:5984"/&gt;
+
+&lt;/beans&gt;</programlisting>If you need multiple connectors connected to
+      the same CouchDB instance, the CouchDbInstance bean can be explicitly
+      declared:<programlisting language="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:couchdb="http://www.ektorp.org/schema/couchdb"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.ektorp.org/schema/couchdb http://www.ektorp.org/schema/couchdb/couchdb.xsd"&gt;
+
+    &lt;couchdb:instance id="localCouchDB" url="http://localhost:5984/" /&gt;
+
+    &lt;couchdb:database name="myDatabase" instance-ref="localCouchDB" /&gt;
+
+    &lt;couchdb:database name="myOtherDatabase" instance-ref="localCouchDB" /&gt;
+
+&lt;/beans&gt;</programlisting><parameter>If you need to specify more
+      properties to Ektorp you can just refer to them when the CouchDB
+      instance is declared:</parameter><programlisting language="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:couchdb="http://www.ektorp.org/schema/couchdb"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.ektorp.org/schema/couchdb http://www.ektorp.org/schema/couchdb/couchdb.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"&gt;
+
+    &lt;util:properties id="couchdbProperties" location="classpath:/couchdb.properties"/&gt;
+
+    &lt;couchdb:instance id="localCouchDB" url="http://localhost:5984" properties="couchdbProperties" /&gt;
+
+    &lt;couchdb:database name="myDatabase" instance-ref="localCouchDB" /&gt;
+
+&lt;/beans&gt;</programlisting></para>
+    </section>
+
+    <section>
       <title>HttpClientFactoryBean</title>
 
-      <para>The class org.ektorp.spring.HttpClientFactoryBean provides an easy
-      way to configure a HttpClient in the application context.</para>
+      <para>If you for some reason cannot use the XML namespace described in
+      the previous section, you can use the class
+      org.ektorp.spring.HttpClientFactoryBean to configure a HttpClient in the
+      application context.</para>
 
       <para>When added to the appllication context, the factory will read
       configuration from couchdbProperties defined in the application
