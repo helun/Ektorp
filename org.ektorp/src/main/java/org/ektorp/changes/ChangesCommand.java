@@ -162,7 +162,9 @@ public class ChangesCommand {
 			filter = other.filter;
 			includeDocs = other.includeDocs;
 			since = other.since;
-			extraQueryParams = new LinkedHashMap<String, String>(other.extraQueryParams);
+			if (other.extraQueryParams != null) {
+			    extraQueryParams = new LinkedHashMap<String, String>(other.extraQueryParams);
+			}
 			return this;
 		}
 		
