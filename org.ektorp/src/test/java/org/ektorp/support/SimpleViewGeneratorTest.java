@@ -37,7 +37,6 @@ public class SimpleViewGeneratorTest {
 	@Test
 	public void views_should_be_generated_for_all_annotations() {
 		Map<String, DesignDocument.View> result = gen.generateViews(new TestRepo());
-		assertEquals(11, result.size());
 		assertTrue(result.containsKey("view_1"));
 		assertTrue(result.containsKey("view_2"));
 		assertTrue(result.containsKey("view_3"));
@@ -53,12 +52,18 @@ public class SimpleViewGeneratorTest {
 		DesignDocument.View all = result.get("all");
 		assertEquals(ALL_VIEW_FUNCTION, all.getMap());
 		assertTrue(result.containsKey("by_special"));
+		assertNull("reduce function should not be defined", result.get("by_special").getReduce());
+		
 		assertTrue(result.containsKey("by_special2"));
 		assertFalse("map function should be loaded from file in classpath", result.get("by_special2").getMap().startsWith("classpath:"));
-		assertFalse("reduce function should be loaded from file in classpath", result.get("by_special2").getReduce().startsWith("classpath:"));
+		assertTrue("reduce function should be loaded from file in classpath", result.get("by_special2").getReduce().indexOf("keys") > -1);
 		assertTrue(result.containsKey("by_complicated"));
 		assertEquals(expectedComplicatedMapFunction, result.get("by_complicated").getMap());
 		assertEquals(expectedComplicatedReduceFunction, result.get("by_complicated").getReduce());
+		
+		assertTrue(result.containsKey("by_special3"));
+		assertFalse("map function should be loaded from file in classpath", result.get("by_special3").getMap().startsWith("classpath:"));
+		assertNull("reduce function should not be defined", result.get("by_special3").getReduce());
 	}
 	
 	@Test
@@ -196,6 +201,11 @@ public class SimpleViewGeneratorTest {
 	
 		@View(name = "by_special2", map = "classpath:map.js", reduce = "classpath:reduce.js")
 		public List<String> findBySpecialView2() {
+			return null;
+		}
+		
+		@View(name = "by_special3", map = "classpath:map.js")
+		public List<String> findBySpecialView3() {
 			return null;
 		}
 		

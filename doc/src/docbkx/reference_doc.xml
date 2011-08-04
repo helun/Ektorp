@@ -9,7 +9,7 @@
   <info>
     <title>Ektorp Reference Documentation</title>
 
-    <releaseinfo>Version: 1.2.0</releaseinfo>
+    <releaseinfo>Version: 1.2.1</releaseinfo>
 
     <author>
       <personname><firstname>Henrik</firstname><surname>Lundgren</surname></personname>
@@ -92,7 +92,7 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp&lt;/artifactId&gt;
-    &lt;version&gt;1.2.0&lt;/version&gt;
+    &lt;version&gt;1.2.1&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
         <para>Spring support module:</para>
@@ -100,7 +100,7 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp.spring&lt;/artifactId&gt;
-    &lt;version&gt;1.2.0&lt;/version&gt;
+    &lt;version&gt;1.2.1&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
       </section>
 
@@ -112,14 +112,14 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp&lt;/artifactId&gt;
-    &lt;version&gt;1.2.1-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;1.2.2-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;
 
 
 &lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp.spring&lt;/artifactId&gt;
-    &lt;version&gt;1.2.1-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;1.2.2-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
         <para>You can find the snapshots at
@@ -144,7 +144,7 @@
       <title>Download</title>
 
       <para>Ektorp can be downloaded from <link
-      xlink:href="http://code.google.com/p/ektorp/downloads/list">http://code.google.com/p/ektorp/downloads/list</link></para>
+      xlink:href="http://code.google.com/p/ektorp/downloads/list">https://github.com/helun/Ektorp/downloads</link></para>
     </section>
 
     <section>
@@ -290,11 +290,11 @@
               <entry>true</entry>
             </row>
 
-			<row>
-			  <entry>cleanupIdleConnections</entry>
+            <row>
+              <entry>cleanupIdleConnections</entry>
 
-			  <entry>true</entry>
-			</row>
+              <entry>true</entry>
+            </row>
           </tbody>
         </tgroup>
       </table>
@@ -983,8 +983,6 @@ import org.codehaus.jackson.node.*;
     <para>Basic CRUD (Create, Read, Update and Delete) operations are
     straightforward in Ektorp.</para>
 
-    <para></para>
-
     <para>The easiest way to create a repository is to extend the class
     CouchDbRepositorySupport. The class provides all CRUD methods out of the
     box and has support methods for writing terse finder methods.</para>
@@ -1030,6 +1028,57 @@ Sofa sofa = db.get(Sofa.class, id, rev);</programlisting>
 InputStream doc = db.getAsStream(id);
 
 InputStream olderRev = db.getAsStream(id, rev);</programlisting>
+
+      <section>
+        <title>Special Cases</title>
+
+        <para>All get methods in CouchDbConnector has a variant that takes a
+        <emphasis>org.ektorp.Options</emphasis> argument. Options is used for
+        special cases when you need to load a document with a specific
+        revision, conflict markers etc.</para>
+
+        <section>
+          <title>Read a Specific Revision</title>
+
+          <para><parameter>Retrieve a specific revision of the
+          document.</parameter><programlisting language="java">String id = ...
+String rev = ...
+Options options = new Options().revision(rev);
+Sofa sofa = db.get(Sofa.class, id, options);</programlisting></para>
+        </section>
+
+        <section>
+          <title>Include Conflicts</title>
+
+          <para>The loaded doc will include the special field '_conflicts'
+          that contains all the conflicting revisions of the document.</para>
+
+          <programlisting language="java">String id = ...
+Options options = new Options().includeConflicts();
+Sofa sofa = db.get(Sofa.class, id, options);</programlisting>
+
+          <para></para>
+        </section>
+
+        <section>
+          <title>Include All Revisions</title>
+
+          <para>The loaded doc will include the special field '_revisions'
+          that describes all document revisions that exists in the
+          database.<programlisting language="java">String id = ...
+Options options = new Options().includeRevisions();
+Sofa sofa = db.get(Sofa.class, id, options);</programlisting></para>
+        </section>
+
+        <section>
+          <title>Add Arbitrary Parameters to the Request</title>
+
+          <para><parameter>It is possible to add arbitrary parameters to the
+          database request.</parameter><programlisting language="java">String id = ...
+Options options = new Options().param("paramName","paramValue");
+Sofa sofa = db.get(Sofa.class, id, options);</programlisting></para>
+        </section>
+      </section>
     </section>
 
     <section>
@@ -1067,6 +1116,19 @@ db.delete(id, revision):</programlisting>
 
       <programlisting language="java">Sofa sofa = ...
 db.delete(sofa)</programlisting>
+
+      <section>
+        <title>Purge Deleted Documents</title>
+
+        <para>Since the database retains references to deleted documents you
+        may need to permanently remove those references. This can be achieved
+        through a purge operation:<programlisting>// the map contains revisions by doc id to purge
+Map&lt;String,List&lt;String&gt;&gt; revisionsToPurge = ...
+PurgeResult result = db.purge(revisionsToPurge);
+</programlisting><parameter>Note that purging docs from the database is not
+        part of a normal use case and should only be considered if you need to
+        free up disk space.</parameter></para>
+      </section>
     </section>
 
     <section>
@@ -1293,22 +1355,21 @@ public class MyRepository {
         <title>Loading the View Definition From the classpath</title>
 
         <para>Non-trivial views are best stored in a separate files. By
-        specifying the file parameter a view definition can be loaded from the
-        classpath. The path is relative to the class annotated by this
-        annotation. If the file complicated_view.json is in the same directory
-        as the repository this parameter should be set to
-        <emphasis>"complicated_view.json"</emphasis>. The file must be a valid
-        json document:</para>
+        specifying the "classpath:" prefix in the map or reduce parameters,
+        followed by the path to a file in the classpath, the functions can be
+        loaded from the classpath. The path is relative to the class annotated
+        by this annotation. If the file myMapFunction.js is in the same
+        directory as the repository this parameter should be set to
+        <emphasis>"myMapFunction.js"</emphasis>:</para>
 
-        <programlisting language="javascript">{
-    "map": "function(doc) { much javascript here }",
-    // the reduce function is optional
-    "reduce": "function(keys, values) { ... }"
+        <programlisting language="javascript">function(doc)
+{
+    much javascript here
 }</programlisting>
 
         <para>The repository class:</para>
 
-        <programlisting language="java">@View( name = "complicated_view", file = "complicated_view.json")
+        <programlisting language="java">@View( name = "complicated_view", map = "classpath:myMapFunction.js")
 public int getAverageSofaSize() {
     ViewResult r = db.queryView(createQuery("complicated_view.json"));
     return r.getRows().get(0).getValueAsInt();
@@ -1663,8 +1724,8 @@ PageRequest prevPageRequest = nextPage.getPreviousPageRequest();</programlisting
         string.</para>
 
         <para>Given that the Page object is available in the model in the jsp
-        page below, a link to the previous page can be constructed like this:
-        </para>
+        page below, a link to the previous page can be constructed like
+        this:</para>
 
         <programlisting language="html">&lt;c:if test="${page.hasPrevious}"&gt;
     &lt;a href="/blog/posts/?p=${page.previousLink}"&gt;Previous page&lt;/a&gt;
@@ -1672,7 +1733,7 @@ PageRequest prevPageRequest = nextPage.getPreviousPageRequest();</programlisting
 
         <para>When the request is handled in a controller the page request can
         be recreated from the request parameter. Here is an example snippet
-        from a controller created in Spring MVC </para>
+        from a controller created in Spring MVC</para>
 
         <programlisting language="java">@RequestMapping( value = "/posts/", method = RequestMethod.GET)
 public String viewAll(Model m, @RequestParam(value = "p", required = false) String pageLink) {

@@ -248,7 +248,7 @@ public class SimpleViewGenerator {
 		if (shouldLoadFunctionFromClassPath(reducePath)) {
 			reduce = loadResourceFromClasspath(repositoryClass, reducePath.substring(10));
 		} else {
-			reduce = mapPath;
+			reduce = reducePath.length() > 0 ? reducePath : null;
 		}
 		return new DesignDocument.View(map, reduce);
 	}

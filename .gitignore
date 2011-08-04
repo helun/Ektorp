@@ -17,3 +17,4 @@ local.properties
 .cproject
 
 /org.ektorp.spring/target/
+/target
