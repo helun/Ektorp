@@ -1,4 +1,4 @@
-Ektorp is a persistence API that uses [http://couchdb.apache.org/ CouchDB] as storage engine. The goal of Ektorp is to combine JPA like functionality with the simplicity and flexibility that CouchDB provides.
+Ektorp is a persistence API that uses [CouchDB](http://couchdb.apache.org/) as storage engine. The goal of Ektorp is to combine JPA like functionality with the simplicity and flexibility that CouchDB provides.
 
 Features
 ========
@@ -11,20 +11,12 @@ Here are some good reasons why you should consider to use Ektorp in your project
   * *Active development.* Ektorp is actively developed and has a growing community.
   * *Choice of abstraction level.* From full object-document mapping to raw streams, Ektorp will never stop you if you need to step down an abstraction level.
 
-News
-----
-  * Ektorp 1.1.1 released! *[http://code.google.com/p/ektorp/downloads/detail?name=ektorp-1.1.1-all.zip Download] | [http://code.google.com/p/ektorp/wiki/Changelog Changelog]*
-  * New *[http://www.ektorp.org/reference_documentation.html reference documentation]* is available.
-  * A simple Ektorp sample application is now available [http://ektorp.org/tutorial.html here]
-  * Ektorp is available in the central Maven repository. *[http://www.ektorp.org/reference_documentation.html#d99e68 Artifact info]*
-
 Simple API
 ----------
 It is very easy to get started with Ektorp:
 
 	HttpClient httpClient = new StdHttpClient.Builder()
-                                    .host("localhost")
-                                    .port(5984)
+                                    .url("http://localhost:5984")
                                     .build();
 
 	CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
@@ -147,7 +139,7 @@ Here's an trivial example class:
 
 Querying Views
 --------------
-There are several methods for querying CouchDB [http://wiki.apache.org/couchdb/Introduction_to_CouchDB_views views] from Ektorp.
+There are several methods for querying CouchDB [views](http://wiki.apache.org/couchdb/Introduction_to_CouchDB_views) from Ektorp.
 
 Query for Objects
 -----------------
@@ -186,8 +178,3 @@ The most flexible method is query for stream. The result is returned as a stream
 	InputStream data = db.queryForStream(query);
 	...
 	data.close();
-
-Learn More
-----------
-If you want to learn more about Ektorp you can download the  [http://code.google.com/p/ektorp/downloads/detail?name=org.ektorp.sample-1.6-project.zip sample application] and read the [http://ektorp.org/tutorial.html tutorial].
-Or you can dive straight into the [http://www.ektorp.org/reference_documentation.html reference documentation]
