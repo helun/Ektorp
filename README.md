@@ -1,7 +1,7 @@
 Ektorp is a persistence API that uses [CouchDB](http://couchdb.apache.org/) as storage engine. The goal of Ektorp is to combine JPA like functionality with the simplicity and flexibility that CouchDB provides.
 
 Features
-========
+--------
 Here are some good reasons why you should consider to use Ektorp in your project:
 
 * *Rich domain models.* With powerful JSON-object mapping provided by Jackson it is easy to create rich domain models.
@@ -179,3 +179,7 @@ The most flexible method is query for stream. The result is returned as a stream
 	InputStream data = db.queryForStream(query);
 	...
 	data.close();
+
+Getting Help
+------------
+You can usually get quick answers at the [Ektorp google group](http://groups.google.com/group/ektorp-discuss)
