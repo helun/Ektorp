@@ -1,18 +1,18 @@
+Change log
+==========
 Changes in version 1.2.1
-========================
+------------------------
 1.2.1 is a minor bug fix release.
 
-Fixes
------
+### Fixes
 * #18: nullpointer exception in ChangesCommand.Builder.merge
 
 Changes in version 1.2.0
-========================
+------------------------
 Besides bugfixes and increased stability, Ektorp 1.2.0 brings compatibility with CouchDB 1.1 and Jackson 1.8.
 New features are transparent caching of http responses from CouchDB through conditional GETs, a Spring XML configuration namespace and support for easily paging view results.
 
-Improvements
-------------
+### Improvements
 * Transparent cache (requires no code changes besides configuring the cache).
 * Spring XML configuration namespace
 * Paging view results
@@ -24,8 +24,7 @@ Improvements
 * Map and reduce functions can now be loaded from separate source files in the classpath. (Write functions in pure javascript files).
 * New efficient checkIfDbExists() method in CouchDbInstance
 
-Fixes
------
+### Fixes
 * GC#98: Blocking queue in ContinuousChangesFeed is not blocking and cause out of memory on huge changes 
 * GC#103: Exception during bulk operation
 * GC#105: Viewresult creates inital array with the size of the whole view
@@ -36,8 +35,7 @@ Fixes
 * GC#117: Map definition in external view file should be allowed to contain newlines (mac/unix/windows)
 * GC#118: Ektorp 1.1.1 does not work with Jackson 1.8.3
 
-Contributors
-------------
+### Contributors
 Benoit Decherf
 Henrik Lundgren
 Ragnar Rova
@@ -45,19 +43,17 @@ Sverre Kristian Valskrå
 + all defect reporters
 
 Changes in version 1.1.1
-========================
+------------------------
 1.1.1 is just a minor bug fix release.
 
-Fixes
------
+### Fixes
 * #94: Ektorp 1.1.0 not working on Android with SSL & other SSL problem
 * #96: org.ektorp.spring.HttpClientFactoryBean? doesn't support SSL-related properties
 * #97: Ektorp gets Logger with runtime class as an argument.
 
 Changes in version 1.1.0
-========================
-Improvements
-------------
+------------------------
+### Improvements
 * New ability to model a collection as external documents with transparent lazy loading
 * Added support for the changes API in CouchDB
 * Support for accessing design doc info
@@ -67,8 +63,7 @@ Improvements
 * Better view generation through the new @TypeDiscriminator? annotation
 * Support for auto generation of the 'all' view
 
-Fixes
------
+### Fixes
 * #72: Cannot write complex view in external view.json file
 * #76: Option to disable connection test at bean creation tim
 * #79: Timeout when iterating through multiple DBs
@@ -79,22 +74,19 @@ Fixes
 * #90: Generated views return documents out of scope of the 'all' view.
 * #92: revision id in UpdateConflictException? of SdtCouchDbConnector?.update
 
-Breaking Changes
-----------------
+### Breaking Changes
 * A constructor in org.ektorp.impl.StdCouchDbConnector? has changed signature.
 * A constructor in org.ektorp.impl.StdCouchDbInstance? has changed signature.
 
-Contributors
-------------
+### Contributors
 Henrik Lundgren
 Ragnar Rova (external document references)
 Pasi Eronen (http connection debugging)
 All defect reporters
 
 Changes in version 1.0.2
-========================
-Improvements
-------------
+------------------------
+### Improvements
 * Added support for replication.
 * Removed the requirement for mapped Pojos to be annotated with @JsonSerialize?(include = Inclusion.NON_NULL)
 * Support for filter, lists and show functions through new annotations.
@@ -103,22 +95,21 @@ Improvements
 * Added support for open content types through new class org.ektorp.support.OpenCouchDbDocument?
 * Added support for setting revision limit for a database
 
-Fixes
------
+### Fixes
 * #54: StdCouchDbConnector?.create() doesn't work for ObjectNodes?
 * #59: StdHttpClient? attempts un-authenticated request every time despite of credentials being provided
 * #60: Non-existing document IDs break ViewQuery?.keys()
 * #69: local_id is not marked as ignorable in ResponseStatus? class exception.
 
 Changes in version 1.0.1
-========================
+------------------------
 * Fixed defect #50: View result cannot be loaded from all_docs views
 * Fixed defect #53: The 'language' field is missing from design documents created using CouchDbRepositorySupport?
 * Fixed defect #55: org.ektorp.util.DocumentAccessor? is not public
 * DesignDocument? is now properly serialized when SerializationConfig?.Feature.AUTO_DETECT_GETTERS is disabled
 
 Changes in version 1.0.0
-========================
+------------------------
 * Support for bulk operations
 * Support for complex keys
 * Support for multiple keys
@@ -136,7 +127,7 @@ Changes in version 1.0.0
 * Fixed defect #28: Better error reporting during attachments creation
 
 Changes in version 0.9.4
-========================
+------------------------
 * New @View annotation for embedding view definitions in repository classes.
 * New @GenerateView? annotation for automatically generate view definitions for finder methods in repository classes.
 * New Spring support module, with factory bean for HttpClient?, Retry advice and an InitialDataLoader?.
@@ -146,7 +137,7 @@ Changes in version 0.9.4
 * CouchDbConnector? and CouchDbInstance? can now be configured with an external Jackson ObjectMapper?
 
 Changes in version 0.9.2
-========================
+------------------------
 * persistent classes no longer have to extend CouchDbDocument?
 * upgraded to Http Components Client 4.0.1
 * upgraded to jackson 1.5.1
