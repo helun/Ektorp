@@ -3,13 +3,13 @@ Ektorp is a persistence API that uses [CouchDB](http://couchdb.apache.org/) as s
 Features
 ========
 Here are some good reasons why you should consider to use Ektorp in your project:
-  * *Rich domain models.* With powerful JSON-object mapping provided by Jackson it is easy to create rich domain models.
-  * *Schemaless comfort.* As CouchDB is schemaless, the database gets out of the way during application development. With a schemaless database, most adjustments to the database become transparent and automatic.
-  * *Out-of-the-Box CRUD.* The generic repository support makes it trivial to create persistence classes.
-  * *Simple and fluent API.*
-  * *Spring Support.* Ektorp features an optional spring support module.
-  * *Active development.* Ektorp is actively developed and has a growing community.
-  * *Choice of abstraction level.* From full object-document mapping to raw streams, Ektorp will never stop you if you need to step down an abstraction level.
+* *Rich domain models.* With powerful JSON-object mapping provided by Jackson it is easy to create rich domain models.
+* *Schemaless comfort.* As CouchDB is schemaless, the database gets out of the way during application development. With a schemaless database, most adjustments to the database become transparent and automatic.
+* *Out-of-the-Box CRUD.* The generic repository support makes it trivial to create persistence classes.
+* *Simple and fluent API.*
+* *Spring Support.* Ektorp features an optional spring support module.
+* *Active development.* Ektorp is actively developed and has a growing community.
+* *Choice of abstraction level.* From full object-document mapping to raw streams, Ektorp will never stop you if you need to step down an abstraction level.
 
 Simple API
 ----------
