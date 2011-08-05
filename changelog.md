@@ -37,10 +37,14 @@ New features are transparent caching of http responses from CouchDB through cond
 
 ### Contributors
 Benoit Decherf
+
 Henrik Lundgren
+
 Ragnar Rova
+
 Sverre Kristian Valskrå
-+ all defect reporters
+
+all defect reporters
 
 Changes in version 1.1.1
 ------------------------
@@ -80,8 +84,11 @@ Changes in version 1.1.0
 
 ### Contributors
 Henrik Lundgren
+
 Ragnar Rova (external document references)
+
 Pasi Eronen (http connection debugging)
+
 All defect reporters
 
 Changes in version 1.0.2
