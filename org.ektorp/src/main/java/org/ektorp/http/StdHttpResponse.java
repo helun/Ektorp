@@ -4,15 +4,14 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.apache.http.client.methods.HttpRequestBase;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.ektorp.util.Exceptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -21,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StdHttpResponse implements HttpResponse {
 
-	private final static Logger LOG = LoggerFactory.getLogger(StdHttpResponse.class);
+	// private final static Logger LOG = LoggerFactory.getLogger(StdHttpResponse.class);
 	private final static HttpEntity NULL_ENTITY = new NullEntity();
 	
 	private final HttpEntity entity;
@@ -84,7 +83,7 @@ public class StdHttpResponse implements HttpResponse {
 				entity.getContent().close();
 			}; 
 		} catch (IOException e) {
-			LOG.error("caught exception while releasing connection: {}", e.getMessage());
+			// ignore
 		}
 	}
 	
