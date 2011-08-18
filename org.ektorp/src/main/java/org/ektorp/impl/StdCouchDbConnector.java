@@ -95,8 +95,6 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		this.objectMapper = om.createObjectMapper(this);
 
 		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
-		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
-		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
 		this.restTemplate = new RestTemplate(dbi.getConnection());
 		this.revisionHandler = new RevisionResponseHandler(objectMapper);
 		this.docIdResponseHandler = new DocIdResponseHandler(objectMapper);
