@@ -2,13 +2,13 @@ package org.ektorp.spring;
 
 import java.util.Properties;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.ektorp.http.HttpClient;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 /**
@@ -49,7 +49,7 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 	
 	public HttpClient getObject() throws Exception {
 		if (couchDBProperties != null) {
-			BeanUtils.populate(this, couchDBProperties);
+			new DirectFieldAccessor(this).setPropertyValues(couchDBProperties);
 		}
 		
 		LOG.debug("host: {}", host);
