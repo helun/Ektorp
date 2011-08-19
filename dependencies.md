@@ -8,7 +8,7 @@ Runtime Dependencies for Ektorp 1.2.1
 * jackson-mapper-asl 1.8.4
 * httpclient 4.1.1
 * httpcore 4.1
-* httpclient-cache 4.1.1
+* httpclient-cache 4.1.1 (only if caching is enabled)
 * commons-codec 1.4
 * commons-io 2.0.1
 * slf4j-api 1.6.1
@@ -24,6 +24,5 @@ Runtime Dependencies for Ektorp Spring 1.2.1
 * spring-asm 3.0.5
 * aspectjweaver 1.6.9
 * aopalliance 1.0
-* commons-beanutils 1.8.3
 * commons-logging 1.1.1
 
