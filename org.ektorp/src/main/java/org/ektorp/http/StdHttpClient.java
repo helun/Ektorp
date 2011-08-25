@@ -434,15 +434,20 @@ public class StdHttpClient implements HttpClient {
 			org.apache.http.client.HttpClient cachingHttpClient = client;
 
 			if (caching) {
-				CacheConfig cacheConfig = new CacheConfig();  
-				cacheConfig.setMaxCacheEntries(maxCacheEntries);
-				cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
-				
-				cachingHttpClient = new CachingHttpClient(client, cacheConfig);
+				cachingHttpClient = WithCachingBuilder.withCaching(client, maxCacheEntries, maxObjectSizeBytes);
 			}
 			return new StdHttpClient(cachingHttpClient, client);
 		}
 
 	}
 
+        // separate class to avoid runtime dependency to httpclient-cache unless using caching
+	private static class WithCachingBuilder {
+		public static org.apache.http.client.HttpClient withCaching(org.apache.http.client.HttpClient client, int maxCacheEntries, int maxObjectSizeBytes) {
+			CacheConfig cacheConfig = new CacheConfig();  
+			cacheConfig.setMaxCacheEntries(maxCacheEntries);
+			cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
+			return new CachingHttpClient(client, cacheConfig);
+		}
+	}
 }
