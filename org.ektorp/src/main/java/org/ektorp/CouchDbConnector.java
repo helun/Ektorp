@@ -522,7 +522,9 @@ public interface CouchDbConnector {
      */
     String callUpdateHandler(String designDocID, String function, String docId, Map<String, String> params);
 
-    <T> T callUpdateHandler(String designDocID, String function, final String docID, final Object data, final Class<T> c);
+    <T> T callUpdateHandler(final UpdateHandlerRequest req, final Class<T> c);
+
+    String callUpdateHandler(final UpdateHandlerRequest req);
 
     /**
      * Commits any recent changes to the specified database to disk.

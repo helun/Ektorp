@@ -37,6 +37,7 @@ import org.ektorp.ReplicationCommand;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.Revision;
 import org.ektorp.UpdateConflictException;
+import org.ektorp.UpdateHandlerRequest;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.ektorp.http.HttpResponse;
@@ -596,11 +597,13 @@ public class StdCouchDbConnectorTest {
                 .thenReturn(HttpResponseStub.valueOf(201,
                         "{\"name\":\"nisse\",\"age\":12,\"_id\":\"some_id\",\"_rev\":\"123D123\"}"));
 
-        TestDoc updated = dbCon.callUpdateHandler("_design/designDocID",
-                "functionName",
-                "docID",
-                new TestRequest("param", "value"),
-                TestDoc.class);
+        UpdateHandlerRequest req = new UpdateHandlerRequest();
+        req.designDocId("_design/designDocID")
+                .functionName("functionName")
+                .docId("docID")
+                .content(new TestRequest("param", "value"));
+
+        TestDoc updated = dbCon.callUpdateHandler(req, TestDoc.class);
 
         assertNotNull(updated);
         assertEquals("some_id", updated.getId());
