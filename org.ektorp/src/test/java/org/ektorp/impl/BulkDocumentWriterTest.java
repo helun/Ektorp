@@ -37,6 +37,14 @@ public class BulkDocumentWriterTest {
 		assertThatObjectsAreWritten(root);
 	}
 	
+	@Test
+    public void testCreateInputStreamWrapper() throws Exception {
+        ByteArrayInputStream bis = new ByteArrayInputStream("[{\"_id\":\"0\",\"key\":\"key_value\",\"value\":\"doc_value0\"},{\"_id\":\"1\",\"key\":\"key_value\",\"value\":\"doc_value1\"},{\"_id\":\"2\",\"key\":\"key_value\",\"value\":\"doc_value2\"}]".getBytes("UTF-8"));
+        InputStream inputStream = bw.createInputStreamWrapper(true, bis);
+        JsonNode root = mapper.readTree(inputStream);
+        assertThatObjectsAreWritten(root);
+    }
+	
 	private void assertThatObjectsAreWritten(JsonNode root) {
 		Iterator<JsonNode> docs = root.get("docs").getElements();
 		

@@ -18,6 +18,10 @@ public class BulkOperationResponseHandler extends StdResponseHandler<List<Docume
 	private final ObjectMapper objectMapper;
 	private final Collection<?> objects;
 	
+	public BulkOperationResponseHandler(ObjectMapper om) {
+        this(null, om);
+    }
+	
 	public BulkOperationResponseHandler(Collection<?> objects,ObjectMapper om) {
 		this.objects = objects;
 		this.objectMapper = om;
@@ -28,7 +32,7 @@ public class BulkOperationResponseHandler extends StdResponseHandler<List<Docume
 			throws Exception {
 		JsonParser jp = objectMapper.getJsonFactory().createJsonParser(hr.getContent());
 		List<DocumentOperationResult> result = new ArrayList<DocumentOperationResult>();
-		Iterator<?> objectsIter = objects.iterator();
+		Iterator<?> objectsIter = objects == null ? null : objects.iterator();
 		while (jp.nextToken() != null) {
 			switch (jp.getCurrentToken()) {
 				case START_OBJECT:
@@ -51,9 +55,11 @@ public class BulkOperationResponseHandler extends StdResponseHandler<List<Docume
 			String id) throws IOException, JsonParseException {
 		jp.nextToken();
 		String rev = jp.getText();
-		Object o = objectsIter.next();
-		Documents.setId(o, id);
-		Documents.setRevision(o, rev);
+		if (objectsIter != null) {
+		    Object o = objectsIter.next();
+    		Documents.setId(o, id);
+    		Documents.setRevision(o, rev);
+		}
 	}
 
 	private DocumentOperationResult readError(JsonParser jp,
@@ -64,7 +70,9 @@ public class BulkOperationResponseHandler extends StdResponseHandler<List<Docume
 		jp.nextToken();
 		jp.nextToken();
 		String reason = jp.getText();
-		objectsIter.next();
+		if (objectsIter != null) {
+		    objectsIter.next();
+		}
 		return DocumentOperationResult.newInstance(id, error, reason);
 	}
 }

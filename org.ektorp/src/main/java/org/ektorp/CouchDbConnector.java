@@ -360,6 +360,27 @@ public interface CouchDbConnector {
 	 */
 	void clearBulkBuffer();
 	/**
+     * Creates, updates or deletes all objects in the supplied collection.
+     *
+     * If the json has no revision set, it will be created, otherwise it will be updated.
+     * If the json document contains a "_deleted"=true field it will be deleted.
+     *
+     *
+     * Some documents may successfully be saved and some may not.
+     * The response will tell the application which documents were saved or not. In the case of a power failure, when the database restarts some may have been saved and some not.
+     * @param an json array with documents  ex [{"_id":"1", "name": "hello world" }, "_id":"2", "name": "hello world 2"}]
+     * @return The list will only contain entries for documents that has any kind of error code returned from CouchDB. i.e. the list will be empty if everything was completed successfully.
+     */
+	List<DocumentOperationResult> executeBulk(InputStream inputStream);
+    /**
+     * Creates, updates or deletes all objects in the supplied collection.
+     * In the case of a power failure, when the database restarts either all the changes will have been saved or none of them.
+     * However, it does not do conflict checking, so the documents will be committed even if this creates conflicts.
+     * @param an json array with documents
+     * @return The list will only contain entries for documents that has any kind of error code returned from CouchDB. i.e. the list will be empty if everything was completed successfully.
+     */
+	List<DocumentOperationResult> executeAllOrNothing(InputStream inputStream);
+	/**
 	 * Creates, updates or deletes all objects in the supplied collection.
 	 *
 	 * If the object has no revision set, it will be created, otherwise it will be updated.

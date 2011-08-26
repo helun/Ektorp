@@ -1,10 +1,17 @@
 package org.ektorp.impl;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.LineNumberInputStream;
+import java.io.PushbackInputStream;
+import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -488,6 +495,15 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	}
 
 	public List<DocumentOperationResult> executeAllOrNothing(
+            InputStream inputStream) {
+        return executeBulk(inputStream, true);
+    }
+
+    public List<DocumentOperationResult> executeBulk(InputStream inputStream) {
+        return executeBulk(inputStream, false);
+    }
+	
+	public List<DocumentOperationResult> executeAllOrNothing(
 			Collection<?> objects) {
 		return executeBulk(objects, true);
 	}
@@ -527,6 +543,18 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		this.jsonSerializer = js;
 	}
 
+	
+	private List<DocumentOperationResult> executeBulk(InputStream inputStream,
+            boolean allOrNothing) {
+        
+	    BulkDocumentWriter writer = new BulkDocumentWriter(objectMapper);
+	    
+        return restTemplate.post(
+                dbURI.append("_bulk_docs").toString(), 
+                writer.createInputStreamWrapper(allOrNothing, inputStream),
+                new BulkOperationResponseHandler(objectMapper));
+    }
+	
 	private List<DocumentOperationResult> executeBulk(Collection<?> objects,
 			boolean allOrNothing) {
 		BulkOperation op = jsonSerializer.createBulkOperation(objects,
