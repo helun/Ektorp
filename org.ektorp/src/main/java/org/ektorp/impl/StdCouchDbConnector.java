@@ -30,6 +30,7 @@ import org.ektorp.ReplicationStatus;
 import org.ektorp.Revision;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.UpdateConflictException;
+import org.ektorp.UpdateHandlerRequest;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.ektorp.changes.ChangesCommand;
@@ -664,49 +665,74 @@ public class StdCouchDbConnector implements CouchDbConnector {
         Assert.hasText(designDocID, "designDocID may not be null or empty");
         Assert.hasText(function, "functionName may not be null or empty");
         Assert.hasText(docID, "docId may not be null or empty");
-        URI uri = dbURI.append(designDocID).append("_update").append(function)
-                .append(docID);
-        if (params != null && !params.isEmpty()) {
-            for (Map.Entry<String, String> p : params.entrySet()) {
-                uri.param(p.getKey(), p.getValue());
+
+        UpdateHandlerRequest req = new UpdateHandlerRequest();
+        req.dbPath(dbURI.toString())
+                .designDocId(designDocID)
+                .functionName(function)
+                .docId(docID)
+                .params(params)
+                .buildRequestUri();
+
+        return callUpdateHandler(req);
+    }
+
+    private String serializeUpdateHandlerRequestBody(Object o) {
+        if (o == null) {
+            return "";
+        } else if (o instanceof String) {
+            return (String) o;
+        } else {
+            try {
+                return objectMapper.writeValueAsString(o);
+            } catch (Exception e) {
+                throw Exceptions.propagate(e);
             }
         }
-
-        return restTemplate.put(uri.toString(), "", new StdResponseHandler<String>() {
-
-            @Override
-            public String success(HttpResponse hr)
-                    throws JsonProcessingException, IOException {
-                return IOUtils.toString(hr.getContent(), "UTF-8");
-            }
-
-        });
-
     }
 
     @Override
-    public <T> T callUpdateHandler(String designDocID, String function, final String docID, final Object data,
-            final Class<T> c) {
-        Assert.hasText(designDocID, "designDocID may not be null or empty");
-        Assert.hasText(function, "functionName may not be null or empty");
-        Assert.hasText(docID, "docId may not be null or empty");
-        Assert.notNull(data, "Document cannot be null");
+    public String callUpdateHandler(final UpdateHandlerRequest req) {
+        Assert.hasText(req.getDesignDocId(), "designDocID may not be null or empty");
+        Assert.hasText(req.getFunctionName(), "functionName may not be null or empty");
+        Assert.hasText(req.getDocId(), "docId may not be null or empty");
 
-        return restTemplate.put(dbURI.append(designDocID).append("_update").append(function).append(docID).toString(),
-                jsonSerializer.toJson(data),
+        req.dbPath(dbURI.toString());
+
+        return restTemplate.put(req.buildRequestUri(),
+                serializeUpdateHandlerRequestBody(req.getBody()),
+                new StdResponseHandler<String>() {
+
+                    @Override
+                    public String success(HttpResponse hr)
+                            throws JsonProcessingException, IOException {
+                        return IOUtils.toString(hr.getContent(), "UTF-8");
+                    }
+
+                });
+    }
+
+    @Override
+    public <T> T callUpdateHandler(final UpdateHandlerRequest req, final Class<T> c) {
+        Assert.hasText(req.getDesignDocId(), "designDocID may not be null or empty");
+        Assert.hasText(req.getFunctionName(), "functionName may not be null or empty");
+        Assert.hasText(req.getDocId(), "docId may not be null or empty");
+
+        req.dbPath(dbURI.toString());
+
+        return restTemplate.put(req.buildRequestUri(),
+                serializeUpdateHandlerRequestBody(req.getBody()),
                 new StdResponseHandler<T>() {
 
                     @Override
                     public T success(HttpResponse hr) throws Exception {
-                        T p = objectMapper.readValue(hr.getContent(), c);
-                        LOG.debug("peer updated: {}", p);
-                        return p;
+                        return objectMapper.readValue(hr.getContent(), c);
                     }
 
                     @Override
                     public T error(HttpResponse hr) {
                         if (hr.getCode() == HttpStatus.CONFLICT) {
-                            throw new UpdateConflictException(docID, "<Update Handler>");
+                            throw new UpdateConflictException(req.getDocId(), "<Update Handler>");
                         }
                         return null;
                     }
