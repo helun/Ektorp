@@ -666,7 +666,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         Assert.hasText(function, "functionName may not be null or empty");
         Assert.hasText(docID, "docId may not be null or empty");
 
-        UpdateHandlerRequest req = new UpdateHandlerRequest(objectMapper);
+        UpdateHandlerRequest req = new UpdateHandlerRequest();
         req.dbPath(dbURI.toString())
                 .designDocId(designDocID)
                 .functionName(function)
@@ -677,6 +677,20 @@ public class StdCouchDbConnector implements CouchDbConnector {
         return callUpdateHandler(req);
     }
 
+    private String serializeUpdateHandlerRequestBody(Object o) {
+        if (o == null) {
+            return "";
+        } else if (o instanceof String) {
+            return (String) o;
+        } else {
+            try {
+                return objectMapper.writeValueAsString(o);
+            } catch (Exception e) {
+                throw Exceptions.propagate(e);
+            }
+        }
+    }
+
     @Override
     public String callUpdateHandler(final UpdateHandlerRequest req) {
         Assert.hasText(req.getDesignDocId(), "designDocID may not be null or empty");
@@ -685,15 +699,17 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
         req.dbPath(dbURI.toString());
 
-        return restTemplate.put(req.buildRequestUri(), req.getContent(), new StdResponseHandler<String>() {
+        return restTemplate.put(req.buildRequestUri(),
+                serializeUpdateHandlerRequestBody(req.getBody()),
+                new StdResponseHandler<String>() {
 
-            @Override
-            public String success(HttpResponse hr)
-                    throws JsonProcessingException, IOException {
-                return IOUtils.toString(hr.getContent(), "UTF-8");
-            }
+                    @Override
+                    public String success(HttpResponse hr)
+                            throws JsonProcessingException, IOException {
+                        return IOUtils.toString(hr.getContent(), "UTF-8");
+                    }
 
-        });
+                });
     }
 
     @Override
@@ -705,7 +721,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         req.dbPath(dbURI.toString());
 
         return restTemplate.put(req.buildRequestUri(),
-                req.getContent(),
+                serializeUpdateHandlerRequestBody(req.getBody()),
                 new StdResponseHandler<T>() {
 
                     @Override

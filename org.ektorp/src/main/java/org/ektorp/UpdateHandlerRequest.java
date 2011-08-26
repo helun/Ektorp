@@ -6,40 +6,21 @@ package org.ektorp;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.http.URI;
-import org.ektorp.impl.StdObjectMapperFactory;
 import org.ektorp.util.Assert;
-import org.ektorp.util.Exceptions;
 
 /**
  * @author lubo
  * 
  */
 public class UpdateHandlerRequest {
-    private final static ObjectMapper DEFAULT_MAPPER = new StdObjectMapperFactory().createObjectMapper();
     private final Map<String, String> queryParams = new TreeMap<String, String>();
-
-    private final ObjectMapper mapper;
 
     private String dbPath;
     private String designDocId;
     private String functionName;
     private String docId;
-    private String body;
-
-    public UpdateHandlerRequest() {
-        mapper = DEFAULT_MAPPER;
-    }
-
-    public UpdateHandlerRequest(ObjectMapper om) {
-        Assert.notNull(om, "ObjectMapper may not be null");
-        mapper = om;
-    }
-
-    public ObjectMapper getMapper() {
-        return mapper;
-    }
+    private Object body;
 
     public String getDbPath() {
         return dbPath;
@@ -53,7 +34,7 @@ public class UpdateHandlerRequest {
         return functionName;
     }
 
-    public String getContent() {
+    public Object getBody() {
         return body == null ? "" : body;
     }
 
@@ -72,17 +53,8 @@ public class UpdateHandlerRequest {
         return this;
     }
 
-    public UpdateHandlerRequest body(String body) {
+    public UpdateHandlerRequest body(Object body) {
         this.body = body;
-        return this;
-    }
-
-    public UpdateHandlerRequest body(Object o) {
-        try {
-            body = mapper.writeValueAsString(o);
-        } catch (Exception e) {
-            throw Exceptions.propagate(e);
-        }
         return this;
     }
 
