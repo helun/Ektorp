@@ -26,7 +26,7 @@ public class UpdateHandlerRequest {
     private String designDocId;
     private String functionName;
     private String docId;
-    private String content;
+    private String body;
 
     public UpdateHandlerRequest() {
         mapper = DEFAULT_MAPPER;
@@ -54,7 +54,7 @@ public class UpdateHandlerRequest {
     }
 
     public String getContent() {
-        return content == null ? "" : content;
+        return body == null ? "" : body;
     }
 
     public UpdateHandlerRequest dbPath(String dbPath) {
@@ -72,14 +72,14 @@ public class UpdateHandlerRequest {
         return this;
     }
 
-    public UpdateHandlerRequest content(String content) {
-        this.content = content;
+    public UpdateHandlerRequest body(String body) {
+        this.body = body;
         return this;
     }
 
-    public UpdateHandlerRequest content(Object o) {
+    public UpdateHandlerRequest body(Object o) {
         try {
-            content = mapper.writeValueAsString(o);
+            body = mapper.writeValueAsString(o);
         } catch (Exception e) {
             throw Exceptions.propagate(e);
         }

@@ -601,7 +601,7 @@ public class StdCouchDbConnectorTest {
         req.designDocId("_design/designDocID")
                 .functionName("functionName")
                 .docId("docID")
-                .content(new TestRequest("param", "value"));
+                .body(new TestRequest("param", "value"));
 
         TestDoc updated = dbCon.callUpdateHandler(req, TestDoc.class);
 
