@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for defining filter functions embedded in repositories.
+ * Annotation for defining update handler functions embedded in repositories.
  * 
  * @author henrik lundgren
  * 
