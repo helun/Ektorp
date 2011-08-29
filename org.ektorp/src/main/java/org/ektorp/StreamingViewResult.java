@@ -101,7 +101,7 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
     				}
     				node = objectMapper.readTree(doc);
     				
-			    }while(!(ignoreNotFound && node.has(Row.ERROR_FIELD_NAME)));
+			    }while(ignoreNotFound && node.has(Row.ERROR_FIELD_NAME));
 			    
 			    row = new ViewResult.Row(node);
 				return true;
