@@ -89,6 +89,7 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 		private Row row;
 		public boolean hasNext() {
 			try {
+			    JsonNode node = null;
 			    do {
     				String doc = reader.readLine();
     				if (doc == null || doc.equals("]}")) {
@@ -98,12 +99,11 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
     				if (doc.endsWith(",")) {
     					doc = doc.substring(0, doc.length() -1);
     				}
-    				JsonNode node = objectMapper.readTree(doc);
-    				if (ignoreNotFound && node.has(Row.ERROR_FIELD_NAME)) {
-    				    continue;
-    				}
-    				row = new ViewResult.Row(node);
-			    }while(false);
+    				node = objectMapper.readTree(doc);
+    				
+			    }while(!(ignoreNotFound && node.has(Row.ERROR_FIELD_NAME)));
+			    
+			    row = new ViewResult.Row(node);
 				return true;
 			} catch (IOException e) {
 				throw new DbAccessException(e);
