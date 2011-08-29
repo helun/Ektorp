@@ -406,14 +406,14 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     @Override
-    public ViewResult queryView(ViewQuery query) {
+    public ViewResult queryView(final ViewQuery query) {
         Assert.notNull(query, "query cannot be null");
         query.dbPath(dbURI.toString());
         ResponseCallback<ViewResult> rh = new StdResponseHandler<ViewResult>() {
 
             @Override
             public ViewResult success(HttpResponse hr) throws Exception {
-                return new ViewResult(objectMapper.readTree(hr.getContent()));
+                return new ViewResult(objectMapper.readTree(hr.getContent()), query.isIgnoreNotFound());
             }
 
         };
@@ -424,7 +424,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     @Override
     public StreamingViewResult queryForStreamingView(ViewQuery query) {
-        return new StreamingViewResult(objectMapper, queryForStream(query));
+        return new StreamingViewResult(objectMapper, queryForStream(query), query.isIgnoreNotFound());
     }
 
     @Override

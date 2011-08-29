@@ -20,9 +20,11 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	private int totalRows = -1;
 	private int offset = -1;
 	private List<Row> rows;
+    private final boolean ignoreNotFound;
 	
-	public ViewResult(JsonNode resultNode) {
-		Assert.notNull(resultNode, "resultNode may not be null");
+	public ViewResult(JsonNode resultNode, boolean ignoreNotFound) {
+		this.ignoreNotFound = ignoreNotFound;
+        Assert.notNull(resultNode, "resultNode may not be null");
 		Assert.isTrue(resultNode.findPath("rows").isArray(), "result must contain 'rows' field of array type");
 		if (resultNode.get(TOTAL_ROWS_FIELD_NAME) != null) {
 			totalRows = resultNode.get(TOTAL_ROWS_FIELD_NAME).getIntValue();
@@ -33,7 +35,9 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		JsonNode rowsNode = resultNode.get("rows");
 		rows = new ArrayList<ViewResult.Row>(rowsNode.size());
 		for (JsonNode n : rowsNode) {
-			rows.add(new Row(n));
+		    if (!(ignoreNotFound && n.has(Row.ERROR_FIELD_NAME))) {
+		        rows.add(new Row(n)); 		        
+		    } 
 		}
 	}
 	
@@ -79,11 +83,11 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	
 	public static class Row {
 		
-		private static final String VALUE_FIELD_NAME = "value";
-		private static final String ID_FIELD_NAME = "id";
-		private static final String KEY_FIELD_NAME = "key";
-		private static final String DOC_FIELD_NAME = "doc";
-		private static final String ERROR_FIELD_NAME = "error";
+		static final String VALUE_FIELD_NAME = "value";
+		static final String ID_FIELD_NAME = "id";
+		static final String KEY_FIELD_NAME = "key";
+		static final String DOC_FIELD_NAME = "doc";
+		static final String ERROR_FIELD_NAME = "error";
 		private final JsonNode rowNode;
 		
 		@JsonCreator

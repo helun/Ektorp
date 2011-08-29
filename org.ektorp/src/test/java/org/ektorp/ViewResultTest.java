@@ -84,6 +84,6 @@ public class ViewResultTest {
 	}
 	
 	private ViewResult readResult(String path) throws Exception {
-		return new ViewResult(om.readTree(getClass().getResourceAsStream(path)));
+		return new ViewResult(om.readTree(getClass().getResourceAsStream(path)), false);
 	}
 }

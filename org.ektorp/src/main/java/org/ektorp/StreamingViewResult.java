@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.ViewResult.Row;
 
@@ -25,11 +26,13 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 	private final BufferedReader reader;
 	private final ObjectMapper objectMapper;
 	private boolean iteratorCalled;
+    private final boolean ignoreNotFound;
 	
 	
-	public StreamingViewResult(ObjectMapper objectMapper, InputStream inputStream) {
+	public StreamingViewResult(ObjectMapper objectMapper, InputStream inputStream, boolean ignoreNotFound) {
 		
 		this.objectMapper = objectMapper;
+        this.ignoreNotFound = ignoreNotFound;
 		reader = new BufferedReader(new InputStreamReader(inputStream));
 		try{
 		String info = reader.readLine();
@@ -86,20 +89,28 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 		private Row row;
 		public boolean hasNext() {
 			try {
-				String doc = reader.readLine();
-				if (doc == null || doc.equals("]}")) {
-					reader.close();
-					return false;
-				}
-				if (doc.endsWith(",")) {
-					doc = doc.substring(0, doc.length() -1);
-				}
-				row = new ViewResult.Row(objectMapper.readTree(doc));
+			    do {
+    				String doc = reader.readLine();
+    				if (doc == null || doc.equals("]}")) {
+    					reader.close();
+    					return false;
+    				}
+    				if (doc.endsWith(",")) {
+    					doc = doc.substring(0, doc.length() -1);
+    				}
+    				JsonNode node = objectMapper.readTree(doc);
+    				if (ignoreNotFound && node.has(Row.ERROR_FIELD_NAME)) {
+    				    continue;
+    				}
+    				row = new ViewResult.Row(node);
+			    }while(false);
 				return true;
 			} catch (IOException e) {
 				throw new DbAccessException(e);
 			}
 		}
+		
+		
 		
 		public Row next() {
 			return row;
