@@ -60,7 +60,6 @@ public class BulkDocumentWriter {
             }
             jg.writeFieldName("docs");
             jg.writeRaw(':');
-            //jg.writeArrayFieldStart("docs");
             jg.flush();
             seq.add(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
             seq.add(in);
