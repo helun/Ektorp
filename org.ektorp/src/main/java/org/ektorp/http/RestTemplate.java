@@ -52,7 +52,7 @@ public class RestTemplate {
 			long contentLength, ResponseCallback<T> callback) {
 		return handleResponse(callback, client.put(path, data, contentType, contentLength));
 	}
-	
+
 	public <T> T post(String path, String content, ResponseCallback<T> callback) {
 		return handleResponse(callback, client.post(path, content));
 	}

@@ -86,7 +86,7 @@ public class StdHttpClient implements HttpClient {
 		e.setContentType("application/json");
 		HttpPost post = new HttpPost(uri);
 		post.setEntity(e);
-		return executeRequest(post);
+		return executeRequest(post, true);
 	}
 
 	public HttpResponse put(String uri, String content) {

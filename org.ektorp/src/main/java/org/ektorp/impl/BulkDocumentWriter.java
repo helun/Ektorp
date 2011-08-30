@@ -47,4 +47,32 @@ public class BulkDocumentWriter {
 			IOUtils.closeQuietly(out);
 		}
 	}
+	
+	public InputStream createInputStreamWrapper(boolean allOrNothing, InputStream in) {
+	    List<InputStream> seq = new ArrayList<InputStream>(3);
+        
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            JsonGenerator jg = objectMapper.getJsonFactory().createJsonGenerator(byteArrayOutputStream, JsonEncoding.UTF8);
+            jg.writeStartObject();
+            if (allOrNothing) {
+                jg.writeBooleanField("all_or_nothing", true);   
+            }
+            jg.writeFieldName("docs");
+            jg.writeRaw(':');
+            //jg.writeArrayFieldStart("docs");
+            jg.flush();
+            seq.add(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            seq.add(in);
+            byteArrayOutputStream.reset();
+            jg.writeEndObject();
+            jg.flush();
+            jg.close();
+            seq.add(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+        } catch (Exception e) {
+            throw Exceptions.propagate(e);
+        } 
+        return new SequenceInputStream(Collections.enumeration(seq));
+    }
+	
 }

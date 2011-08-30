@@ -406,14 +406,14 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     @Override
-    public ViewResult queryView(ViewQuery query) {
+    public ViewResult queryView(final ViewQuery query) {
         Assert.notNull(query, "query cannot be null");
         query.dbPath(dbURI.toString());
         ResponseCallback<ViewResult> rh = new StdResponseHandler<ViewResult>() {
 
             @Override
             public ViewResult success(HttpResponse hr) throws Exception {
-                return new ViewResult(objectMapper.readTree(hr.getContent()));
+                return new ViewResult(objectMapper.readTree(hr.getContent()), query.isIgnoreNotFound());
             }
 
         };
@@ -424,7 +424,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     @Override
     public StreamingViewResult queryForStreamingView(ViewQuery query) {
-        return new StreamingViewResult(objectMapper, queryForStream(query));
+        return new StreamingViewResult(objectMapper, queryForStream(query), query.isIgnoreNotFound());
     }
 
     @Override
@@ -534,6 +534,28 @@ public class StdCouchDbConnector implements CouchDbConnector {
                 "designDocumentId may not be null or empty");
         restTemplate.post(dbURI.append("_compact").append(designDocumentId)
                 .toString(), "not_used", VOID_RESPONSE_HANDLER);
+    }
+    
+    @Override
+    public List<DocumentOperationResult> executeAllOrNothing(
+            InputStream inputStream) {
+        return executeBulk(inputStream, true);
+    }
+
+    @Override
+    public List<DocumentOperationResult> executeBulk(InputStream inputStream) {
+        return executeBulk(inputStream, false);
+    }
+    
+    private List<DocumentOperationResult> executeBulk(InputStream inputStream,
+            boolean allOrNothing) {
+        BulkDocumentWriter writer = new BulkDocumentWriter(objectMapper);
+
+        return restTemplate.post(
+            dbURI.append("_bulk_docs").toString(),
+            writer.createInputStreamWrapper(allOrNothing, inputStream),
+            new BulkOperationResponseHandler(objectMapper));
+
     }
 
     @Override
