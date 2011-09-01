@@ -180,6 +180,18 @@ The most flexible method is query for stream. The result is returned as a stream
 	...
 	data.close();
 
+Try it Out
+------------
+[Download binaries here](https://github.com/helun/Ektorp/downloads)
+
+If you are using Maven:
+
+    <dependency>
+        <groupId>org.ektorp</groupId>
+        <artifactId>org.ektorp</artifactId>
+        <version>1.2.1</version>
+    </dependency>
+
 Getting Help
 ------------
 You can usually get quick answers at the [Ektorp google group](http://groups.google.com/group/ektorp-discuss)
