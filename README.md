@@ -182,8 +182,7 @@ The most flexible method is query for stream. The result is returned as a stream
 
 Try it Out
 ------------
-[Download binaries here](https://github.com/helun/Ektorp/downloads)
-========================
+### [Download binaries here](https://github.com/helun/Ektorp/downloads)
 
 If you are using Maven:
 
