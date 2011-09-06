@@ -1,13 +1,18 @@
 package org.ektorp.impl;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
-import org.ektorp.*;
-import org.ektorp.http.*;
-import org.ektorp.util.*;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.ektorp.DocumentOperationResult;
+import org.ektorp.http.HttpResponse;
+import org.ektorp.http.StdResponseHandler;
+import org.ektorp.util.Documents;
 /**
  * 
  * @author henrik lundgren
@@ -37,6 +42,10 @@ public class BulkOperationResponseHandler extends StdResponseHandler<List<Docume
 			switch (jp.getCurrentToken()) {
 				case START_OBJECT:
 				jp.nextToken();
+				if ("ok".equals(jp.getCurrentName())) {
+				    jp.nextToken();
+				    jp.nextToken();
+				}
 				jp.nextToken();
 				String id = jp.getText();
 				jp.nextToken();

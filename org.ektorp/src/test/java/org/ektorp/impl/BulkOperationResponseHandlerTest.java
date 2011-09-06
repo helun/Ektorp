@@ -1,12 +1,13 @@
 package org.ektorp.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
-import org.codehaus.jackson.map.*;
-import org.ektorp.*;
-import org.junit.*;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.ektorp.DocumentOperationResult;
+import org.junit.Test;
 
 public class BulkOperationResponseHandlerTest {
 
@@ -21,7 +22,9 @@ public class BulkOperationResponseHandlerTest {
 		assertEquals("conflict", errors.get(0).getError());
 		assertEquals("Document update conflict.", errors.get(0).getReason());
 		
+        assertEquals("1", objects.get(1).getId());
 		assertEquals("new_rev1", objects.get(1).getRevision());
+        assertEquals("2", objects.get(2).getId());
 		assertEquals("new_rev2", objects.get(2).getRevision());
 	}
 	
