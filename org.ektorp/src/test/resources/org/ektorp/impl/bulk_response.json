@@ -1,5 +1,5 @@
 [
     {"id":"0","error":"conflict","reason":"Document update conflict."},
     {"id":"1","rev":"new_rev1"},
-    {"id":"2","rev":"new_rev2"}
+    {"ok":true,"id":"2","rev":"new_rev2"}
 ]
