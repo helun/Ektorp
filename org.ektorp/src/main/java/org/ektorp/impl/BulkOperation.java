@@ -30,4 +30,17 @@ public class BulkOperation {
 			throw Exceptions.propagate(e.getCause());
 		}
 	}
+
+	public void close() {
+		try { 
+			data.close(); 
+		} catch (Exception e) { 
+			LOG.error("closing piped input stream failed", e); 
+		}
+		try {
+			writeTask.cancel(true); 
+		} catch (Exception e) { 
+			LOG.error("cancelling write task failed", e); 
+		}
+	}
 }
