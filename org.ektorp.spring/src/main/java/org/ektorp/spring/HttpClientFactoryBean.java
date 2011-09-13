@@ -26,9 +26,9 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 
 	private final static Logger LOG = LoggerFactory.getLogger(HttpClientFactoryBean.class);
 	
-	public String url = "http://localhost:5984";
-	public String host;
-	public int port;
+	public String url;
+	public String host = "localhost";
+	public int port = 5984;
 	public int maxConnections = 20;
 	public int connectionTimeout = 1000;
 	public int socketTimeout = 10000;
@@ -37,7 +37,7 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 	public String password;
 	public boolean testConnectionAtStartup;
 	public boolean cleanupIdleConnections = true;
-	public boolean enableSSL;
+	public boolean enableSSL = false;
 	public boolean relaxedSSLSettings;
 	public boolean caching = true;
 	public int maxCacheEntries = 1000;
@@ -54,6 +54,7 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 		
 		LOG.debug("host: {}", host);
 		LOG.debug("port: {}", port);
+		LOG.debug("url: {}", url);
 		LOG.debug("maxConnections: {}", maxConnections);
 		LOG.debug("connectionTimeout: {}", connectionTimeout);
 		LOG.debug("socketTimeout: {}", socketTimeout);
