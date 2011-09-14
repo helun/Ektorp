@@ -40,7 +40,9 @@ public class StreamingJsonSerializer implements JsonSerializer {
 				private final AtomicInteger threadCount = new AtomicInteger();
 				
 				public Thread newThread(Runnable r) {
-					return new Thread(r, String.format("ektorp-doc-writer-thread-%s", threadCount.incrementAndGet()));
+					Thread t = new Thread(r, String.format("ektorp-doc-writer-thread-%s", threadCount.incrementAndGet()));
+					t.setDaemon(true);
+					return t;
 				}
 				
 			});	

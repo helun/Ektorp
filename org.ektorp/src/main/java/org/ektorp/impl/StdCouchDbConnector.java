@@ -604,15 +604,20 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     private List<DocumentOperationResult> executeBulk(Collection<?> objects,
-            boolean allOrNothing) {
-        BulkOperation op = jsonSerializer.createBulkOperation(objects,
-                allOrNothing);
-        List<DocumentOperationResult> result = restTemplate.post(
-                dbURI.append("_bulk_docs").toString(), op.getData(),
-                new BulkOperationResponseHandler(objects, objectMapper));
-        op.awaitCompletion();
-        return result;
-    }
+			boolean allOrNothing) {
+		BulkOperation op = jsonSerializer.createBulkOperation(objects,
+				allOrNothing);
+		try {
+			List<DocumentOperationResult> result = restTemplate.post(
+					dbURI.append("_bulk_docs").toString(), 
+					op.getData(),
+					new BulkOperationResponseHandler(objects, objectMapper));
+			op.awaitCompletion();
+			return result;
+		} finally {
+			op.close();
+		}
+	}
 
     @Override
     public int getRevisionLimit() {
@@ -767,3 +772,4 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
 }
+
