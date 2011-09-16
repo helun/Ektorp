@@ -151,6 +151,10 @@ public class StdHttpClient implements HttpClient {
 		return executeRequest(request, false);
 	}
 
+	public void shutdown() {
+		client.getConnectionManager().shutdown();
+	}
+
 	public static class Builder {
 		String host = "localhost";
 		int port = 5984;

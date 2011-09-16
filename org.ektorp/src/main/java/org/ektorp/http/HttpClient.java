@@ -26,4 +26,6 @@ public interface HttpClient {
 	
 	HttpResponse postUncached(String uri, String content);
 
+	void shutdown();
+
 }
