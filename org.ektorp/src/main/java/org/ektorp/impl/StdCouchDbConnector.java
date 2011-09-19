@@ -28,6 +28,7 @@ import org.ektorp.PurgeResult;
 import org.ektorp.ReplicationCommand;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.Revision;
+import org.ektorp.StreamingChangesViewResult;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.UpdateHandlerRequest;
@@ -665,6 +666,19 @@ public class StdCouchDbConnector implements CouchDbConnector {
             throw Exceptions.propagate(e);
         }
         return changes;
+    }
+    
+    @Override
+    public StreamingChangesViewResult changesAsStreamingView(ChangesCommand cmd) {
+        if (cmd.continuous) {
+            throw new IllegalArgumentException(
+                    "ChangesCommand may not declare continous = true while calling changes");
+        }
+
+        ChangesCommand actualCmd = new ChangesCommand.Builder().merge(cmd)
+                .continuous(false).build();
+
+        return new StreamingChangesViewResult(objectMapper, changesAsStream(actualCmd));
     }
 
     @Override
