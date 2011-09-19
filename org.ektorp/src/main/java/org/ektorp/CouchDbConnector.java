@@ -514,6 +514,15 @@ public interface CouchDbConnector {
      * @return
      */
     List<DocumentChange> changes(ChangesCommand cmd);
+    
+    /**
+     * Queries the database for changes. this operation gives you the result as a iterable stream of documentchange objects, 
+     * the stream should be closed when finished
+     * 
+     * @param cmd
+     * @return
+     */
+    StreamingChangesViewResult changesAsStreamingView(ChangesCommand cmd);
 
     /**
      * Sets up a continuous changes feed. The current update sequence in the DB will be used if ChangesCommand does not
@@ -553,5 +562,7 @@ public interface CouchDbConnector {
      * Commits any recent changes to the specified database to disk.
      */
     void ensureFullCommit();
+
+    
 
 }

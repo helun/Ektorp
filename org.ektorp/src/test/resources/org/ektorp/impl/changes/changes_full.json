@@ -1,0 +1,5 @@
+{"results":[
+{"seq":1,"id":"doc_id","changes":[{"rev":"doc_rev"}],"doc":{"_id":"df629c360be62d4645bcffe1b8000f32","_rev":"3-ed850c2e0c525d57fe03294794d8831a","fubar":"snafu"}},
+{"seq":2,"id":"doc_id","changes":[{"rev":"doc_rev"}],"deleted":true}
+],
+"last_seq":5}
