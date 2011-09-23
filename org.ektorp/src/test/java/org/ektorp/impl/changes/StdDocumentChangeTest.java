@@ -12,8 +12,10 @@ import junit.framework.Assert;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.ektorp.StreamingChangesViewResult;
+import org.ektorp.StreamingChangesResult;
 import org.ektorp.changes.DocumentChange;
+import org.ektorp.http.HttpResponse;
+import org.ektorp.impl.ResponseOnFileStub;
 import org.junit.Test;
 
 public class StdDocumentChangeTest {
@@ -55,8 +57,10 @@ public class StdDocumentChangeTest {
 	
 	@Test
     public void test_streaming_changes() throws IOException {
-	    StreamingChangesViewResult changes = new StreamingChangesViewResult(new ObjectMapper(),
-                getClass().getResourceAsStream("changes_full.json"));
+	    HttpResponse httpResponse = ResponseOnFileStub.newInstance(200, "changes/changes_full.json");
+	    
+	    StreamingChangesResult changes = new StreamingChangesResult(new ObjectMapper(),
+                httpResponse);
 	    int i = 0;
         for (DocumentChange documentChange : changes) {
             Assert.assertEquals(++i, documentChange.getSequence());
