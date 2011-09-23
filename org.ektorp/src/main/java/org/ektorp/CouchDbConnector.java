@@ -522,7 +522,7 @@ public interface CouchDbConnector {
      * @param cmd
      * @return
      */
-    StreamingChangesViewResult changesAsStreamingView(ChangesCommand cmd);
+    StreamingChangesResult changesAsStream(ChangesCommand cmd);
 
     /**
      * Sets up a continuous changes feed. The current update sequence in the DB will be used if ChangesCommand does not

@@ -10,21 +10,24 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.changes.DocumentChange;
+import org.ektorp.http.HttpResponse;
 import org.ektorp.impl.changes.StdDocumentChange;
 
 /**
  * 
  * @author Sverre Kristian Valskrå
  */
-public class StreamingChangesViewResult implements Serializable, Iterable<DocumentChange>, Closeable{
+public class StreamingChangesResult implements Serializable, Iterable<DocumentChange>, Closeable{
 
 	private static final long serialVersionUID = 4750290767936801714L;
 	private boolean iteratorCalled;
 	private JsonParser jp;
 	private long lastSeq = -1l;
-	public StreamingChangesViewResult(ObjectMapper objectMapper, InputStream inputStream) {
-		try{
-		    jp = objectMapper.getJsonFactory().createJsonParser(inputStream);
+    private final HttpResponse response;
+	public StreamingChangesResult(ObjectMapper objectMapper, HttpResponse response) {
+		this.response = response;
+        try{
+		    jp = objectMapper.getJsonFactory().createJsonParser(response.getContent());
 		    jp.nextValue();
 		    jp.nextValue();
 		    jp.nextToken();
@@ -39,9 +42,19 @@ public class StreamingChangesViewResult implements Serializable, Iterable<Docume
 			throw new IllegalStateException("Iterator can only be called once!");
 		}
 		iteratorCalled = true;
-		return new StreamingViewResultIterator();
+		return new StreamingResultIterator();
 	}
 	
+	/**
+	 * Aborts the stream immediately
+	 */
+	public void abort() {
+	    try{
+	    response.abort();
+	    }finally {
+	        close();
+	    }
+	}
 	public void close() {
 		try {
 			jp.close();
@@ -62,7 +75,7 @@ public class StreamingChangesViewResult implements Serializable, Iterable<Docume
     }
 	
 	
-	private class StreamingViewResultIterator implements Iterator<DocumentChange>{
+	private class StreamingResultIterator implements Iterator<DocumentChange>{
 		private DocumentChange row;
 		public boolean hasNext() {
 			try {
