@@ -1,13 +1,9 @@
-package org.ektorp.http;
+package org.ektorp.android.http;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -29,74 +25,85 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.cache.CacheConfig;
-import org.apache.http.impl.client.cache.CachingHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.ektorp.http.HttpClient;
+import org.ektorp.http.HttpResponse;
+import org.ektorp.http.IdleConnectionMonitor;
+import org.ektorp.http.PreemptiveAuthRequestInterceptor;
 import org.ektorp.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * 
- * @author henrik lundgren
- * 
- */
-public class StdHttpClient implements HttpClient {
+public class AndroidHttpClient implements HttpClient {
 
 	private final org.apache.http.client.HttpClient client;
 	private final org.apache.http.client.HttpClient backend;
 	private final static Logger LOG = LoggerFactory
-			.getLogger(StdHttpClient.class);
+			.getLogger(AndroidHttpClient.class);
 
-	public StdHttpClient(org.apache.http.client.HttpClient hc) {
+	public AndroidHttpClient(org.apache.http.client.HttpClient hc) {
 		this(hc, hc);
 	}
-	public StdHttpClient(org.apache.http.client.HttpClient hc, 
+	public AndroidHttpClient(org.apache.http.client.HttpClient hc,
 			org.apache.http.client.HttpClient backend) {
 		this.client = hc;
 		this.backend = backend;
 	}
 
+	@Override
 	public HttpResponse delete(String uri) {
 		return executeRequest(new HttpDelete(uri));
 	}
 
+	@Override
 	public HttpResponse get(String uri) {
 		return executeRequest(new HttpGet(uri));
 	}
-	
+
+	@Override
 	public HttpResponse getUncached(String uri) {
 		return executeRequest(new HttpGet(uri), true);
 	}
 
-	public HttpResponse postUncached(String uri, String content) {
-		return executePutPost(new HttpPost(uri), content, true);
+	@Override
+	public HttpResponse head(String uri) {
+		return executeRequest(new HttpHead(uri));
 	}
 
+	@Override
 	public HttpResponse post(String uri, String content) {
 		return executePutPost(new HttpPost(uri), content, false);
 	}
 
+	@Override
 	public HttpResponse post(String uri, InputStream content) {
 		InputStreamEntity e = new InputStreamEntity(content, -1);
 		e.setContentType("application/json");
 		HttpPost post = new HttpPost(uri);
 		post.setEntity(e);
-		return executeRequest(post, true);
+		return executeRequest(post);
 	}
 
-	public HttpResponse put(String uri, String content) {
-		return executePutPost(new HttpPut(uri), content, false);
+	@Override
+	public HttpResponse postUncached(String uri, String content) {
+		return executePutPost(new HttpPost(uri), content, true);
 	}
 
+	@Override
 	public HttpResponse put(String uri) {
 		return executeRequest(new HttpPut(uri));
 	}
 
+	@Override
+	public HttpResponse put(String uri, String content) {
+		return executePutPost(new HttpPut(uri), content, false);
+	}
+
+	@Override
 	public HttpResponse put(String uri, InputStream data, String contentType,
 			long contentLength) {
 		InputStreamEntity e = new InputStreamEntity(data, contentLength);
@@ -106,12 +113,6 @@ public class StdHttpClient implements HttpClient {
 		hp.setEntity(e);
 		return executeRequest(hp);
 	}
-
-	public HttpResponse head(String uri) {
-		return executeRequest(new HttpHead(uri));
-	}
-	
-	
 
 	private HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,
 			String content, boolean useBackend) {
@@ -134,26 +135,26 @@ public class StdHttpClient implements HttpClient {
 			if (useBackend) {
 				rsp = backend.execute(request);
 			} else {
-				rsp = client.execute((HttpHost)client.getParams().getParameter(ClientPNames.DEFAULT_HOST), request);				
+				rsp = client.execute((HttpHost)client.getParams().getParameter(ClientPNames.DEFAULT_HOST), request);
 			}
 			if (LOG.isTraceEnabled()) {
 				LOG.trace(String.format("%s %s %s %s", request.getMethod(),
 						request.getURI(), rsp.getStatusLine().getStatusCode(),
 						rsp.getStatusLine().getReasonPhrase()));
 			}
-			return StdHttpResponse.of(rsp, request);
+			return AndroidHttpResponse.of(rsp, request);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
-		}		
+		}
 	}
-	
+
 	private HttpResponse executeRequest(HttpRequestBase request) {
 		return executeRequest(request, false);
 	}
 
-	public void shutdown() {
-		client.getConnectionManager().shutdown();
-	}
+        public void shutdown() {
+                client.getConnectionManager().shutdown();
+        }
 
 	public static class Builder {
 		String host = "localhost";
@@ -184,7 +185,7 @@ public class StdHttpClient implements HttpClient {
 		}
 		/**
 		 * Will set host, port and possible enables SSL based on the properties if the supplied URL.
-		 * This method overrides the properties: host, port and enableSSL. 
+		 * This method overrides the properties: host, port and enableSSL.
 		 * @param url
 		 * @return
 		 */
@@ -194,7 +195,7 @@ public class StdHttpClient implements HttpClient {
 			enableSSL("https".equals(url.getProtocol()));
 			return this;
 		}
-		
+
 		public Builder host(String s) {
 			host = s;
 			return this;
@@ -219,7 +220,7 @@ public class StdHttpClient implements HttpClient {
 			caching = b;
 			return this;
 		}
-		
+
 		public Builder maxCacheEntries(int m) {
 			maxCacheEntries = m;
 			return this;
@@ -235,9 +236,7 @@ public class StdHttpClient implements HttpClient {
 				SchemeRegistry schemeRegistry = new SchemeRegistry();
 				schemeRegistry.register(configureScheme());
 
-				ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(schemeRegistry);
-				cm.setMaxTotal(maxConnections);
-				cm.setDefaultMaxPerRoute(maxConnections);
+				ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
 				conman = cm;
 			}
 
@@ -247,42 +246,17 @@ public class StdHttpClient implements HttpClient {
 			return conman;
 		}
 
-		@SuppressWarnings("deprecation")
 		private Scheme configureScheme() {
 			if (enableSSL) {
-				try {
-					if (sslSocketFactory == null) {
-						SSLContext context = SSLContext.getInstance("TLS");
-
-						if (relaxedSSLSettings) {
-							context.init(
-									null,
-									new TrustManager[] { new X509TrustManager() {
-										public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-											return null;
-										}
-
-										public void checkClientTrusted(
-												java.security.cert.X509Certificate[] certs,
-												String authType) {
-										}
-
-										public void checkServerTrusted(
-												java.security.cert.X509Certificate[] certs,
-												String authType) {
-										}
-									} }, null);
-						}
-
-						sslSocketFactory = relaxedSSLSettings ? new SSLSocketFactory(context, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER) : new SSLSocketFactory(context);
-
-					}
-					return new Scheme("https", port, sslSocketFactory);
-                } catch (Exception e) {
+                try {
+					AndroidSSLSocketFactory androidSSLSocketFactory = new AndroidSSLSocketFactory((KeyStore)null);
+					androidSSLSocketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+					return new Scheme("https", androidSSLSocketFactory, port);
+				} catch (Exception e) {
 					throw Exceptions.propagate(e);
 				}
 			} else {
-				return new Scheme("http", port, PlainSocketFactory.getSocketFactory());
+				return new Scheme("http", PlainSocketFactory.getSocketFactory(), port);
 			}
 		}
 
@@ -314,9 +288,9 @@ public class StdHttpClient implements HttpClient {
 				client.addRequestInterceptor(
 						new PreemptiveAuthRequestInterceptor(), 0);
 			}
-			
-			
-			
+
+
+
 			return client;
 		}
 
@@ -353,7 +327,7 @@ public class StdHttpClient implements HttpClient {
 		/**
 		 * If set to true, a monitor thread will be started that cleans up idle
 		 * connections every 30 seconds.
-		 * 
+		 *
 		 * @param b
 		 * @return
 		 */
@@ -366,7 +340,7 @@ public class StdHttpClient implements HttpClient {
 		 * Bring your own Connection Manager. If this parameters is set, the
 		 * parameters port, maxConnections, connectionTimeout and socketTimeout
 		 * are ignored.
-		 * 
+		 *
 		 * @param cm
 		 * @return
 		 */
@@ -378,7 +352,7 @@ public class StdHttpClient implements HttpClient {
 		/**
 		 * Set to true in order to enable SSL sockets. Note that the CouchDB
 		 * host must be accessible through a https:// path Default is false.
-		 * 
+		 *
 		 * @param s
 		 * @return
 		 */
@@ -391,7 +365,7 @@ public class StdHttpClient implements HttpClient {
 		 * Bring your own SSLSocketFactory. Note that schemeName must be also be
 		 * configured to "https". Will override any setting of
 		 * relaxedSSLSettings.
-		 * 
+		 *
 		 * @param f
 		 * @return
 		 */
@@ -403,7 +377,7 @@ public class StdHttpClient implements HttpClient {
 		/**
 		 * If set to true all SSL certificates and hosts will be trusted. This
 		 * might be handy during development. default is false.
-		 * 
+		 *
 		 * @param b
 		 * @return
 		 */
@@ -416,7 +390,7 @@ public class StdHttpClient implements HttpClient {
 		 * Activates 'Expect: 100-Continue' handshake with CouchDB.
 		 * Using expect continue can reduce stale connection problems for PUT / POST operations.
 		 * body. Enabled by default.
-		 * 
+		 *
 		 * @param b
 		 * @return
 		 */
@@ -426,24 +400,9 @@ public class StdHttpClient implements HttpClient {
 		}
 
 		public HttpClient build() {
-			org.apache.http.client.HttpClient client = configureClient();
-			org.apache.http.client.HttpClient cachingHttpClient = client;
-
-			if (caching) {
-				cachingHttpClient = WithCachingBuilder.withCaching(client, maxCacheEntries, maxObjectSizeBytes);
-			}
-			return new StdHttpClient(cachingHttpClient, client);
+			return new AndroidHttpClient(configureClient());
 		}
 
 	}
 
-        // separate class to avoid runtime dependency to httpclient-cache unless using caching
-	private static class WithCachingBuilder {
-		public static org.apache.http.client.HttpClient withCaching(org.apache.http.client.HttpClient client, int maxCacheEntries, int maxObjectSizeBytes) {
-			CacheConfig cacheConfig = new CacheConfig();  
-			cacheConfig.setMaxCacheEntries(maxCacheEntries);
-			cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
-			return new CachingHttpClient(client, cacheConfig);
-		}
-	}
 }

@@ -28,6 +28,7 @@ import org.ektorp.PurgeResult;
 import org.ektorp.ReplicationCommand;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.Revision;
+import org.ektorp.StreamingChangesResult;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.UpdateHandlerRequest;
@@ -637,7 +638,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
                 Integer.toString(limit), VOID_RESPONSE_HANDLER);
     }
 
-    private InputStream changesAsStream(ChangesCommand cmd) {
+    private InputStream fetchChangesAsStream(ChangesCommand cmd) {
         HttpResponse r = restTemplate.get(dbURI.append(cmd.toString())
                 .toString());
         return r.getContent();
@@ -655,7 +656,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
         List<DocumentChange> changes = new ArrayList<DocumentChange>();
         try {
-            JsonNode node = objectMapper.readTree(changesAsStream(actualCmd));
+            JsonNode node = objectMapper.readTree(fetchChangesAsStream(actualCmd));
             JsonNode results = node.findPath("results");
 
             for (JsonNode change : results) {
@@ -665,6 +666,22 @@ public class StdCouchDbConnector implements CouchDbConnector {
             throw Exceptions.propagate(e);
         }
         return changes;
+    }
+    
+    @Override
+    public StreamingChangesResult changesAsStream(ChangesCommand cmd) {
+        if (cmd.continuous) {
+            throw new IllegalArgumentException(
+                    "ChangesCommand may not declare continous = true while calling changes");
+        }
+
+        ChangesCommand actualCmd = new ChangesCommand.Builder().merge(cmd)
+                .continuous(false).build();
+        
+        HttpResponse response = restTemplate.get(dbURI.append(actualCmd.toString())
+                .toString());
+        
+        return new StreamingChangesResult(objectMapper, response);
     }
 
     @Override
