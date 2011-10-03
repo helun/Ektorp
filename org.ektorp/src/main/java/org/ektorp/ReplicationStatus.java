@@ -82,10 +82,10 @@ public class ReplicationStatus implements Serializable {
 		String endTime;
 		
 		@JsonProperty("start_last_seq")
-		int startLastSeq;
+		String startLastSeq;
 		
 		@JsonProperty("end_last_seq")
-		int endLastSeq;
+		String endLastSeq;
 		
 		@JsonProperty("missing_checked")
 		int missingChecked;
@@ -121,11 +121,11 @@ public class ReplicationStatus implements Serializable {
 			return endTime;
 		}
 
-		public int getStartLastSeq() {
+		public String getStartLastSeq() {
 			return startLastSeq;
 		}
 
-		public int getEndLastSeq() {
+		public String getEndLastSeq() {
 			return endLastSeq;
 		}
 
