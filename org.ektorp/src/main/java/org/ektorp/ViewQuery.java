@@ -50,6 +50,7 @@ public class ViewQuery {
 	private boolean includeDocs = false;
 	private boolean inclusiveEnd = true;
 	private boolean ignoreNotFound = false;
+	private boolean updateSeq = false;
 
 	private String cachedQuery;
 	private String listName;
@@ -121,6 +122,10 @@ public class ViewQuery {
 
     public boolean isInclusiveEnd() {
         return inclusiveEnd;
+    }
+
+    public boolean isUpdateSeq() {
+        return updateSeq;
     }
 
     public ViewQuery dbPath(String s) {
@@ -503,6 +508,17 @@ public class ViewQuery {
 		return this;
 	}
 
+	/**
+	 * The update_seq option adds a field to the result indicating the update_seq the view reflects.  It defaults to false.
+	 * @param b the updateSeq flag
+	 * @return the view query for chained calls
+	 */
+	public ViewQuery updateSeq(boolean b) {
+		reset();
+		updateSeq = b;
+		return this;
+	}
+
 	public ViewQuery queryParam(String name, String value) {
 		queryParams.put(name, value);
 		return this;
@@ -606,6 +622,10 @@ public class ViewQuery {
 			appendQueryParams(query);
 		}
 
+		if(updateSeq) {
+			query.param("update_seq", "true");
+		}
+
 		cachedQuery = query.toString();
 		return cachedQuery;
 	}
@@ -673,6 +693,7 @@ public class ViewQuery {
 		result = prime * result + (ignoreNotFound ? 1231 : 1237);
 		result = prime * result + (includeDocs ? 1231 : 1237);
 		result = prime * result + (inclusiveEnd ? 1231 : 1237);
+		result = prime * result + (updateSeq ? 1231 : 1237);
 		result = prime * result + ((key == null) ? 0 : key.hashCode());
 		result = prime * result + limit;
 		result = prime * result
@@ -735,6 +756,8 @@ public class ViewQuery {
 		if (includeDocs != other.includeDocs)
 			return false;
 		if (inclusiveEnd != other.inclusiveEnd)
+			return false;
+		if (updateSeq != other.updateSeq)
 			return false;
 		if (key == null) {
 			if (other.key != null)
