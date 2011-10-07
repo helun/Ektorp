@@ -211,6 +211,14 @@ public class ViewQueryTest {
 			.buildQuery();
 		assertTrue(contains(url, "?include_docs=true"));
 	}
+
+        @Test
+        public void update_seq_parameter_added() {
+                String url = query
+                        .updateSeq(true)
+                        .buildQuery();
+                assertTrue(contains(url, "?update_seq=true"));
+        }
 	
 	@Test
 	public void stale_ok_parameter_added() {

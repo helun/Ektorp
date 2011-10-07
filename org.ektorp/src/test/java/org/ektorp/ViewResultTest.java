@@ -82,6 +82,23 @@ public class ViewResultTest {
 	public void view_result_with_error_row() throws Exception {
 		readResult("impl/view_result_with_error.json");
 	}
+
+        @Test
+        public void int_update_seq_view_result() throws Exception {
+
+                ViewResult result = readResult("impl/view_result_with_int_update_seq.json");
+		assertTrue(result.isUpdateSeqNumeric());
+                assertEquals(1234, result.getUpdateSeq());
+		assertEquals("1234", result.getUpdateSeqAsString());
+	}
+
+        @Test
+        public void string_update_seq_view_result() throws Exception {
+
+                ViewResult result = readResult("impl/view_result_with_string_update_seq.json");
+                assertFalse(result.isUpdateSeqNumeric());
+                assertEquals("1234-abc", result.getUpdateSeqAsString());
+        }
 	
 	private ViewResult readResult(String path) throws Exception {
 		return new ViewResult(om.readTree(getClass().getResourceAsStream(path)), false);
