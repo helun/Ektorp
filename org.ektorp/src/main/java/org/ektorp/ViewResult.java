@@ -16,9 +16,11 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 
 	private static final String OFFSET_FIELD_NAME = "offset";
 	private static final String TOTAL_ROWS_FIELD_NAME = "total_rows";
+	private static final String UPDATE_SEQ = "update_seq";
 	private static final long serialVersionUID = 4750290767933801714L;
 	private int totalRows = -1;
 	private int offset = -1;
+	private String updateSeq;
 	private List<Row> rows;
     private final boolean ignoreNotFound;
 	
@@ -31,6 +33,12 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		}
 		if (resultNode.get(OFFSET_FIELD_NAME) != null) {
 			offset = resultNode.get(OFFSET_FIELD_NAME).getIntValue();
+		}
+		if (resultNode.get(UPDATE_SEQ) != null) {
+			updateSeq = resultNode.get(UPDATE_SEQ).getTextValue();
+                        if(updateSeq == null) {
+                                updateSeq = Long.toString(resultNode.get(UPDATE_SEQ).getIntValue());
+                        }
 		}
 		JsonNode rowsNode = resultNode.get("rows");
 		rows = new ArrayList<ViewResult.Row>(rowsNode.size());
@@ -72,7 +80,37 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	void setTotalRows(int i) {
 		this.totalRows = i;
 	}
-	
+
+	/**
+	 * @return -1L if result did not contain an update_seq field
+	 */
+	public long getUpdateSeq() {
+		if(updateSeq != null) {
+			return Long.parseLong(updateSeq);
+		}
+		return -1L;
+	}
+
+	/**
+	 * @return false if db is an Cloudant instance.
+	 */
+	public boolean isUpdateSeqNumeric() {
+		return updateSeq != null && updateSeq.matches("^\\d*$");
+	}
+
+	/**
+	 *
+	 * @return null if result did not contain an update_seq field
+	 */
+	public String getUpdateSeqAsString() {
+		return updateSeq;
+	}
+
+	@JsonProperty(UPDATE_SEQ)
+	public void setUpdateSeq(String updateSeq) {
+		this.updateSeq = updateSeq;
+	}
+
 	public Iterator<ViewResult.Row> iterator() {
 		return rows.iterator();
 	}
