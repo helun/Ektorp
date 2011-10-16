@@ -274,7 +274,11 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		}
 		if (changed) {
 			log.debug("DesignDocument changed or new. Updating database");
-			db.update(designDoc);
+			try {
+				db.update(designDoc);	
+			} catch (UpdateConflictException e) {
+				log.warn("Update conflict occurred when trying to update design document: {}", designDoc.getId());
+			}
 		} else if (log.isDebugEnabled()){
 			log.debug("DesignDocument was unchanged. Database was not updated.");
 		}
