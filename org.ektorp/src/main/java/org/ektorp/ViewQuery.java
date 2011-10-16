@@ -52,6 +52,8 @@ public class ViewQuery {
 	private boolean ignoreNotFound = false;
 	private boolean updateSeq = false;
 
+	private boolean noCache = false;
+	
 	private String cachedQuery;
 	private String listName;
 
@@ -160,6 +162,20 @@ public class ViewQuery {
 		reset();
 		listName = s;
 		return this;
+	}
+	/**
+	 * If set to true, the view query result will not be fetched from cache or be cached.
+	 * @param b
+	 * @return
+	 */
+	public ViewQuery noCache(boolean b) {
+		reset();
+		noCache = b;
+		return this;
+	}
+	
+	public boolean isNoCacheSet() {
+		return noCache;
 	}
 	/**
 	 * @param Will be JSON-encoded.

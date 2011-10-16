@@ -383,10 +383,20 @@ public class StdCouchDbConnector implements CouchDbConnector {
         EmbeddedDocViewResponseHandler<T> rh = new EmbeddedDocViewResponseHandler<T>(
                 type, objectMapper, query.isIgnoreNotFound());
 
-        return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
+        return executeQuery(query, rh);
+    }
+
+	private <T> T executeQuery(final ViewQuery query,
+			ResponseCallback<T> rh) {
+		if (query.isNoCacheSet()) {
+			return query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(),
+	                query.getKeysAsJson(), rh) : restTemplate.getUncached(
+	                query.buildQuery(), rh);	
+		}
+		return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
                 query.getKeysAsJson(), rh) : restTemplate.get(
                 query.buildQuery(), rh);
-    }
+	}
 
     @Override
     public <T> Page<T> queryForPage(ViewQuery query, PageRequest pr, Class<T> type) {
@@ -401,9 +411,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
         }
         PageResponseHandler<T> ph = new PageResponseHandler<T>(pr, type, objectMapper, query.isIgnoreNotFound());
         query = PageRequest.applyPagingParameters(query, pr);
-        return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
-                query.getKeysAsJson(), ph) : restTemplate.get(
-                query.buildQuery(), ph);
+        
+        return executeQuery(query, ph);
     }
 
     @Override
@@ -418,9 +427,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
             }
 
         };
-        return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
-                query.getKeysAsJson(), rh) : restTemplate.get(
-                query.buildQuery(), rh);
+        
+        return executeQuery(query, rh);
     }
 
     @Override
