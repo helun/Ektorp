@@ -260,6 +260,10 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	 * </p>
 	 */
 	public void initStandardDesignDocument() {
+		initDesignDocInternal(0);
+	}
+	
+	private void initDesignDocInternal(int invocations) {
 		DesignDocument designDoc;
 		if (db.contains(stdDesignDocumentId)) {
 			designDoc = db.get(DesignDocument.class, stdDesignDocumentId);
@@ -278,9 +282,25 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 				db.update(designDoc);	
 			} catch (UpdateConflictException e) {
 				log.warn("Update conflict occurred when trying to update design document: {}", designDoc.getId());
+				if (invocations == 0) {
+					backOff();
+					log.info("retrying initStandardDesignDocument for design document: {}", designDoc.getId());
+					initDesignDocInternal(1);
+				}
 			}
 		} else if (log.isDebugEnabled()){
 			log.debug("DesignDocument was unchanged. Database was not updated.");
+		}
+	}
+	/**
+	 * Wait a short while in order to prevent racing initializations from other repositories.
+	 */
+	private void backOff() {
+		try {
+			Thread.sleep(new Random().nextInt(400));
+		} catch (InterruptedException ie) {
+			Thread.currentThread().interrupt();
+			return;
 		}
 	}
 	
