@@ -52,7 +52,7 @@ public class ViewQuery {
 	private boolean ignoreNotFound = false;
 	private boolean updateSeq = false;
 
-	private boolean noCache = false;
+	private boolean cacheOk = false;
 	
 	private String cachedQuery;
 	private String listName;
@@ -164,18 +164,22 @@ public class ViewQuery {
 		return this;
 	}
 	/**
-	 * If set to true, the view query result will not be fetched from cache or be cached.
+	 * If set to true, the view query result will be cached and subsequent queries
+	 * (with cacheOk set) may be served from the cache instead of the db.
+	 * 
+	 * Note that if the view changes, the cache will be invalidated.
+	 * 
 	 * @param b
 	 * @return
 	 */
-	public ViewQuery noCache(boolean b) {
+	public ViewQuery cacheOk(boolean b) {
 		reset();
-		noCache = b;
+		cacheOk = b;
 		return this;
 	}
 	
-	public boolean isNoCacheSet() {
-		return noCache;
+	public boolean isCacheOk() {
+		return cacheOk;
 	}
 	/**
 	 * @param Will be JSON-encoded.

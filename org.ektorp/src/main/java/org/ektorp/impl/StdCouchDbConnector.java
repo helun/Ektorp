@@ -388,7 +388,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
 	private <T> T executeQuery(final ViewQuery query,
 			ResponseCallback<T> rh) {
-		if (query.isNoCacheSet()) {
+		if (!query.isCacheOk()) {
 			return query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(),
 	                query.getKeysAsJson(), rh) : restTemplate.getUncached(
 	                query.buildQuery(), rh);	
