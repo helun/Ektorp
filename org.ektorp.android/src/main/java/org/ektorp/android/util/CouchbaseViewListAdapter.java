@@ -157,7 +157,9 @@ public abstract class CouchbaseViewListAdapter extends BaseAdapter {
 	 * Cancel the following of continuous changes, necessary to properly clean up resources
 	 */
 	public void cancelContinuous() {
-		couchChangesAsyncTask.cancel(true);
+		if(couchChangesAsyncTask != null) {
+			couchChangesAsyncTask.cancel(true);
+		}
 	}
 
 }
