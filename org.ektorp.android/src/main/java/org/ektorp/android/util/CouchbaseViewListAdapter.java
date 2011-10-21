@@ -124,13 +124,17 @@ public abstract class CouchbaseViewListAdapter extends BaseAdapter {
 				@Override
 				protected void onDbAccessException(
 						DbAccessException dbAccessException) {
-					LOG.error("DbAccessException accessing view for list", dbAccessException);
+					handleViewAsyncTaskDbAccessException(dbAccessException);
 				}
 
 			};
 
 			updateListItemsTask.execute();
 		}
+	}
+
+	protected void handleViewAsyncTaskDbAccessException(DbAccessException dbAccessException) {
+		LOG.error("DbAccessException accessing view for list", dbAccessException);
 	}
 
 	private class CouchbaseListChangesAsyncTask extends ChangesFeedAsyncTask {
@@ -148,16 +152,22 @@ public abstract class CouchbaseViewListAdapter extends BaseAdapter {
 
 		@Override
 		protected void onDbAccessException(DbAccessException dbAccessException) {
-			LOG.error("DbAccessException following changes feed for list", dbAccessException);
+			handleChangesAsyncTaskDbAccessException(dbAccessException);
 		}
 
+	}
+
+	protected void handleChangesAsyncTaskDbAccessException(DbAccessException dbAccessException) {
+		LOG.error("DbAccessException following changes feed for list", dbAccessException);
 	}
 
 	/**
 	 * Cancel the following of continuous changes, necessary to properly clean up resources
 	 */
 	public void cancelContinuous() {
-		couchChangesAsyncTask.cancel(true);
+		if(couchChangesAsyncTask != null) {
+			couchChangesAsyncTask.cancel(true);
+		}
 	}
 
 }
