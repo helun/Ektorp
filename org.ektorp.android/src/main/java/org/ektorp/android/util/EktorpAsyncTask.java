@@ -28,18 +28,6 @@ public abstract class EktorpAsyncTask extends AsyncTask<Void, Void, Object> {
 		try {
 			doInBackground();
 		}
-		catch(UpdateConflictException updateConflictException) {
-			result = updateConflictException;
-		}
-		catch(DocumentNotFoundException documentNotFoundException) {
-			result = documentNotFoundException;
-		}
-		catch(InvalidDocumentException invalidDocumentException) {
-			result = invalidDocumentException;
-		}
-		catch(ViewResultException viewResultException) {
-			result = viewResultException;
-		}
 		catch(DbAccessException dbAccessException) {
 			result = dbAccessException;
 		}
@@ -48,48 +36,25 @@ public abstract class EktorpAsyncTask extends AsyncTask<Void, Void, Object> {
 	}
 
 	@Override
-	//open to ideas on how to implement this more succinctly
 	protected void onPostExecute(Object result) {
 		if(result == null) {
 			onSuccess();
 		}
-		else if(result instanceof DbAccessException) {
-			try {
-				throw (DbAccessException)result;
-			}
-			catch(UpdateConflictException updateConflictException) {
-				try {
-					onUpdateConflict(updateConflictException);
-				} catch (DbAccessException dbAccessException) {
-					onDbAccessException(dbAccessException);
-				}
-			}
-			catch(DocumentNotFoundException documentNotFoundException) {
-				try {
-					onDocumentNotFound(documentNotFoundException);
-				} catch (DbAccessException dbAccessException) {
-					onDbAccessException(dbAccessException);
-				}
-			}
-			catch(InvalidDocumentException invalidDocumentException) {
-				try {
-					onInvalidDocument(invalidDocumentException);
-				} catch (DbAccessException dbAccessException) {
-					onDbAccessException(dbAccessException);
-				}
-			}
-			catch(ViewResultException viewResultException) {
-				try {
-					onViewResultException(viewResultException);
-				} catch (DbAccessException dbAccessException) {
-					onDbAccessException(dbAccessException);
-				}
-			}
-			catch(DbAccessException dbAccessException) {
-				onDbAccessException(dbAccessException);
-			}
+		else if(result instanceof UpdateConflictException) {
+		    onUpdateConflict((UpdateConflictException)result);
 		}
-
+		else if(result instanceof DocumentNotFoundException) {
+		    onDocumentNotFound((DocumentNotFoundException)result);
+		}
+		else if(result instanceof InvalidDocumentException) {
+		    onInvalidDocument((InvalidDocumentException)result);
+		}
+		else if(result instanceof ViewResultException) {
+		    onViewResultException((ViewResultException)result);
+		}
+		else if(result instanceof DbAccessException) {
+			onDbAccessException((DbAccessException)result);
+		}
 	}
 
 	/**
@@ -100,35 +65,35 @@ public abstract class EktorpAsyncTask extends AsyncTask<Void, Void, Object> {
 	}
 
 	/**
-	 * By default, we rethrow this exception
+	 * By default, defer to onDbAccessException
 	 * @param updateConflictException
 	 */
 	protected void onUpdateConflict(UpdateConflictException updateConflictException) {
-		throw updateConflictException;
+	    onDbAccessException(updateConflictException);
 	}
 
 	/**
-	 * By default, we rethrow this exception
+	 * By default, defer to onDbAccessException
 	 * @param documentNotFoundException
 	 */
 	protected void onDocumentNotFound(DocumentNotFoundException documentNotFoundException) {
-		throw documentNotFoundException;
+	    onDbAccessException(documentNotFoundException);
 	}
 
 	/**
-	 * By default, we rethrow this exception
+	 * By default, defer to onDbAccessException
 	 * @param invalidDocumentException
 	 */
 	protected void onInvalidDocument(InvalidDocumentException invalidDocumentException) {
-		throw invalidDocumentException;
+	    onDbAccessException(invalidDocumentException);
 	}
 
 	/**
-	 * By default, we rethrow this exception
+	 * By default, defer to onDbAccessException
 	 * @param viewResultException
 	 */
 	protected void onViewResultException(ViewResultException viewResultException) {
-		throw viewResultException;
+	    onDbAccessException(viewResultException);
 	}
 
 	/**
