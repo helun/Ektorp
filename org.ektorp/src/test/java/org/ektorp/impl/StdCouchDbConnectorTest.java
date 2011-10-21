@@ -322,7 +322,7 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .key("key_value");
 
-        when(httpClient.get(query.buildQuery())).thenReturn(ResponseOnFileStub.newInstance(200, "view_result.json"));
+        when(httpClient.getUncached(query.buildQuery())).thenReturn(ResponseOnFileStub.newInstance(200, "view_result.json"));
 
         ViewResult result = dbCon.queryView(query);
 
@@ -339,7 +339,7 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .key("key_value");
 
-        when(httpClient.get(query.buildQuery())).thenReturn(
+        when(httpClient.getUncached(query.buildQuery())).thenReturn(
                 ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json"));
 
         List<TestDoc> result = dbCon.queryView(query, TestDoc.class);
@@ -348,7 +348,7 @@ public class StdCouchDbConnectorTest {
         assertEquals(TestDoc.class, result.get(0).getClass());
         assertEquals("doc_id1", result.get(0).getId());
         assertEquals("doc_id2", result.get(1).getId());
-        verify(httpClient, times(1)).get(anyString());
+        verify(httpClient, times(1)).getUncached(anyString());
     }
 
     @Test
@@ -358,7 +358,8 @@ public class StdCouchDbConnectorTest {
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
                 .includeDocs(true)
-                .key("key_value");
+                .key("key_value")
+                .cacheOk(true);
 
         when(httpClient.get(query.buildQuery())).thenReturn(
                 ResponseOnFileStub.newInstance(200, "view_result_with_included_docs.json"));
@@ -386,10 +387,10 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .keys(keys);
 
-        when(httpClient.post(anyString(), anyString())).thenReturn(
+        when(httpClient.postUncached(anyString(), anyString())).thenReturn(
                 ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json"));
         dbCon.queryView(query, TestDoc.class);
-        verify(httpClient).post(query.buildQuery(), query.getKeysAsJson());
+        verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
     }
 
     @Test
@@ -405,10 +406,10 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .keys(keys);
 
-        when(httpClient.post(anyString(), anyString())).thenReturn(
+        when(httpClient.postUncached(anyString(), anyString())).thenReturn(
                 ResponseOnFileStub.newInstance(200, "view_result.json"));
         dbCon.queryView(query);
-        verify(httpClient).post(query.buildQuery(), query.getKeysAsJson());
+        verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
     }
 
     @Test

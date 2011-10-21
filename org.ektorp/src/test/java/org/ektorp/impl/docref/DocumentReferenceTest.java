@@ -45,7 +45,7 @@ public class DocumentReferenceTest {
 				ResponseOnFileStub.newInstance(200,
 						"docref/lounge_person_kalle.json"));
 		
-		when(httpClient.get(Matchers.matches(".*_docrefs_.*"))).thenAnswer(new Answer<ResponseOnFileStub>()
+		when(httpClient.getUncached(Matchers.matches(".*_docrefs_.*"))).thenAnswer(new Answer<ResponseOnFileStub>()
 				{
 
 					public ResponseOnFileStub answer(InvocationOnMock invocation) throws Throwable {
@@ -76,7 +76,7 @@ public class DocumentReferenceTest {
 		assertEquals(true, ektorp.getSeatedPeople().contains(nisse));
 
 		verify(httpClient)
-				.get(Matchers
+				.getUncached(Matchers
 						.matches("/test_db/_design/LazyLounge/_view/ektorp_docrefs_seatedPeople\\?" +
 								"startkey=%5B%22lounge_id%22%2C%22seatedPeople%22%5D&" +
 								"endkey=%5B%22lounge_id%22%2C%22seatedPeople%22%2C%7B%7D%5D.*"));
@@ -221,7 +221,7 @@ public class DocumentReferenceTest {
 	}
 
 	private void verifyDocRefsLoaded() {
-		verify(httpClient).get(Matchers.matches(".*_docrefs_.*"));
+		verify(httpClient).getUncached(Matchers.matches(".*_docrefs_.*"));
 	}
 
 	public String readFile(String fileName) {

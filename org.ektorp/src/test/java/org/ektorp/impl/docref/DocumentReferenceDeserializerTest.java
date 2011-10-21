@@ -40,7 +40,7 @@ public class DocumentReferenceDeserializerTest {
 	private void setupLoungeWithLoadableBackrefs() {
 		when(httpClient.get("/test_db/lounge_id")).thenReturn(
 				ResponseOnFileStub.newInstance(200, "docref/lounge.json"));
-		when(httpClient.get(Matchers.matches(".*_docrefs_.*"))).thenReturn(
+		when(httpClient.getUncached(Matchers.matches(".*_docrefs_.*"))).thenReturn(
 				ResponseOnFileStub.newInstance(200,
 						"docref/setlounge_persons_nisse_kalle.json"));
 	}
