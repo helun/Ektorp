@@ -2086,4 +2086,160 @@ class SofaRepository extends CouchDbRepositorySupport&lt;Sofa&gt; implements Dat
       </section>
     </section>
   </chapter>
+  <chapter>
+    <title>Android Integration</title>
+
+    <para>The Android Integration package provides additional functionality to improve
+    the behavior of Ektorp on the Android Platform.   Using the AndroidHttpClient
+    implementation is required since Android inclues a version of Apache HttpClient
+    that is not compatible with the StdHttpClient provided by Ektorp.  Use of the other
+    classes in this package is entirely optional, but they may save you writing repetitive
+    code.</para>
+
+      <section>
+      <title>AndroidHttpClient</title>
+
+      <para>Ektorp has a custom implementation of the HttpClient interface for Android
+      <emphasis>org.ektorp.android.http.AndroidHttpClient</emphasis>. It is designed to
+      use the version of Apache HttpClient included in the Android platform:
+      <emphasis>AnddroidHttpClient.Builder</emphasis><programlisting
+      language="java">HttpClient authenticatedHttpClient = new AndroidHttpClient.Builder()
+                                .url("http://mychouchdbhost:5984")
+                                .username("admin")
+                                .password("secret")
+                                .build();</programlisting></para>
+
+    <para>When using AndroidHttpClient you should NOT include the httpclient or httpcore libraries
+          in your project.  Android includes a copy of Apache HttpClient and supplying your own
+          copy can lead to difficult to debug class loading exceptions.</para>
+
+    <para><emphasis>NOTE:</emphasis> AndroidHttpClient does not support caching.</para>
+      </section>
+
+      <section>
+      <title>EktorpAsyncTask</title>
+
+      <para>The EktorpAsyncTask class extends the Android platform's  <link
+    xlink:href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</link> class
+    to perform Ektorp operations on a background thread, while handling success and failure conditions
+    on the application's main thread.  This is important since performing network operations on the main
+    thread may lead to <link xlink:href="http://developer.android.com/reference/android/os/NetworkOnMainThreadException.html">
+    NetworkOnMainThreadException</link>.  Further, you can only interact with the Android UI from the
+    main thread.</para>
+      </section>
+      <programlisting language="java">EktorpAsyncTask createItemTask = new EktorpAsyncTask() {
+
+    @Override
+    protected void doInBackground() {
+        couchDbConnector.create(item);
+    }
+
+    @Override
+    protected void onSuccess() {
+        Toast.makeText(context, "Document created successfully", 5000).show();
+    }
+
+    @Override
+    protected void onUpdateConflict(UpdateConflictException updateConflictException) {
+        Toast.makeText(context, "Got an update conflict for: " + item.toString(), 5000).show();
+    }
+
+    @Override
+    protected void onDbAccessException(DbAccessException dbAccessException) {
+        Log.e(TAG, "DbAccessException in background", dbAccessException);
+    }
+};
+createItemTask.execute();
+      </programlisting>
+      <para>In this example, a document is created on a background thread.  If the document is created
+      successfully or an update conflict occurs, the user is notifed by a Toast popup message.  If any
+      other DbAccessException occurs the exception is sent to the Android Log.</para>
+
+      <section>
+      <title>ChangesFeedAsyncTask</title>
+
+      <para>The ChangesFeedAsyncTask is another class extending the Android platform's  <link
+    xlink:href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</link>
+    class.  This class allows you to follow a CouchDB changes feed in a background thread and
+    receive the DocumentChange objects on the main thread.</para>
+
+    <programlisting language="java">public class ExampleChangesFeedAsyncTask extends ChangesFeedAsyncTask {
+
+    private Context context;
+
+    public ExampleChangesFeedAsyncTask(Context context, CouchDbConnector couchDbConnector, ChangesCommand changesCommand) {
+        super(couchDbConnector, changesCommand);
+        this.context = context;
+    }
+
+    @Override
+    protected void handleDocumentChange(DocumentChange change) {
+        Toast.makeText(context, "Received change sequence : " + change.getSequence(), 5000).show();
+    }
+
+    @Override
+    protected void onDbAccessException(DbAccessException dbAccessException) {
+        Log.e(TAG, "DbAccessException following changes feed", dbAccessException);
+    }
+
+}</programlisting>
+
+    <para>Then to use this class:</para>
+
+    <programlisting language="java">ChangesCommand changesCmd = new ChangesCommand.Builder().since(lastUpdate).continuous(true).build();
+ExampleChangesFeedAsyncTask couchChangesAsyncTask = new ExampleChangesFeedAsyncTask(couchDbConnector, changesCmd);
+couchChangesAsyncTask.execute();
+    </programlisting>
+
+    </section>
+
+      <section>
+      <title>CouchbaseViewListAdapter</title>
+
+    <para>The CouchbaseViewListAdapter class extends the Android platform's  <link
+    xlink:href="http://developer.android.com/reference/android/widget/BaseAdapter.html">BaseAdapter</link>
+    class.  This class allows you populate the rows of an Android <link
+    xlink:href="http://developer.android.com/reference/android/widget/ListView.html">ListView</link>.
+    with content from the rows of a CouchDB view.  Optionally, you can have it follow the changes feed
+    and update the list when the data changes.</para>
+
+    <programlisting language="java">public class ExampleListAdapter extends CouchbaseViewListAdapter {
+
+    private Context context;
+
+    public ExampleListAdapter(Context context, CouchDbConnector couchDbConnector, ViewQuery viewQuery, boolean followChanges) {
+        super(couchDbConnector, viewQuery, followChanges);
+        this.context = context;
+    }
+
+    @Override
+    public View getView(int position, View itemView, ViewGroup parent) {
+        if (itemView == null) {
+            LayoutInflater li = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            itemView = li.inflate(R.layout.grocery_list_item, null);
+        }
+
+        TextView label = (TextView) itemView.findViewById(R.id.label);
+        Row row = getRow(position);
+        JsonNode item = row.getValueAsNode();
+        JsonNode itemText = item.get("text");
+        if(itemText != null) {
+            label.setText(itemText.getTextValue());
+        }
+
+        return itemView;
+    }
+}
+    </programlisting>
+
+    <para>To use this adapter:</para>
+
+    <programlisting language="java">ViewQuery viewQuery = new ViewQuery().designDocId(dDocId).viewName(viewName);
+ExampleListAdapter itemListViewAdapter = new ExampleListAdapter(this, couchDbConnector, viewQuery, true);
+listView.setAdapter(itemListViewAdapter);
+    </programlisting>
+
+      </section>
+
+  </chapter>
 </book>
