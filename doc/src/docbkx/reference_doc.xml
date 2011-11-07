@@ -9,7 +9,7 @@
   <info>
     <title>Ektorp Reference Documentation</title>
 
-    <releaseinfo>Version: 1.2.1</releaseinfo>
+    <releaseinfo>Version: 1.2.2</releaseinfo>
 
     <author>
       <personname><firstname>Henrik</firstname><surname>Lundgren</surname></personname>
@@ -92,7 +92,7 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp&lt;/artifactId&gt;
-    &lt;version&gt;1.2.1&lt;/version&gt;
+    &lt;version&gt;1.2.2&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
         <para>Spring support module:</para>
@@ -100,7 +100,7 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp.spring&lt;/artifactId&gt;
-    &lt;version&gt;1.2.1&lt;/version&gt;
+    &lt;version&gt;1.2.2&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
       </section>
 
@@ -112,14 +112,14 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp&lt;/artifactId&gt;
-    &lt;version&gt;1.2.2-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;1.3.0-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;
 
 
 &lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp.spring&lt;/artifactId&gt;
-    &lt;version&gt;1.2.2-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;1.3.0-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
         <para>You can find the snapshots at
@@ -153,7 +153,7 @@
       <para>A sample application can be downloaded from the Ektorp site. It is
       a blog webapp aimed to showcase a basic Ektorp application. You can read
       more about it in the <link
-      xlink:href="http://code.google.com/p/ektorp/wiki/Tutorial">Ektorp
+      xlink:href="http://ektorp.org/tutorial.html">Ektorp
       tutorial</link>.</para>
     </section>
   </chapter>
@@ -1492,7 +1492,7 @@ public class BlogPost {
     </section>
 
     <section>
-      <title>List, Show and Filter Definitions</title>
+      <title>Additional Design Document Functions</title>
 
       <para>Repositories based on CouchDbRepositorySupport may also define
       list, show and filter functions through annotations in the repository
@@ -1502,13 +1502,14 @@ public class BlogPost {
       function that differs:</para>
 
       <programlisting language="java">@Filter( name = "my_filter" file = "my_filter.js")
-@ListFunction( name = "my_list_function" file = "my_filter.js")
-@ShowFunction( name = "my_show_function" file = "my_filter.js")
+@ListFunction( name = "my_list_function" file = "my_list_function.js")
+@ShowFunction( name = "my_show_function" file = "my_show_function.js")
+@UpdateHandler( name = "my_show_function" file = "my_update_handler.js")
 public class MyRepository {
     ...</programlisting>
 
       <para>Multiple functions can be grouped with the corresponding
-      annotations @Filters, @Lists and @Shows.</para>
+      annotations @Filters, @Lists, @Shows and @UpdateHandlers.</para>
 
       <para>These annotations behaves in effect as the @View and @Views
       annotations described in section 3 of this chapter.</para>
@@ -1744,6 +1745,28 @@ public String viewAll(Model m, @RequestParam(value = "p", required = false) Stri
 
         <para>Handlig the page state as text links eliminates the need for
         storing data in the session.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Queries and Cache</title>
+
+      <para>If you enable the cache in a query, the result may be stale
+      depending on how your view is constructed.</para>
+
+      <para>The cache works through conditional gets that invalidates the
+      cache if the view's etag has changed. It is possible that an document
+      update don't cause the view contents to be updated and hence the cache
+      will not be invalidated. If you emit a timestamp or the document's
+      revision as the view value the cache will be properly
+      invalidated.</para>
+
+      <section>
+        <title>Enable the Cached Queries</title>
+
+        <para>As of Ektorp 1.2.2 it is possible to control if a query should
+        use the cache or not. Cached queries is disabled by default but can be
+        enabled by setting the parameter cacheOk to true in ViewQuery.</para>
       </section>
     </section>
   </chapter>
@@ -2086,22 +2109,24 @@ class SofaRepository extends CouchDbRepositorySupport&lt;Sofa&gt; implements Dat
       </section>
     </section>
   </chapter>
+
   <chapter>
     <title>Android Integration</title>
 
-    <para>The Android Integration package provides additional functionality to improve
-    the behavior of Ektorp on the Android Platform.   Using the AndroidHttpClient
-    implementation is required since Android inclues a version of Apache HttpClient
-    that is not compatible with the StdHttpClient provided by Ektorp.  Use of the other
-    classes in this package is entirely optional, but they may save you writing repetitive
-    code.</para>
+    <para>The Android Integration package provides additional functionality to
+    improve the behavior of Ektorp on the Android Platform. Using the
+    AndroidHttpClient implementation is required since Android inclues a
+    version of Apache HttpClient that is not compatible with the StdHttpClient
+    provided by Ektorp. Use of the other classes in this package is entirely
+    optional, but they may save you writing repetitive code.</para>
 
-      <section>
+    <section>
       <title>AndroidHttpClient</title>
 
-      <para>Ektorp has a custom implementation of the HttpClient interface for Android
-      <emphasis>org.ektorp.android.http.AndroidHttpClient</emphasis>. It is designed to
-      use the version of Apache HttpClient included in the Android platform:
+      <para>Ektorp has a custom implementation of the HttpClient interface for
+      Android <emphasis>org.ektorp.android.http.AndroidHttpClient</emphasis>.
+      It is designed to use the version of Apache HttpClient included in the
+      Android platform:
       <emphasis>AnddroidHttpClient.Builder</emphasis><programlisting
       language="java">HttpClient authenticatedHttpClient = new AndroidHttpClient.Builder()
                                 .url("http://mychouchdbhost:5984")
@@ -2109,25 +2134,30 @@ class SofaRepository extends CouchDbRepositorySupport&lt;Sofa&gt; implements Dat
                                 .password("secret")
                                 .build();</programlisting></para>
 
-    <para>When using AndroidHttpClient you should NOT include the httpclient or httpcore libraries
-          in your project.  Android includes a copy of Apache HttpClient and supplying your own
-          copy can lead to difficult to debug class loading exceptions.</para>
+      <para>When using AndroidHttpClient you should NOT include the httpclient
+      or httpcore libraries in your project. Android includes a copy of Apache
+      HttpClient and supplying your own copy can lead to difficult to debug
+      class loading exceptions.</para>
 
-    <para><emphasis>NOTE:</emphasis> AndroidHttpClient does not support caching.</para>
-      </section>
+      <para><emphasis>NOTE:</emphasis> AndroidHttpClient does not support
+      caching.</para>
+    </section>
 
-      <section>
+    <section>
       <title>EktorpAsyncTask</title>
 
-      <para>The EktorpAsyncTask class extends the Android platform's  <link
-    xlink:href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</link> class
-    to perform Ektorp operations on a background thread, while handling success and failure conditions
-    on the application's main thread.  This is important since performing network operations on the main
-    thread may lead to <link xlink:href="http://developer.android.com/reference/android/os/NetworkOnMainThreadException.html">
-    NetworkOnMainThreadException</link>.  Further, you can only interact with the Android UI from the
-    main thread.</para>
-      </section>
-      <programlisting language="java">EktorpAsyncTask createItemTask = new EktorpAsyncTask() {
+      <para>The EktorpAsyncTask class extends the Android platform's <link
+      xlink:href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</link>
+      class to perform Ektorp operations on a background thread, while
+      handling success and failure conditions on the application's main
+      thread. This is important since performing network operations on the
+      main thread may lead to <link
+      xlink:href="http://developer.android.com/reference/android/os/NetworkOnMainThreadException.html">
+      NetworkOnMainThreadException</link>. Further, you can only interact with
+      the Android UI from the main thread.</para>
+    </section>
+
+    <programlisting language="java">EktorpAsyncTask createItemTask = new EktorpAsyncTask() {
 
     @Override
     protected void doInBackground() {
@@ -2151,19 +2181,23 @@ class SofaRepository extends CouchDbRepositorySupport&lt;Sofa&gt; implements Dat
 };
 createItemTask.execute();
       </programlisting>
-      <para>In this example, a document is created on a background thread.  If the document is created
-      successfully or an update conflict occurs, the user is notifed by a Toast popup message.  If any
-      other DbAccessException occurs the exception is sent to the Android Log.</para>
 
-      <section>
+    <para>In this example, a document is created on a background thread. If
+    the document is created successfully or an update conflict occurs, the
+    user is notifed by a Toast popup message. If any other DbAccessException
+    occurs the exception is sent to the Android Log.</para>
+
+    <section>
       <title>ChangesFeedAsyncTask</title>
 
-      <para>The ChangesFeedAsyncTask is another class extending the Android platform's  <link
-    xlink:href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</link>
-    class.  This class allows you to follow a CouchDB changes feed in a background thread and
-    receive the DocumentChange objects on the main thread.</para>
+      <para>The ChangesFeedAsyncTask is another class extending the Android
+      platform's <link
+      xlink:href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</link>
+      class. This class allows you to follow a CouchDB changes feed in a
+      background thread and receive the DocumentChange objects on the main
+      thread.</para>
 
-    <programlisting language="java">public class ExampleChangesFeedAsyncTask extends ChangesFeedAsyncTask {
+      <programlisting language="java">public class ExampleChangesFeedAsyncTask extends ChangesFeedAsyncTask {
 
     private Context context;
 
@@ -2184,26 +2218,27 @@ createItemTask.execute();
 
 }</programlisting>
 
-    <para>Then to use this class:</para>
+      <para>Then to use this class:</para>
 
-    <programlisting language="java">ChangesCommand changesCmd = new ChangesCommand.Builder().since(lastUpdate).continuous(true).build();
+      <programlisting language="java">ChangesCommand changesCmd = new ChangesCommand.Builder().since(lastUpdate).continuous(true).build();
 ExampleChangesFeedAsyncTask couchChangesAsyncTask = new ExampleChangesFeedAsyncTask(couchDbConnector, changesCmd);
 couchChangesAsyncTask.execute();
     </programlisting>
-
     </section>
 
-      <section>
+    <section>
       <title>CouchbaseViewListAdapter</title>
 
-    <para>The CouchbaseViewListAdapter class extends the Android platform's  <link
-    xlink:href="http://developer.android.com/reference/android/widget/BaseAdapter.html">BaseAdapter</link>
-    class.  This class allows you populate the rows of an Android <link
-    xlink:href="http://developer.android.com/reference/android/widget/ListView.html">ListView</link>.
-    with content from the rows of a CouchDB view.  Optionally, you can have it follow the changes feed
-    and update the list when the data changes.</para>
+      <para>The CouchbaseViewListAdapter class extends the Android platform's
+      <link
+      xlink:href="http://developer.android.com/reference/android/widget/BaseAdapter.html">BaseAdapter</link>
+      class. This class allows you populate the rows of an Android <link
+      xlink:href="http://developer.android.com/reference/android/widget/ListView.html">ListView</link>.
+      with content from the rows of a CouchDB view. Optionally, you can have
+      it follow the changes feed and update the list when the data
+      changes.</para>
 
-    <programlisting language="java">public class ExampleListAdapter extends CouchbaseViewListAdapter {
+      <programlisting language="java">public class ExampleListAdapter extends CouchbaseViewListAdapter {
 
     private Context context;
 
@@ -2232,14 +2267,12 @@ couchChangesAsyncTask.execute();
 }
     </programlisting>
 
-    <para>To use this adapter:</para>
+      <para>To use this adapter:</para>
 
-    <programlisting language="java">ViewQuery viewQuery = new ViewQuery().designDocId(dDocId).viewName(viewName);
+      <programlisting language="java">ViewQuery viewQuery = new ViewQuery().designDocId(dDocId).viewName(viewName);
 ExampleListAdapter itemListViewAdapter = new ExampleListAdapter(this, couchDbConnector, viewQuery, true);
 listView.setAdapter(itemListViewAdapter);
     </programlisting>
-
-      </section>
-
+    </section>
   </chapter>
 </book>

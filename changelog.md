@@ -18,8 +18,9 @@ Changes in version 1.2.2
 * #51: New option for controlling the cache in ViewQuery: cacheOk
 * #17: New @UpdateHandler annotation
 
-### Dependency Changes
+### Other Changes
 * Jackson Version changed to 1.8.6
+* Cached queries are now disabled by default.
 
 Changes in version 1.2.1
 ------------------------
