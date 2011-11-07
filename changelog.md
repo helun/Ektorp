@@ -1,5 +1,26 @@
 Change log
 ==========
+Changes in version 1.2.2
+------------------------
+1.2.2 is a bug fix release.
+### Fixes
+* #44: Sequence fields are integers when replicating from cloudant
+* #43: ensureFullCommit leaks connections
+* #34: Default url overwrites host and port in spring config
+* #32: HTTP errors leak StreamingJsonSerializer writer threads
+* #31: String keys with double quote is not correctly encoded in view queries
+* #20: Avoid runtime dependency to httpclient-cache if not using caching
+* #19: avoid dependency to commons-beanutils
+
+### Improvements
+* New Android module: org.ektorp.android
+* #55: Move DesignDocument instance creation to a separate method
+* #51: New option for controlling the cache in ViewQuery: cacheOk
+* #17: New @UpdateHandler annotation
+
+### Dependency Changes
+* Jackson Version changed to 1.8.6
+
 Changes in version 1.2.1
 ------------------------
 1.2.1 is a minor bug fix release.
