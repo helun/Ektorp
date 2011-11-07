@@ -9,14 +9,19 @@ Changes in version 1.2.2
 * #34: Default url overwrites host and port in spring config
 * #32: HTTP errors leak StreamingJsonSerializer writer threads
 * #31: String keys with double quote is not correctly encoded in view queries
+* #28 "ok":true in bulk update response causes problems
 * #20: Avoid runtime dependency to httpclient-cache if not using caching
 * #19: avoid dependency to commons-beanutils
 
 ### Improvements
 * New Android module: org.ektorp.android
+* Support for consuming changes as a stream
+* Support for streaming bulk operations
 * #55: Move DesignDocument instance creation to a separate method
+* #50: Multiple Ektorps Race Condition with Design Docs
 * #51: New option for controlling the cache in ViewQuery: cacheOk
 * #17: New @UpdateHandler annotation
+* Support for the update_seq parameter when querying views
 
 ### Other Changes
 * Jackson Version changed to 1.8.6

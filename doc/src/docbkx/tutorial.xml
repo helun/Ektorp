@@ -17,7 +17,7 @@
       </affiliation>
     </author>
 
-    <pubdate>2011-03-01</pubdate>
+    <pubdate>2011-11-07</pubdate>
   </info>
 
   <chapter>
@@ -57,11 +57,11 @@
       <itemizedlist>
         <listitem>
           <para><link
-          xlink:href="http://code.google.com/p/ektorp/downloads/detail?name=org.ektorp.sample-1.5-project.zip">org.ektorp.sample-1.5-project.zip</link></para>
+          xlink:href="https://github.com/downloads/helun/Ektorp/org.ektorp.sample-1.8-project.zip">org.ektorp.sample-1.8-project.zip</link></para>
         </listitem>
 
         <listitem>
-          <para>CouchDB 1.0.2 installed and running.</para>
+          <para>CouchDB installed and running.</para>
         </listitem>
 
         <listitem>
@@ -567,7 +567,7 @@ public class BlogController {
 
           <listitem>
             <para><link
-            xlink:href="http://code.google.com/p/ektorp/wiki/Documentation">Ektorp
+            xlink:href="http://ektorp.org/reference_documentation.html">Ektorp
             Reference Documentation</link></para>
           </listitem>
         </itemizedlist>
