@@ -177,17 +177,35 @@ public class StdCouchDbConnector implements CouchDbConnector {
     public AttachmentInputStream getAttachment(final String id,
             final String attachmentId) {
         assertDocIdHasValue(id);
-        Assert.hasText(attachmentId, "attachmentId must have a value");
+        Assert.hasText(attachmentId, "attachmentId may not be null or empty");
+        
         if (LOG.isTraceEnabled()) {
             LOG.trace("fetching attachment for doc: {} attachmentId: {}", id,
                     attachmentId);
         }
-        HttpResponse r = restTemplate.get(dbURI.append(id).append(attachmentId)
-                .toString());
+        return getAttachment(attachmentId, dbURI.append(id).append(attachmentId));
+    }
+
+    @Override
+    public AttachmentInputStream getAttachment(String id, String attachmentId,
+    		String revision) {
+    	assertDocIdHasValue(id);
+        Assert.hasText(attachmentId, "attachmentId may not be null or empty");
+        Assert.hasText(revision, "revision may not be null or empty");
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("fetching attachment for doc: {} attachmentId: {}", id,
+                    attachmentId);
+        }
+        return getAttachment(attachmentId, dbURI.append(id).append(attachmentId).param("rev", revision));
+    }
+    
+    private AttachmentInputStream getAttachment(String attachmentId, URI uri) {
+    	HttpResponse r = restTemplate.get(uri.toString());
         return new AttachmentInputStream(attachmentId, r.getContent(),
                 r.getContentType(), r.getContentLength());
     }
-
+    
     @Override
     public String delete(Object o) {
         Assert.notNull(o, "document may not be null");

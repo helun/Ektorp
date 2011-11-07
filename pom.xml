@@ -43,7 +43,7 @@
 		<mockito.version>1.8.5</mockito.version>
 		<junit.version>4.8.2</junit.version>
 		<joda.time.version>1.6.2</joda.time.version>
-		<jackson.version>1.8.4</jackson.version>
+		<jackson.version>1.8.6</jackson.version>
 		<spring.version>3.0.5.RELEASE</spring.version>
 		<commons.io.version>2.0.1</commons.io.version>
 		<httpclient.version>4.1.1</httpclient.version>
