@@ -27,6 +27,24 @@ Changes in version 1.2.2
 * Jackson Version changed to 1.8.6
 * Cached queries are now disabled by default.
 
+### Contributors
+Geir Ove Grønmo
+
+Jaakko Sipari
+
+Henrik Lundgren
+
+Lubomir Chorbadjiev
+
+Marty Schoch
+
+Pasi Eronen
+
+Sverre Kristian Valskrå
+
+all defect reporters
+
+
 Changes in version 1.2.1
 ------------------------
 1.2.1 is a minor bug fix release.
