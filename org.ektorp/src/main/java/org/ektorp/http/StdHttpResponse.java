@@ -53,8 +53,8 @@ public class StdHttpResponse implements HttpResponse {
 	}
 	
 	
-	public int getContentLength() {
-		return (int) entity.getContentLength();
+	public long getContentLength() {
+		return entity.getContentLength();
 	}
 
 	
