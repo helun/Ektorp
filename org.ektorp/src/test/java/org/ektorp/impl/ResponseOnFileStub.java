@@ -78,7 +78,7 @@ public class ResponseOnFileStub implements HttpResponse {
 		return connectionReleased;
 	}
 
-	public int getContentLength() {
+	public long getContentLength() {
 		return contentLength;
 	}
 

@@ -82,7 +82,7 @@ public class Attachment implements Serializable {
 		this.id = id;
 	}
 
-	void setLength(int contentLength) {
+	void setLength(long contentLength) {
 		this.length = contentLength;
 	}
 
