@@ -8,7 +8,7 @@ public interface HttpResponse {
 	int getCode();
 	String getRequestURI();
 	String getContentType();
-	int getContentLength();
+	long getContentLength();
 	InputStream getContent();
 	void releaseConnection();
 	void abort();
