@@ -58,4 +58,41 @@ public class StdCouchDbInstanceTest {
 		assertEquals("anotherdatabase", all.get(1));
 	}
 
+	@Test
+	public void testGetFullConfiguration() {
+	    when(client.get("/_config")).thenReturn(HttpResponseStub.valueOf(200, "{\"httpd\": {" +
+	       "\"bind_address\": \"0.0.0.0\",\"port\": \"5984\"}, \"ssl\": {\"port\": \"6984\"}}"));
+	    Map<String,Object> config = instance.getConfiguration(Map.class);
+	    assertEquals(2, config.keySet().size());
+	}
+
+	@Test
+	public void testGetConfigurationSection() {
+		when(client.get("/_config/httpd")).thenReturn(HttpResponseStub.valueOf(200, "{\"httpd\": {" +
+			"\"bind_address\": \"0.0.0.0\",\"port\": \"5984\"}}"));
+		Map<String,Object> config = instance.getConfiguration(Map.class, "httpd");
+		assertEquals(1, config.keySet().size());
+	}
+
+	@Test
+	public void testGetConfigurationValue() {
+		when(client.get("/_config/httpd/port")).thenReturn(HttpResponseStub.valueOf(200, "\"5984\""));
+		String config = instance.getConfiguration(String.class, "httpd", "port");
+		assertEquals("5984", config);
+	}
+
+        @Test
+        public void testSetConfigurationValue() {
+                when(client.put(eq("/_config/httpd/port"),anyString())).thenReturn(HttpResponseStub.valueOf(200, "\"5984\""));
+                String oldConfig = instance.setConfiguration("httpd", "port", "5985");
+                assertEquals("5984", oldConfig);
+        }
+
+        @Test
+        public void testDeleteConfigurationValue() {
+                when(client.delete("/_config/httpd/port")).thenReturn(HttpResponseStub.valueOf(200, "\"5984\""));
+                String oldConfig = instance.deleteConfiguration("httpd", "port");
+                assertEquals("5984", oldConfig);
+        }
+
 }
