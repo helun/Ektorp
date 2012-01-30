@@ -11,6 +11,7 @@ import java.util.Iterator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.ViewResult.Row;
+import org.ektorp.http.HttpResponse;
 
 /**
  * 
@@ -27,13 +28,15 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 	private final ObjectMapper objectMapper;
 	private boolean iteratorCalled;
     private final boolean ignoreNotFound;
+    private final HttpResponse httpResponse;
 	
 	
-	public StreamingViewResult(ObjectMapper objectMapper, InputStream inputStream, boolean ignoreNotFound) {
+	public StreamingViewResult(ObjectMapper objectMapper, HttpResponse httpResponse, boolean ignoreNotFound) {
 		
 		this.objectMapper = objectMapper;
+        this.httpResponse = httpResponse;
         this.ignoreNotFound = ignoreNotFound;
-		reader = new BufferedReader(new InputStreamReader(inputStream));
+		reader = new BufferedReader(new InputStreamReader(httpResponse.getContent()));
 		try{
 		String info = reader.readLine();
 		totalRows = getFieldValue(info, TOTAL_ROWS_FIELD_NAME);
@@ -68,7 +71,9 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 		iteratorCalled = true;
 		return new StreamingViewResultIterator();
 	}
-	
+	public void abort() {
+	    httpResponse.abort();
+	}
 	public void close() {
 		try {
 			reader.close();
