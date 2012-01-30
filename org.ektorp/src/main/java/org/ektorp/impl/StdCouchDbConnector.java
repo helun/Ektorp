@@ -425,16 +425,20 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     @Override
     public StreamingViewResult queryForStreamingView(ViewQuery query) {
-        return new StreamingViewResult(objectMapper, queryForStream(query), query.isIgnoreNotFound());
+        return new StreamingViewResult(objectMapper, queryForHttpResponse(query), query.isIgnoreNotFound());
     }
 
     @Override
     public InputStream queryForStream(ViewQuery query) {
+        return queryForHttpResponse(query).getContent();
+    }
+    
+    private HttpResponse queryForHttpResponse(ViewQuery query) {
         Assert.notNull(query, "query cannot be null");
         query.dbPath(dbURI.toString());
         return query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(),
-                query.getKeysAsJson()).getContent() : restTemplate.getUncached(
-                query.buildQuery()).getContent();
+                query.getKeysAsJson()) : restTemplate.getUncached(
+                query.buildQuery());
     }
 
     @Override
