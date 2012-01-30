@@ -174,6 +174,35 @@ public class CouchDbRepositorySupportTest {
 	}
 	
 	@Test
+	public void given_update_conflict_occurs_then_init_design_doc_should_be_retried() {
+		DesignDocument conflicting = new DesignDocument("_design/TestDoc");
+		DesignDocument.View existing = new DesignDocument.View("function(doc) {my map function}");
+		conflicting.setRevision("first");
+		conflicting.addView("by_field", existing);
+		
+		DesignDocument updated = new DesignDocument("_design/TestDoc");
+		updated.setRevision("second");
+		updated.addView("by_field", existing);
+		
+		when(db.contains(conflicting.getId())).thenReturn(Boolean.TRUE);
+		when(db.get(DesignDocument.class, conflicting.getId())).thenReturn(conflicting, updated);
+		
+		doThrow(new UpdateConflictException())
+				.doNothing()
+				.when(db).update(any(DesignDocument.class));
+		
+		TestRepo repo = new TestRepo(db);
+		repo.initStandardDesignDocument();
+		
+		ArgumentCaptor<DesignDocument> ac = ArgumentCaptor.forClass(DesignDocument.class);
+		verify(db, times(2)).update(ac.capture());
+		List<DesignDocument> all = ac.getAllValues();
+		assertEquals(2, all.size());
+		assertEquals("second", all.get(1).getRevision());
+		
+	}
+	
+	@Test
 	public void given_view_function_is_not_equal_then_the_view_should_be_updated() {
 		System.setProperty(CouchDbRepositorySupport.AUTO_UPDATE_VIEW_ON_CHANGE, "true");
 		

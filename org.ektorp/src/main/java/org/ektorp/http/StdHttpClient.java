@@ -3,7 +3,6 @@ package org.ektorp.http;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -247,7 +246,6 @@ public class StdHttpClient implements HttpClient {
 			return conman;
 		}
 
-		@SuppressWarnings("deprecation")
 		private Scheme configureScheme() {
 			if (enableSSL) {
 				try {

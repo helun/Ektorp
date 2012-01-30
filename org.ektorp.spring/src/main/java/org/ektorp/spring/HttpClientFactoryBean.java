@@ -4,7 +4,9 @@ import java.util.Properties;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.ektorp.http.HttpClient;
+import org.ektorp.http.RestTemplate;
 import org.ektorp.http.StdHttpClient;
+import org.ektorp.http.StdResponseHandler;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +102,8 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 
 	private void testConnect(HttpClient client) {
 		try {
-			client.head("/");
+			RestTemplate rt = new RestTemplate(client);
+			rt.head("/", new StdResponseHandler<Void>());
 		} catch (Exception e) {
 			throw new BeanCreationException(String.format("Cannot connect to CouchDb@%s:%s", host, port), e);
 		}

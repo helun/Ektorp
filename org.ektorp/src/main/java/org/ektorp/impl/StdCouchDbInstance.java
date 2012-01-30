@@ -25,7 +25,8 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	private final RestTemplate restTemplate;
 	private final ObjectMapper objectMapper;
 	private final ObjectMapperFactory objectMapperFactory;
-	
+	private JsonSerializer jsonSerializer;
+
 	public StdCouchDbInstance(HttpClient client) {
 		this(client, new StdObjectMapperFactory());
 	}
@@ -36,6 +37,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		this.client = client;
 		this.restTemplate = new RestTemplate(client);
 		this.objectMapper = of.createObjectMapper();
+		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
 		this.objectMapperFactory = of;
 	}
 	
@@ -103,4 +105,68 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		if (createIfNotExists) db.createDatabaseIfNotExists();
 		return db;
 	}
+
+   @Override
+    public <T> T getConfiguration(final Class<T> c) {
+       return getConfiguration(c, null, null);
+    }
+
+   @Override
+   public <T> T getConfiguration(final Class<T> c, String section) {
+       return getConfiguration(c, section, null);
+   }
+
+   @Override
+   public <T> T getConfiguration(final Class<T> c, String section, String key) {
+       Assert.notNull(c, "Class may not be null");
+       String url = "/_config";
+       if(section != null) {
+           url = url + "/" + section;
+           if(key != null) {
+               url = url + "/" + key;
+           }
+       }
+       return restTemplate.get(url,
+          new StdResponseHandler<T>() {
+             @Override
+             public T success(HttpResponse hr) throws Exception {
+                return objectMapper.readValue(hr.getContent(), c);
+             }
+          });
+   }
+
+   @Override
+   public String getConfiguration(String section, String key) {
+      return getConfiguration(String.class, section, key);
+   }
+
+   @Override
+   public String setConfiguration(String section, String key, String value) {
+      Assert.notNull(section, "Section may not be null");
+      Assert.notNull(key, "Key may not be null");
+      String url = "/_config/" + section + "/" + key;
+      return restTemplate.put(url, jsonSerializer.toJson(value),
+         new StdResponseHandler<String>() {
+            @Override
+            public String success(HttpResponse hr) throws Exception {
+               String s = objectMapper.readValue(hr.getContent(), String.class);
+               return s;
+            }
+         });
+    }
+
+   @Override
+   public String deleteConfiguration(String section, String key) {
+       Assert.notNull(section, "Section may not be null");
+       Assert.notNull(key, "Key may not be null");
+       String url = "/_config/" + section + "/" + key;
+       return restTemplate.delete(url,
+          new StdResponseHandler<String>() {
+             @Override
+             public String success(HttpResponse hr) throws Exception {
+                String s = objectMapper.readValue(hr.getContent(), String.class);
+                return s;
+             }
+         });
+   }
 }

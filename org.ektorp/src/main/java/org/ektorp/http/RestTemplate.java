@@ -22,6 +22,11 @@ public class RestTemplate {
 		return handleResponse(callback, hr);
 	}
 
+	public <T> T getUncached(String path, ResponseCallback<T> callback) {
+		HttpResponse hr = client.getUncached(path);
+		return handleResponse(callback, hr);
+	}
+	
 	public HttpResponse get(String path) {
 		return handleRawResponse(client.get(path));
 	}
@@ -59,6 +64,10 @@ public class RestTemplate {
 
 	public <T> T post(String path, InputStream content, ResponseCallback<T> callback) {
 		return handleResponse(callback, client.post(path, content));
+	}
+	
+	public <T> T postUncached(String path, String content, ResponseCallback<T> callback) {
+		return handleResponse(callback, client.postUncached(path, content));
 	}
 	
 	public HttpResponse post(String path, String content ) {

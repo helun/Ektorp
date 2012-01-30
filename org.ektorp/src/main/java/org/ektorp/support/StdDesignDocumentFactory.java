@@ -28,7 +28,7 @@ public class StdDesignDocumentFactory implements DesignDocumentFactory {
     @Override
     public DesignDocument generateFrom(Object metaDataSource) {
         Class<?> metaDataClass = metaDataSource.getClass();
-        DesignDocument dd = new DesignDocument();
+        DesignDocument dd = newDesignDocumentInstance();
         Map<String, DesignDocument.View> views = viewGenerator.generateViews(metaDataSource);
         dd.setViews(views);
 
@@ -47,6 +47,10 @@ public class StdDesignDocumentFactory implements DesignDocumentFactory {
         return dd;
     }
 
+    protected DesignDocument newDesignDocumentInstance() {
+    	return new DesignDocument();
+    }
+    
     private Map<String, String> createFilterFunctions(final Class<?> metaDataClass) {
         final Map<String, String> shows = new HashMap<String, String>();
 

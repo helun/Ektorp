@@ -1,11 +1,17 @@
 package org.ektorp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
-import org.ektorp.util.*;
-import org.junit.*;
+import org.ektorp.util.RegexMatcher;
+import org.junit.Test;
 
 public class ViewQueryTest {
 
@@ -31,6 +37,12 @@ public class ViewQueryTest {
 	public void string_key() throws Exception {
 		String url = query.key("value").buildQuery();
 		assertTrue(contains(url, "?key=%22value%22"));
+	}
+	
+	@Test
+	public void string_key_with_quotes() throws Exception {
+		String url = query.key("value with a \"quote").buildQuery();
+		assertTrue(contains(url, "?key=%22value+with+a+%5C%22quote%22"));
 	}
 	
 	@Test
@@ -115,9 +127,21 @@ public class ViewQueryTest {
 	}
 	
 	@Test
-	public void given_key_is_json_then_key_parameter_should_be_unchanged() throws Exception {
-		String url = query.key("\"value\"").buildQuery();
+	public void rawKey_should_be_unchanged() throws Exception {
+		String url = query.rawKey("\"value\"").buildQuery();
 		assertTrue(contains(url, "?key=%22value%22"));
+	}
+	
+	@Test
+	public void rawStartKey_should_be_unchanged() throws Exception {
+		String url = query.rawStartKey("\"value\"").buildQuery();
+		assertTrue(contains(url, "?startkey=%22value%22"));
+	}
+	
+	@Test
+	public void rawEndKey_should_be_unchanged() throws Exception {
+		String url = query.rawStartKey("\"value\"").buildQuery();
+		assertTrue(contains(url, "?startkey=%22value%22"));
 	}
 	
 	@Test
@@ -187,6 +211,14 @@ public class ViewQueryTest {
 			.buildQuery();
 		assertTrue(contains(url, "?include_docs=true"));
 	}
+
+        @Test
+        public void update_seq_parameter_added() {
+                String url = query
+                        .updateSeq(true)
+                        .buildQuery();
+                assertTrue(contains(url, "?update_seq=true"));
+        }
 	
 	@Test
 	public void stale_ok_parameter_added() {

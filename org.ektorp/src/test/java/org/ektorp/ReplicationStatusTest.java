@@ -21,8 +21,8 @@ public class ReplicationStatusTest {
 		assertNotNull(h.getStartTime());
 		assertNotNull(h.getEndTime());
 		assertNotNull(h.getEndTime());
-		assertTrue(h.getStartLastSeq() > 0);
-		assertTrue(h.getEndLastSeq() > 0);
+		assertNotNull(h.getStartLastSeq());
+		assertNotNull(h.getEndLastSeq());
 		assertTrue(h.getRecordedSeq() > 0);
 		assertTrue(h.getMissingChecked() > 0);
 		assertTrue(h.getMissingFound() > 0);

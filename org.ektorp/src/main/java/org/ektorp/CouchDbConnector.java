@@ -228,6 +228,7 @@ public interface CouchDbConnector {
      */
     AttachmentInputStream getAttachment(String id, String attachmentId);
 
+    AttachmentInputStream getAttachment(String id, String attachmentId, String revision);
     /**
      * Creates both the document and the attachment
      * 

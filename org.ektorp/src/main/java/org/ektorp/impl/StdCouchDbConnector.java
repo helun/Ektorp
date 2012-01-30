@@ -177,17 +177,35 @@ public class StdCouchDbConnector implements CouchDbConnector {
     public AttachmentInputStream getAttachment(final String id,
             final String attachmentId) {
         assertDocIdHasValue(id);
-        Assert.hasText(attachmentId, "attachmentId must have a value");
+        Assert.hasText(attachmentId, "attachmentId may not be null or empty");
+        
         if (LOG.isTraceEnabled()) {
             LOG.trace("fetching attachment for doc: {} attachmentId: {}", id,
                     attachmentId);
         }
-        HttpResponse r = restTemplate.get(dbURI.append(id).append(attachmentId)
-                .toString());
+        return getAttachment(attachmentId, dbURI.append(id).append(attachmentId));
+    }
+
+    @Override
+    public AttachmentInputStream getAttachment(String id, String attachmentId,
+    		String revision) {
+    	assertDocIdHasValue(id);
+        Assert.hasText(attachmentId, "attachmentId may not be null or empty");
+        Assert.hasText(revision, "revision may not be null or empty");
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("fetching attachment for doc: {} attachmentId: {}", id,
+                    attachmentId);
+        }
+        return getAttachment(attachmentId, dbURI.append(id).append(attachmentId).param("rev", revision));
+    }
+    
+    private AttachmentInputStream getAttachment(String attachmentId, URI uri) {
+    	HttpResponse r = restTemplate.get(uri.toString());
         return new AttachmentInputStream(attachmentId, r.getContent(),
                 r.getContentType(), r.getContentLength());
     }
-
+    
     @Override
     public String delete(Object o) {
         Assert.notNull(o, "document may not be null");
@@ -383,10 +401,20 @@ public class StdCouchDbConnector implements CouchDbConnector {
         EmbeddedDocViewResponseHandler<T> rh = new EmbeddedDocViewResponseHandler<T>(
                 type, objectMapper, query.isIgnoreNotFound());
 
-        return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
+        return executeQuery(query, rh);
+    }
+
+	private <T> T executeQuery(final ViewQuery query,
+			ResponseCallback<T> rh) {
+		if (!query.isCacheOk()) {
+			return query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(),
+	                query.getKeysAsJson(), rh) : restTemplate.getUncached(
+	                query.buildQuery(), rh);	
+		}
+		return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
                 query.getKeysAsJson(), rh) : restTemplate.get(
                 query.buildQuery(), rh);
-    }
+	}
 
     @Override
     public <T> Page<T> queryForPage(ViewQuery query, PageRequest pr, Class<T> type) {
@@ -401,9 +429,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
         }
         PageResponseHandler<T> ph = new PageResponseHandler<T>(pr, type, objectMapper, query.isIgnoreNotFound());
         query = PageRequest.applyPagingParameters(query, pr);
-        return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
-                query.getKeysAsJson(), ph) : restTemplate.get(
-                query.buildQuery(), ph);
+        
+        return executeQuery(query, ph);
     }
 
     @Override
@@ -418,9 +445,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
             }
 
         };
-        return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
-                query.getKeysAsJson(), rh) : restTemplate.get(
-                query.buildQuery(), rh);
+        
+        return executeQuery(query, rh);
     }
 
     @Override
@@ -789,7 +815,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     @Override
     public void ensureFullCommit() {
-        restTemplate.post(dbURI.append("_ensure_full_commit").toString(), "");
+        restTemplate.post(dbURI.append("_ensure_full_commit").toString(), "", new StdResponseHandler<Void>());
     }
 
 }
