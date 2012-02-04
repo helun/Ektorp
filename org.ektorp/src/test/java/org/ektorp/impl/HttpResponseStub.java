@@ -40,7 +40,7 @@ public class HttpResponseStub implements HttpResponse {
 		
 	}
 	
-	public int getContentLength() {
+	public long getContentLength() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
