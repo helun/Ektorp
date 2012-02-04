@@ -57,8 +57,8 @@ public class AndroidHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public int getContentLength() {
-		return (int) entity.getContentLength();
+	public long getContentLength() {
+		return entity.getContentLength();
 	}
 
 	@Override

@@ -2,9 +2,9 @@ Ektorp is a persistence API that uses [CouchDB](http://couchdb.apache.org/) as s
 
 Features
 --------
-Here are some good reasons why you should consider to use Ektorp in your project:
+Here are some good reasons why you should consider using Ektorp in your project:
 
-* *Rich domain models.* With powerful JSON-object mapping provided by Jackson it is easy to create rich domain models.
+* *Rich domain models.* With the powerful JSON-object mapping provided by [Jackson][jackson] it is easy to create rich domain models.
 * *Schemaless comfort.* As CouchDB is schemaless, the database gets out of the way during application development. With a schemaless database, most adjustments to the database become transparent and automatic.
 * *Out-of-the-Box CRUD.* The generic repository support makes it trivial to create persistence classes.
 * *Simple and fluent API.*
@@ -54,7 +54,7 @@ This repository will have the following methods "out of the box":
 	repo.remove(Sofa s);
 	List<Sofa> repo.getAll();
 
-Convenient Managent of View Definitions
+Convenient Management of View Definitions
 ---------------------------------------
 The concept of views in CouchDB can be a little daunting at first and there will always be the task of managing view definitions to go along your mapped classes.
 Ektorp provides two solutions for this:
@@ -94,11 +94,11 @@ CouchDbRepositorySupport will generate a "by_tag" view in CouchDB at application
 
 Simple and Powerful JSON / Object Mapping
 -----------------------------------------
-The JSON / Object mapping in Ektorp is handled by the excellent [http://wiki.fasterxml.com/JacksonHome Jackson JSON library].
+The JSON / Object mapping in Ektorp is handled by the excellent [Jackson JSON library][jackson].
 
 Jackson makes it easy to map the common cases and provides for instance the possibility to map polymorph types for more advanced use cases.
 
-All persistent objects managed by Ektorp need define properties for id and revision and they need to be accessible by getters and setters.
+All persistent objects managed by Ektorp need to define properties for id and revision and they need to be accessible by getters and setters.
 
 Here's an trivial example class:
 
@@ -195,3 +195,5 @@ If you are using Maven:
 Getting Help
 ------------
 You can usually get quick answers at the [Ektorp google group](http://groups.google.com/group/ektorp-discuss)
+
+[jackson]: http://wiki.fasterxml.com/JacksonHome
