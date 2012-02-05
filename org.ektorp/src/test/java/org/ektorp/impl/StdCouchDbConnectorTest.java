@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbInstance;
@@ -678,6 +679,7 @@ public class StdCouchDbConnectorTest {
 
     }
 
+    @JsonPropertyOrder({"value","param"})
     static class TestRequest {
         private String param;
         private String value;
