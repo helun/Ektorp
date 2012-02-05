@@ -66,12 +66,10 @@ public class QueryResultParser<T> {
 			if (totalRows == 0) {
 				rows = Collections.emptyList();
 				return;
-			} else {
-				rows = new ArrayList<T>(totalRows);
 			}
-		} else {
-			rows = new ArrayList<T>();
 		}
+		
+		rows = new ArrayList<T>();
 
 		ParseState state = new ParseState();
 
