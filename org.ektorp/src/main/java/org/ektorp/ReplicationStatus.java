@@ -3,7 +3,9 @@ package org.ektorp;
 import java.io.*;
 import java.util.*;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.*;
+
 /**
  * 
  * Replication response doc is not very well documented in the CouchDB reference...
@@ -25,7 +27,7 @@ public class ReplicationStatus implements Serializable {
 	String sessionId;
 	
 	@JsonProperty("source_last_seq")
-	String sourceLastSequence;
+	JsonNode sourceLastSequence;
 	
 	@JsonProperty("history")
 	List<History> history;
@@ -45,6 +47,10 @@ public class ReplicationStatus implements Serializable {
 	}
 
 	public String getSourceLastSequence() {
+		return sourceLastSequence != null ? sourceLastSequence.getValueAsText() : null;
+	}
+	
+	public JsonNode getSourceLastSequenceAsNode() {
 		return sourceLastSequence;
 	}
 
@@ -82,10 +88,10 @@ public class ReplicationStatus implements Serializable {
 		String endTime;
 		
 		@JsonProperty("start_last_seq")
-		String startLastSeq;
+		JsonNode startLastSeq;
 		
 		@JsonProperty("end_last_seq")
-		String endLastSeq;
+		JsonNode endLastSeq;
 		
 		@JsonProperty("missing_checked")
 		int missingChecked;
@@ -122,13 +128,21 @@ public class ReplicationStatus implements Serializable {
 		}
 
 		public String getStartLastSeq() {
+			return startLastSeq != null ? startLastSeq.getValueAsText() : null;
+		}
+		
+		public JsonNode getStartLastSeqAsNode() {
 			return startLastSeq;
 		}
 
 		public String getEndLastSeq() {
-			return endLastSeq;
+			return endLastSeq != null ? endLastSeq.getValueAsText() : null;
 		}
 
+		public JsonNode getEndLastSeqAsNode() {
+			return endLastSeq;
+		}
+		
 		public int getMissingChecked() {
 			return missingChecked;
 		}

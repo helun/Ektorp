@@ -30,4 +30,24 @@ public class ReplicationStatusTest {
 		assertTrue(h.getDocsWritten() > 0);
 		assertTrue(h.getDocWriteFailures() > 0);
 	}
+	
+	@Test
+	public void sequences_as_strings() throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		ReplicationStatus rs = mapper.readValue(getClass().getResourceAsStream("replication_response_string_seqs.json"), ReplicationStatus.class);
+		assertNotNull(rs.getSourceLastSequence());
+		ReplicationStatus.History h = rs.getHistory().get(0);
+		assertNotNull(h.getStartLastSeq());
+		assertNotNull(h.getEndLastSeq());
+	}
+	
+	@Test
+	public void sequences_as_arrays() throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		ReplicationStatus rs = mapper.readValue(getClass().getResourceAsStream("replication_response_array_seqs.json"), ReplicationStatus.class);
+		assertNotNull(rs.getSourceLastSequenceAsNode());
+		ReplicationStatus.History h = rs.getHistory().get(0);
+		assertNotNull(h.getStartLastSeqAsNode());
+		assertNotNull(h.getEndLastSeqAsNode());
+	}
 }

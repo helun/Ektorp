@@ -1,11 +1,14 @@
 package org.ektorp;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.annotate.*;
-import org.ektorp.util.*;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.ektorp.util.Assert;
 
 /**
  * 
@@ -22,10 +25,8 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	private int offset = -1;
 	private String updateSeq;
 	private List<Row> rows;
-    private final boolean ignoreNotFound;
 	
 	public ViewResult(JsonNode resultNode, boolean ignoreNotFound) {
-		this.ignoreNotFound = ignoreNotFound;
         Assert.notNull(resultNode, "resultNode may not be null");
 		Assert.isTrue(resultNode.findPath("rows").isArray(), "result must contain 'rows' field of array type");
 		if (resultNode.get(TOTAL_ROWS_FIELD_NAME) != null) {
