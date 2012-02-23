@@ -45,7 +45,7 @@
 		<junit.version>4.8.2</junit.version>
 		<joda.time.version>1.6.2</joda.time.version>
 		<jackson.version>1.9.4</jackson.version>
-		<spring.version>3.0.7.RELEASE</spring.version>
+		<spring.version>3.1.1.RELEASE</spring.version>
 		<commons.io.version>2.0.1</commons.io.version>
 		<httpclient.version>4.1.2</httpclient.version>
 		<aspectj.version>1.6.9</aspectj.version>
