@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 /**
  * FactoryBean that produces a HttpClient.
  * Configuration parameters are set through @Value annotations.
@@ -24,9 +26,11 @@ import org.springframework.beans.factory.FactoryBean;
  * @author henrik lundgren
  *
  */
-public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
+public class HttpClientFactoryBean implements FactoryBean<HttpClient>, InitializingBean, DisposableBean {
 
 	private final static Logger LOG = LoggerFactory.getLogger(HttpClientFactoryBean.class);
+	
+	protected HttpClient client;
 	
 	public String url;
 	public String host = "localhost";
@@ -49,48 +53,8 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 	
 	private Properties couchDBProperties;
 	
+	@Override
 	public HttpClient getObject() throws Exception {
-		if (couchDBProperties != null) {
-			new DirectFieldAccessor(this).setPropertyValues(couchDBProperties);
-		}
-		
-		LOG.debug("host: {}", host);
-		LOG.debug("port: {}", port);
-		LOG.debug("url: {}", url);
-		LOG.debug("maxConnections: {}", maxConnections);
-		LOG.debug("connectionTimeout: {}", connectionTimeout);
-		LOG.debug("socketTimeout: {}", socketTimeout);
-		LOG.debug("autoUpdateViewOnChange: {}", autoUpdateViewOnChange);
-		LOG.debug("testConnectionAtStartup: {}", testConnectionAtStartup);
-		LOG.debug("cleanupIdleConnections: {}", cleanupIdleConnections);
-		LOG.debug("enableSSL: {}", enableSSL);
-		LOG.debug("relaxedSSLSettings: {}", relaxedSSLSettings);
-		
-		HttpClient client = new StdHttpClient.Builder()
-								.host(host)
-								.port(port)
-								.maxConnections(maxConnections)
-								.connectionTimeout(connectionTimeout)
-								.socketTimeout(socketTimeout)
-								.username(username)
-								.password(password)
-								.cleanupIdleConnections(cleanupIdleConnections)
-								.enableSSL(enableSSL)
-								.relaxedSSLSettings(relaxedSSLSettings)
-								.sslSocketFactory(sslSocketFactory)
-								.caching(caching)
-								.maxCacheEntries(maxCacheEntries)
-								.maxObjectSizeBytes(maxObjectSizeBytes)
-								.url(url)
-								.build();
-		
-		if (testConnectionAtStartup) {
-			testConnect(client);
-		}
-		
-		
-		
-		configureAutoUpdateViewOnChange();
 		return client;
 	}
 	
@@ -109,10 +73,12 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 		}
 	}
 
+	@Override
 	public Class<? extends HttpClient> getObjectType() {
 		return HttpClient.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -187,6 +153,64 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient> {
 	
 	public void setProperties(Properties p) {
 		this.couchDBProperties = p;
+	}
+
+	/**
+	 * Shutdown the HTTP Client when destroying the bean
+	 */
+	@Override
+	public void destroy() throws Exception {
+		LOG.info("Stopping couchDb connector...");
+		if (client != null) {
+			client.shutdown();
+		}
+	}
+
+	/**
+	 * Create the couchDB connection when starting the bean factory
+	 */
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		LOG.info("Starting couchDb connector on {}:{}...",  new Object[]{host,port});
+		if (couchDBProperties != null) {
+			new DirectFieldAccessor(this).setPropertyValues(couchDBProperties);
+		}
+		
+		LOG.debug("host: {}", host);
+		LOG.debug("port: {}", port);
+		LOG.debug("url: {}", url);
+		LOG.debug("maxConnections: {}", maxConnections);
+		LOG.debug("connectionTimeout: {}", connectionTimeout);
+		LOG.debug("socketTimeout: {}", socketTimeout);
+		LOG.debug("autoUpdateViewOnChange: {}", autoUpdateViewOnChange);
+		LOG.debug("testConnectionAtStartup: {}", testConnectionAtStartup);
+		LOG.debug("cleanupIdleConnections: {}", cleanupIdleConnections);
+		LOG.debug("enableSSL: {}", enableSSL);
+		LOG.debug("relaxedSSLSettings: {}", relaxedSSLSettings);
+		
+		client = new StdHttpClient.Builder()
+								.host(host)
+								.port(port)
+								.maxConnections(maxConnections)
+								.connectionTimeout(connectionTimeout)
+								.socketTimeout(socketTimeout)
+								.username(username)
+								.password(password)
+								.cleanupIdleConnections(cleanupIdleConnections)
+								.enableSSL(enableSSL)
+								.relaxedSSLSettings(relaxedSSLSettings)
+								.sslSocketFactory(sslSocketFactory)
+								.caching(caching)
+								.maxCacheEntries(maxCacheEntries)
+								.maxObjectSizeBytes(maxObjectSizeBytes)
+								.url(url)
+								.build();
+		
+		if (testConnectionAtStartup) {
+			testConnect(client);
+		}
+		
+		configureAutoUpdateViewOnChange();
 	}
 	
 }
