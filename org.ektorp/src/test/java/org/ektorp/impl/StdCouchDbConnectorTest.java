@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -372,6 +373,28 @@ public class StdCouchDbConnectorTest {
         assertEquals("doc_id1", result.get(0).getId());
         assertEquals("doc_id2", result.get(1).getId());
         verify(httpClient, times(1)).get(anyString());
+    }
+
+    @Test
+    public void queries_with_ignore_not_found() {
+        ViewQuery query = new ViewQuery()
+                .dbPath(TEST_DB_PATH)
+                .designDocId("_design/testdoc")
+                .viewName("test_view")
+                .includeDocs(true)                
+                .keys(Arrays.asList("doc_id1", "doc_id2", "doc_id3", "doc_id4"));
+        query.setIgnoreNotFound(true);
+
+        when(httpClient.postUncached(anyString(), anyString())).thenReturn(
+                ResponseOnFileStub.newInstance(200, "view_result_with_ignored_docs.json"));
+
+        List<TestDoc> result = dbCon.queryView(query, TestDoc.class);
+
+        assertEquals(2, result.size());
+        assertEquals(TestDoc.class, result.get(0).getClass());
+        assertEquals("doc_id1", result.get(0).getId());
+        assertEquals("doc_id3", result.get(1).getId());
+        verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
     }
 
     @Test
