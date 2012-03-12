@@ -1,4 +1,4 @@
-{"total_rows":2,"offset":1,"rows":[
+{"total_rows":4,"rows":[
 {"id":"doc_id1","key":"key_value","value":null,"doc":{"_id":"doc_id1", "_rev":"rev1", "name":"foo", "age":12}},
 {"key":"doc_id2","error":"not_found"},
 {"id":"doc_id3","key":"key_value","value":null,"doc":{"_id":"doc_id3", "_rev":"rev3", "name":"bar", "age":99}},
