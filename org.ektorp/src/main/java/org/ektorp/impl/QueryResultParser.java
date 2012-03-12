@@ -191,7 +191,11 @@ public class QueryResultParser<T> {
 					JsonNode error = jp.readValueAsTree();
 					if (ignoreNotFound
 							&& error.getValueAsText().equals("not_found")) {
-						break;
+					    lastFieldName = null;
+				        state.inRow = false;
+				        jp.nextToken();
+                        jp.nextToken();
+						continue;
 					}
 					throw new ViewResultException(state.lastKey,
 							error.getValueAsText());
