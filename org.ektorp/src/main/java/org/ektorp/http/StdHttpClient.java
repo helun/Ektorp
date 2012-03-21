@@ -190,6 +190,13 @@ public class StdHttpClient implements HttpClient {
 		public Builder url(URL url){
 			this.host = url.getHost();
 			this.port = url.getPort();
+			if (url.getUserInfo() != null) {
+				String[] userInfoParts = url.getUserInfo().split(":");
+				if (userInfoParts.length == 2) {
+					this.username = userInfoParts[0];
+					this.password = userInfoParts[1];
+				}
+			}
 			enableSSL("https".equals(url.getProtocol()));
 			return this;
 		}
