@@ -270,6 +270,8 @@ public class StdHttpClient implements HttpClient {
 												String authType) {
 										}
 									} }, null);
+						} else {
+							context.init(null, null, null);
 						}
 
 						sslSocketFactory = relaxedSSLSettings ? new SSLSocketFactory(context, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER) : new SSLSocketFactory(context);
