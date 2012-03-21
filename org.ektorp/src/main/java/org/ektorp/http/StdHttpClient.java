@@ -198,6 +198,13 @@ public class StdHttpClient implements HttpClient {
 				}
 			}
 			enableSSL("https".equals(url.getProtocol()));
+			if (this.port == -1) {
+				if (this.enableSSL) {
+					this.port = 443;
+				} else {
+					this.port = 80;
+				}
+			}
 			return this;
 		}
 		
