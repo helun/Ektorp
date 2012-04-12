@@ -818,5 +818,16 @@ public class StdCouchDbConnector implements CouchDbConnector {
         restTemplate.post(dbURI.append("_ensure_full_commit").toString(), "", new StdResponseHandler<Void>());
     }
 
+	@Override
+	public void updateMultipart(String id, InputStream stream, String boundary, long length, Options options) {
+		assertDocIdHasValue(id);
+		URI uri = dbURI.append(id);
+		applyOptions(options, uri);
+
+		String contentType = String.format("multipart/related; boundary=\"%s\"", boundary);
+
+		restTemplate.put(uri.toString(), stream, contentType, length);
+	}
+
 }
 

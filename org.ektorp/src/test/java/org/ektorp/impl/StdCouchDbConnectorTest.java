@@ -5,10 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,31 +14,13 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.ektorp.AttachmentInputStream;
-import org.ektorp.CouchDbInstance;
-import org.ektorp.DbInfo;
-import org.ektorp.DesignDocInfo;
-import org.ektorp.DocumentNotFoundException;
-import org.ektorp.PurgeResult;
-import org.ektorp.ReplicationCommand;
-import org.ektorp.ReplicationStatus;
-import org.ektorp.Revision;
-import org.ektorp.UpdateConflictException;
-import org.ektorp.UpdateHandlerRequest;
-import org.ektorp.ViewQuery;
-import org.ektorp.ViewResult;
+import org.ektorp.*;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.support.CouchDbDocument;
@@ -655,6 +634,52 @@ public class StdCouchDbConnectorTest {
         assertEquals(11, r.getPurgeSeq());
         assertTrue(r.getPurged().containsKey("Billy"));
     }
+
+	@Test
+	public void putMultipart_should_perform_put_operation_with_path_set_to_db_followed_by_id() {
+		String id = UUID.randomUUID().toString();
+		dbCon.updateMultipart(id, null, null, 0, null);
+
+		String expectedPath = "/test_db/" + id;
+		verify(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
+	}
+
+	@Test
+	public void putMultipart_should_perform_put_operation_with_path_using_any_given_options() {
+		String id = UUID.randomUUID().toString();
+		String paramName = "some_param";
+		String paramValue = "false";
+		Options options = new Options().param(paramName, paramValue);
+		dbCon.updateMultipart(id, null, null, 0, options);
+
+		String expectedPath = "/test_db/" + id + "?some_param=false";
+		verify(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
+	}
+
+	@Test
+	public void putMultipart_should_perform_put_operation_with_the_given_InputStream() {
+		InputStream stream = mock(InputStream.class);
+		dbCon.updateMultipart("a", stream, null, 0, null);
+
+		verify(httpClient).put(anyString(), eq(stream), anyString(), anyLong());
+	}
+
+	@Test
+	public void putMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_boundary() {
+		String boundary = UUID.randomUUID().toString();
+		dbCon.updateMultipart("a", null, boundary, 0, null);
+
+		String expectedContentType = "multipart/related; boundary=\"" + boundary + "\"";
+		verify(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
+	}
+
+	@Test
+	public void putMultipart_should_perform_put_operation_with_content_type_set_to_length() {
+		long length = 1000l;
+		dbCon.updateMultipart("a", null, null, length, null);
+
+		verify(httpClient).put(anyString(), any(InputStream.class), anyString(), eq(length));
+	}
 
     @SuppressWarnings("serial")
     static class DateDoc extends CouchDbDocument {

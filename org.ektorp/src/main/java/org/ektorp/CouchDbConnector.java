@@ -564,6 +564,15 @@ public interface CouchDbConnector {
      */
     void ensureFullCommit();
 
-    
+	/**
+	 * Sends a document to the Couch server as a MIME multipart/related message.
+	 * @param id the document ID
+	 * @param stream an InputStream of the multipart message containing
+	 *                  the document and any attachments
+	 * @param boundary the boundary of the multipart/related message parts
+	 * @param length the length of the MIME multipart message stream
+	 * @param options options to pass to the Couch request
+	 */
+	void updateMultipart(String id, InputStream stream, String boundary, long length, Options options);
 
 }
