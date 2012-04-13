@@ -674,6 +674,14 @@ public class StdCouchDbConnectorTest {
 	}
 
 	@Test
+	public void putMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_no_boundary_if_it_is_null() {
+		dbCon.updateMultipart("a", null, null, 0, null);
+
+		String expectedContentType = "multipart/related";
+		verify(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
+	}
+
+	@Test
 	public void putMultipart_should_perform_put_operation_with_content_type_set_to_length() {
 		long length = 1000l;
 		dbCon.updateMultipart("a", null, null, length, null);

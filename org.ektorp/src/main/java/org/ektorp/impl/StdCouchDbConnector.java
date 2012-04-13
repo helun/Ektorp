@@ -824,7 +824,9 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		URI uri = dbURI.append(id);
 		applyOptions(options, uri);
 
-		String contentType = String.format("multipart/related; boundary=\"%s\"", boundary);
+		String contentType = boundary != null ?
+				String.format("multipart/related; boundary=\"%s\"", boundary) :
+				"multipart/related";
 
 		restTemplate.put(uri.toString(), stream, contentType, length);
 	}
