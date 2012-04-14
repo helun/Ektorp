@@ -636,7 +636,7 @@ public class StdCouchDbConnectorTest {
     }
 
 	@Test
-	public void putMultipart_should_perform_put_operation_with_path_set_to_db_followed_by_id() {
+	public void updateMultipart_should_perform_put_operation_with_path_set_to_db_followed_by_id() {
 		String id = UUID.randomUUID().toString();
 		dbCon.updateMultipart(id, null, null, 0, null);
 
@@ -645,7 +645,7 @@ public class StdCouchDbConnectorTest {
 	}
 
 	@Test
-	public void putMultipart_should_perform_put_operation_with_path_using_any_given_options() {
+	public void updateMultipart_should_perform_put_operation_with_path_using_any_given_options() {
 		String id = UUID.randomUUID().toString();
 		String paramName = "some_param";
 		String paramValue = "false";
@@ -657,7 +657,7 @@ public class StdCouchDbConnectorTest {
 	}
 
 	@Test
-	public void putMultipart_should_perform_put_operation_with_the_given_InputStream() {
+	public void updateMultipart_should_perform_put_operation_with_the_given_InputStream() {
 		InputStream stream = mock(InputStream.class);
 		dbCon.updateMultipart("a", stream, null, 0, null);
 
@@ -665,7 +665,7 @@ public class StdCouchDbConnectorTest {
 	}
 
 	@Test
-	public void putMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_boundary() {
+	public void updateMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_boundary() {
 		String boundary = UUID.randomUUID().toString();
 		dbCon.updateMultipart("a", null, boundary, 0, null);
 
@@ -674,7 +674,7 @@ public class StdCouchDbConnectorTest {
 	}
 
 	@Test
-	public void putMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_no_boundary_if_it_is_null() {
+	public void updateMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_no_boundary_if_it_is_null() {
 		dbCon.updateMultipart("a", null, null, 0, null);
 
 		String expectedContentType = "multipart/related";
@@ -682,11 +682,19 @@ public class StdCouchDbConnectorTest {
 	}
 
 	@Test
-	public void putMultipart_should_perform_put_operation_with_content_type_set_to_length() {
+	public void updateMultipart_should_perform_put_operation_with_content_type_set_to_length() {
 		long length = 1000l;
 		dbCon.updateMultipart("a", null, null, length, null);
 
 		verify(httpClient).put(anyString(), any(InputStream.class), anyString(), eq(length));
+	}
+
+	@Test
+	public void updateMultipart_without_boundary_should_perform_put_operation_with_content_type_set_to_multipart_related_with_no_boundary() {
+		dbCon.updateMultipart("a", null, 0, null);
+
+		String expectedContentType = "multipart/related";
+		verify(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
 	}
 
     @SuppressWarnings("serial")

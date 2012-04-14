@@ -831,5 +831,11 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		restTemplate.put(uri.toString(), stream, contentType, length);
 	}
 
+	@Override
+	public void updateMultipart(String id, InputStream stream, long length, Options options)
+	{
+		updateMultipart(id, stream, null, length, options);
+	}
+
 }
 
