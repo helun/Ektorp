@@ -1588,6 +1588,49 @@ db.createAttachment("existing_document_id", "document_revision", a);</programlis
       accessor for the document's attachments. The list contains stub
       attachments.</para>
     </section>
+
+      <section>
+          <title>Upload a Document with Attachments in MIME Format</title>
+
+          <para>Couch supports updating a document along with attachments as a MIME
+              multipart/related message. This is an efficient way to update a document
+              along with attachments since it does not require Base64 encoding.
+          </para>
+
+          <para>To update a document as a MIME multipart/related in Ektorp, use
+              the updateMultipart() method of CouchDbConnector.
+          </para>
+
+          <programlisting language="java">
+              File file = someMethodToGetFile();
+              InputStream mimeInputStream = new FileInputStream(file);
+              db.updateMultipart("document_id",
+                                 mimeInputStream,
+                                 "abc_boundary",
+                                 file.length(),
+                                 new Options());
+          </programlisting>
+
+          <para>The data in the InputStream must contain only the MIME multipart/related
+              message. This message is specifed in
+              <link xlink:href="http://wiki.apache.org/couchdb/HTTP_Document_API#Multiple_Attachments">
+                  CouchDB Multiple Attachments API
+              </link>.
+          </para>
+
+          <para>To update a document as a MIME multipart/related without attachments, use
+              the updateMultipart overload which does not have a boundary parameter. In this
+              case the InputStream is just the JSON document.
+          </para>
+
+          <programlisting language="java">
+              db.updateMultipart("document_id",
+                                 mimeInputStream,
+                                 file.length(),
+                                 new Options());
+          </programlisting>
+
+      </section>
   </chapter>
 
   <chapter>
