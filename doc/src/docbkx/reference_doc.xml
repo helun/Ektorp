@@ -1095,6 +1095,24 @@ sofa.getRevision();</programlisting>
 
       <para>Note that calling update with an object that has an empty id field
       will create a new document in the database.</para>
+
+        <section>
+            <title>Updating from a Stream</title>
+            <para>
+                Documents can be updated from an InputStream. The InputStream must contain a JSON document. Using
+                an InputStream allows you to update a document from a JSON document without having to parse it, which
+                can be more efficient for large documents.
+            </para>
+
+            <programlisting language="java">
+                File file = someMethodToGetFile();
+                InputStream jsonInputStream = new FileInputStream(file);
+                db.update("document_id",
+                          jsonInputStream,
+                          file.length(),
+                          null);
+            </programlisting>
+        </section>
     </section>
 
     <section>
@@ -1588,6 +1606,37 @@ db.createAttachment("existing_document_id", "document_revision", a);</programlis
       accessor for the document's attachments. The list contains stub
       attachments.</para>
     </section>
+
+      <section>
+          <title>Upload a Document with Attachments in MIME Format</title>
+
+          <para>Couch supports updating a document along with attachments as a MIME
+              multipart/related message. This is an efficient way to update a document
+              along with attachments since it does not require Base64 encoding.
+          </para>
+
+          <para>To update a document as a MIME multipart/related in Ektorp, use
+              the updateMultipart() method of CouchDbConnector.
+          </para>
+
+          <programlisting language="java">
+              File file = someMethodToGetFile();
+              InputStream mimeInputStream = new FileInputStream(file);
+              db.updateMultipart("document_id",
+                                 mimeInputStream,
+                                 "abc_boundary",
+                                 file.length(),
+                                 new Options());
+          </programlisting>
+
+          <para>The data in the InputStream must contain only the MIME multipart/related
+              message. This message is specifed in
+              <link xlink:href="http://wiki.apache.org/couchdb/HTTP_Document_API#Multiple_Attachments">
+                  CouchDB Multiple Attachments API
+              </link>.
+          </para>
+
+      </section>
   </chapter>
 
   <chapter>
