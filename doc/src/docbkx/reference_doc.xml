@@ -1095,6 +1095,24 @@ sofa.getRevision();</programlisting>
 
       <para>Note that calling update with an object that has an empty id field
       will create a new document in the database.</para>
+
+        <section>
+            <title>Updating from a Stream</title>
+            <para>
+                Documents can be updated from an InputStream. The InputStream must contain a JSON document. Using
+                an InputStream allows you to update a document from a JSON document without having to parse it, which
+                can be more efficient for large documents.
+            </para>
+
+            <programlisting language="java">
+                File file = someMethodToGetFile();
+                InputStream jsonInputStream = new FileInputStream(file);
+                db.update("document_id",
+                          jsonInputStream,
+                          file.length(),
+                          null);
+            </programlisting>
+        </section>
     </section>
 
     <section>
@@ -1617,18 +1635,6 @@ db.createAttachment("existing_document_id", "document_revision", a);</programlis
                   CouchDB Multiple Attachments API
               </link>.
           </para>
-
-          <para>To update a document as a MIME multipart/related without attachments, use
-              the updateMultipart overload which does not have a boundary parameter. In this
-              case the InputStream is just the JSON document.
-          </para>
-
-          <programlisting language="java">
-              db.updateMultipart("document_id",
-                                 mimeInputStream,
-                                 file.length(),
-                                 new Options());
-          </programlisting>
 
       </section>
   </chapter>

@@ -638,7 +638,7 @@ public class StdCouchDbConnectorTest {
 	@Test
 	public void updateMultipart_should_perform_put_operation_with_path_set_to_db_followed_by_id() {
 		String id = UUID.randomUUID().toString();
-		dbCon.updateMultipart(id, null, null, 0, null);
+		dbCon.updateMultipart(id, null, "abc", 0, null);
 
 		String expectedPath = "/test_db/" + id;
 		verify(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
@@ -650,7 +650,7 @@ public class StdCouchDbConnectorTest {
 		String paramName = "some_param";
 		String paramValue = "false";
 		Options options = new Options().param(paramName, paramValue);
-		dbCon.updateMultipart(id, null, null, 0, options);
+		dbCon.updateMultipart(id, null, "abc", 0, options);
 
 		String expectedPath = "/test_db/" + id + "?some_param=false";
 		verify(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
@@ -659,7 +659,7 @@ public class StdCouchDbConnectorTest {
 	@Test
 	public void updateMultipart_should_perform_put_operation_with_the_given_InputStream() {
 		InputStream stream = mock(InputStream.class);
-		dbCon.updateMultipart("a", stream, null, 0, null);
+		dbCon.updateMultipart("a", stream, "abc", 0, null);
 
 		verify(httpClient).put(anyString(), eq(stream), anyString(), anyLong());
 	}
@@ -673,28 +673,33 @@ public class StdCouchDbConnectorTest {
 		verify(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
 	}
 
-	@Test
-	public void updateMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_no_boundary_if_it_is_null() {
+	@Test(expected = IllegalArgumentException.class)
+	public void updateMultipart_should_throw_if_boundary_is_null() {
 		dbCon.updateMultipart("a", null, null, 0, null);
-
-		String expectedContentType = "multipart/related";
-		verify(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
 	}
 
 	@Test
 	public void updateMultipart_should_perform_put_operation_with_content_type_set_to_length() {
 		long length = 1000l;
-		dbCon.updateMultipart("a", null, null, length, null);
+		dbCon.updateMultipart("a", null, "abc", length, null);
 
 		verify(httpClient).put(anyString(), any(InputStream.class), anyString(), eq(length));
 	}
 
 	@Test
-	public void updateMultipart_without_boundary_should_perform_put_operation_with_content_type_set_to_multipart_related_with_no_boundary() {
-		dbCon.updateMultipart("a", null, 0, null);
+	public void update_with_stream_should_perform_put_operation_with_content_type_set_to_application_json() {
+		String documentId = UUID.randomUUID().toString();
+		InputStream inputStream = mock(InputStream.class);
+		long documentLength = 999l;
+		String paramName = "some_param";
+		String paramValue = "false";
+		Options options = new Options().param(paramName, paramValue);
 
-		String expectedContentType = "multipart/related";
-		verify(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
+		dbCon.update(documentId, inputStream, documentLength, options);
+
+		String expectedPath = "/test_db/" + documentId + "?some_param=false";
+		String expectedContentType = "application/json";
+		verify(httpClient).put(expectedPath, inputStream, expectedContentType, documentLength);
 	}
 
     @SuppressWarnings("serial")
