@@ -112,12 +112,12 @@ Here's an trivial example class:
 		@JsonProperty("_id")
 		private String id;
 
-	        @JsonProperty("_rev")
+		@JsonProperty("_rev")
 		private String revision;
 
 		private String color;
 	
-	        public String setId(String s) {
+		public void setId(String s) {
 			id = s;
 		}
 
@@ -126,7 +126,7 @@ Here's an trivial example class:
 		}
 
 		public String getRevision() {
-			return rev;
+			return revision;
 		}
 	
 		public void setColor(String s) {
