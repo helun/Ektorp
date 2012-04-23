@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
@@ -114,10 +116,10 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 			DeserializationConfig config, BasicBeanDescription beanDesc) {
 		VisibilityChecker<?> vchecker = config.getDefaultVisibilityChecker();
 		if (!config
-				.isEnabled(DeserializationConfig.Feature.AUTO_DETECT_SETTERS)) {
+				.isEnabled(MapperFeature.AUTO_DETECT_SETTERS)) {
 			vchecker = vchecker.withSetterVisibility(Visibility.NONE);
 		}
-		if (!config.isEnabled(DeserializationConfig.Feature.AUTO_DETECT_FIELDS)) {
+		if (!config.isEnabled(MapperFeature.AUTO_DETECT_FIELDS)) {
 			vchecker = vchecker.withFieldVisibility(Visibility.NONE);
 		}
 		vchecker = config.getAnnotationIntrospector().findAutoDetectVisibility(
@@ -135,7 +137,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 			String name, AnnotatedMethod setter, JavaType type) {
 		// need to ensure method is callable (for non-public)
 		if (config
-				.isEnabled(DeserializationConfig.Feature.CAN_OVERRIDE_ACCESS_MODIFIERS)) {
+				.isEnabled(MapperFeature.CAN_OVERRIDE_ACCESS_MODIFIERS)) {
 			setter.fixAccess();
 		}
 
@@ -183,7 +185,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 		}
 
 		boolean fixAccess = config
-				.isEnabled(DeserializationConfig.Feature.CAN_OVERRIDE_ACCESS_MODIFIERS);
+				.isEnabled(MapperFeature.CAN_OVERRIDE_ACCESS_MODIFIERS);
 		@SuppressWarnings("unchecked")
 		Constructor<Collection<Object>> ctor = ClassUtil.findConstructor(
 				(Class<Collection<Object>>) collectionClass, fixAccess);

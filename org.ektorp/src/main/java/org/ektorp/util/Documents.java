@@ -491,7 +491,7 @@ public final class Documents {
 				throw Exceptions.newRTE("field %s in node: %s is not textual ",
 						fieldName, target);
 			}
-			return field.getTextValue();
+			return field.textValue();
 		}
 
 		private void setField(Object o, String fieldName, String fieldValue) {

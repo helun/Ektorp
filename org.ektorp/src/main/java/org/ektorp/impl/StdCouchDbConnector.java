@@ -302,10 +302,10 @@ public class StdCouchDbConnector implements CouchDbConnector {
                         JsonNode.class);
                 List<Revision> revs = new ArrayList<Revision>();
                 for (Iterator<JsonNode> i = root.get("_revs_info")
-                        .getElements(); i.hasNext();) {
+                        .elements(); i.hasNext();) {
                     JsonNode rev = i.next();
-                    revs.add(new Revision(rev.get("rev").getTextValue(), rev
-                            .get("status").getTextValue()));
+                    revs.add(new Revision(rev.get("rev").textValue(), rev
+                            .get("status").textValue()));
                 }
                 return revs;
             }
@@ -353,7 +353,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
                     public Void success(HttpResponse hr) throws Exception {
                         JsonNode n = objectMapper.readValue(hr.getContent(),
                                 JsonNode.class);
-                        Documents.setRevision(o, n.get("rev").getTextValue());
+                        Documents.setRevision(o, n.get("rev").textValue());
                         return null;
                     }
 

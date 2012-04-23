@@ -34,7 +34,7 @@ public class DocumentNotFoundException extends DbAccessException {
 			return false;
 		}
 		JsonNode reason = body.findPath("reason");
-		return !reason.isMissingNode() ? reason.getTextValue().equals("deleted") : false;
+		return !reason.isMissingNode() ? reason.textValue().equals("deleted") : false;
 	}
 
 	public String getPath() {
