@@ -3,43 +3,42 @@ package org.ektorp;
 import java.io.*;
 import java.util.*;
 
-import org.codehaus.jackson.annotate.*;
-import org.codehaus.jackson.map.annotate.*;
-import org.codehaus.jackson.map.annotate.JsonSerialize.*;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.ektorp.util.*;
 
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class ReplicationCommand implements Serializable {
 
 	private static final long serialVersionUID = 6919908757724780784L;
 
 	@JsonProperty
 	public final String source;
-	
+
 	@JsonProperty
 	public final String target;
-	
+
 	@JsonProperty
 	public final String proxy;
-	
+
 	@JsonProperty
 	public final String filter;
-	
+
 	@JsonProperty("doc_ids")
 	public final Collection<String> docIds;
-	
+
 	@JsonProperty
 	public final Boolean continuous;
-	
+
 	@JsonProperty
 	public final Boolean cancel;
-	
+
 	@JsonProperty("query_params")
 	public final Object queryParams;
 
 	@JsonProperty("create_target")
 	public final Boolean createTarget;
-	
+
 	private ReplicationCommand(Builder b) {
 		source = b.source;
 		target = b.target;
@@ -51,9 +50,9 @@ public class ReplicationCommand implements Serializable {
 		createTarget = b.createTarget ? Boolean.TRUE : null;
 		queryParams = b.queryParams;
 	}
-	
+
 	public static class Builder {
-		
+
 		private String source;
 		private String target;
 		private String proxy;
@@ -65,7 +64,7 @@ public class ReplicationCommand implements Serializable {
 		private Object queryParams;
 		/**
 		 * Source and target can both point at local databases, remote databases and any combination of these.
-		 * 
+		 *
 		 * If your local CouchDB instance is secured by an admin account, you need to use the full URL format
 		 * @param s
 		 * @return
@@ -76,7 +75,7 @@ public class ReplicationCommand implements Serializable {
 		}
 		/**
 		 * Source and target can both point at local databases, remote databases and any combination of these
-		 * 
+		 *
 		 * If your local CouchDB instance is secured by an admin account, you need to use the full URL format.
 		 * @param s
 		 * @return
@@ -149,7 +148,7 @@ public class ReplicationCommand implements Serializable {
 			createTarget = b;
 			return this;
 		}
-		
+
 		public ReplicationCommand build() {
 			Assert.hasText(source, "source may not be null or empty");
 			Assert.hasText(target, "target may not be null or empty");

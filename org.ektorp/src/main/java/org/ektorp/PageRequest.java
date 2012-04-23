@@ -5,18 +5,15 @@ import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.NullNode;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.*;
 import org.ektorp.util.Base64;
 import org.ektorp.util.Exceptions;
 
 /**
- * 
+ *
  * @author henrik lundgren
- * 
+ *
  */
 public class PageRequest {
 
@@ -59,7 +56,7 @@ public class PageRequest {
 			KeyIdPair key = parseNextKey(n);
 			Deque<KeyIdPair> keyHistory = parseKeyHistory(n);
 			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).getIntValue();
-			
+
 			return new PageRequest(key, pageSize, keyHistory);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
@@ -147,7 +144,7 @@ public class PageRequest {
 		try {
 			JsonNode keyNode = MAPPER.readTree(MAPPER
 					.writeValueAsString(nextStartKey));
-			
+
 			Deque<KeyIdPair> d = new LinkedList<KeyIdPair>(keyHistory);
 			d.addFirst(this.nextKey != null ? this.nextKey : FIRST_PAGE_NEXT_KEY_PLACEHOLDER);
 
@@ -237,8 +234,8 @@ public class PageRequest {
 				return false;
 			return true;
 		}
-		
-		
+
+
 	}
 
 }

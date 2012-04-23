@@ -8,11 +8,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.JsonSerializer;
-import org.codehaus.jackson.map.SerializerProvider;
-import org.codehaus.jackson.map.ser.BeanPropertyWriter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
@@ -101,7 +101,7 @@ public class BackReferencedBeanSerializer<T> extends JsonSerializer<T> {
 		if (o == null) {
 			return;
 		}
-		
+
 		if (Proxy.isProxyClass(o.getClass())
 				&& Proxy.getInvocationHandler(o) instanceof ViewBasedCollection) {
 

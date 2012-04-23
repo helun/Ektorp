@@ -4,21 +4,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonAnyGetter;
-import org.codehaus.jackson.annotate.JsonAnySetter;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ektorp.util.Assert;
 
 /**
  * Representation of a CouchDb design document.
- * 
+ *
  * Design documents can contain fields currently not handled by Ektorp, such as update handlers and validators. These
  * fields are still accessible through the methods getAnonymous() and setAnonymous(String key, Object value)
- * 
+ *
  * @author henrik lundgren
- * 
+ *
  */
 public class DesignDocument extends OpenCouchDbDocument {
 
@@ -235,11 +235,11 @@ public class DesignDocument extends OpenCouchDbDocument {
 
     /**
      * Definition of a view in a design document.
-     * 
+     *
      * @author henrik lundgren
-     * 
+     *
      */
-    @JsonSerialize(include = Inclusion.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     public static class View {
         @JsonProperty
         private String map;

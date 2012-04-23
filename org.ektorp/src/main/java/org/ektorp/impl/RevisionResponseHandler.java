@@ -1,6 +1,6 @@
 package org.ektorp.impl;
 
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.*;
 import org.ektorp.http.*;
 import org.ektorp.util.*;
@@ -12,12 +12,12 @@ import org.ektorp.util.*;
 public class RevisionResponseHandler extends StdResponseHandler<DocumentOperationResult> {
 
 	ObjectMapper objectMapper;
-	
+
 	public RevisionResponseHandler(ObjectMapper om) {
 		Assert.notNull(om, "ObjectMapper cannot be null");
 		objectMapper = om;
 	}
-	
+
 	@Override
 	public DocumentOperationResult success(HttpResponse hr) throws Exception {
 		return objectMapper.readValue(hr.getContent(), DocumentOperationResult.class);

@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.ektorp.util.Assert;
 
 /**
- * 
+ *
  * @author henrik lundgren
  *
  */
@@ -25,7 +26,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	private int offset = -1;
 	private String updateSeq;
 	private List<Row> rows;
-	
+
 	public ViewResult(JsonNode resultNode, boolean ignoreNotFound) {
         Assert.notNull(resultNode, "resultNode may not be null");
 		Assert.isTrue(resultNode.findPath("rows").isArray(), "result must contain 'rows' field of array type");
@@ -45,38 +46,38 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		rows = new ArrayList<ViewResult.Row>(rowsNode.size());
 		for (JsonNode n : rowsNode) {
 		    if (!(ignoreNotFound && n.has(Row.ERROR_FIELD_NAME))) {
-		        rows.add(new Row(n)); 		        
-		    } 
+		        rows.add(new Row(n));
+		    }
 		}
 	}
-	
+
 	public List<Row> getRows() {
 		return rows;
 	}
-	
+
 	public int getSize() {
 		return rows.size();
 	}
 	/**
-	 * 
+	 *
 	 * @return -1 if result did not contain an offset field
 	 */
 	public int getOffset() {
 		return offset;
 	}
-	
+
 	@JsonProperty
 	void setOffset(int offset) {
 		this.offset = offset;
 	}
 	/**
-	 * 
+	 *
 	 * @return -1 if result did not contain a total_rows field
 	 */
 	public int getTotalRows() {
 		return totalRows;
 	}
-	
+
 	@JsonProperty(TOTAL_ROWS_FIELD_NAME)
 	void setTotalRows(int i) {
 		this.totalRows = i;
@@ -115,20 +116,20 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	public Iterator<ViewResult.Row> iterator() {
 		return rows.iterator();
 	}
-	
+
 	public boolean isEmpty() {
 		return rows.isEmpty();
 	}
-	
+
 	public static class Row {
-		
+
 		static final String VALUE_FIELD_NAME = "value";
 		static final String ID_FIELD_NAME = "id";
 		static final String KEY_FIELD_NAME = "key";
 		static final String DOC_FIELD_NAME = "doc";
 		static final String ERROR_FIELD_NAME = "error";
 		private final JsonNode rowNode;
-		
+
 		@JsonCreator
 		public Row(JsonNode rowNode) {
 			Assert.notNull(rowNode, "row node may not be null");
@@ -137,43 +138,43 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 				throw new ViewResultException(getKeyAsNode(), getError());
 			}
 		}
-		
+
 		public String getId() {
 			return rowNode.get(ID_FIELD_NAME).getTextValue();
 		}
-		
+
 		public String getKey() {
 			return nodeAsString(getKeyAsNode());
 		}
-		
+
 		public JsonNode getKeyAsNode() {
 			return rowNode.findPath(KEY_FIELD_NAME);
 		}
-		
+
 		public String getValue() {
 			return nodeAsString(getValueAsNode());
 		}
-		
+
 		public int getValueAsInt() {
 			return getValueAsNode().getValueAsInt(0);
 		}
-		
+
 		public JsonNode getValueAsNode() {
 			return rowNode.findPath(VALUE_FIELD_NAME);
 		}
-		
+
 		public String getDoc() {
 			return nodeAsString(rowNode.findValue(DOC_FIELD_NAME));
 		}
-		
+
 		public JsonNode getDocAsNode() {
 			return rowNode.findPath(DOC_FIELD_NAME);
 		}
-		
+
 		private String getError() {
 			return nodeAsString(rowNode.findValue(ERROR_FIELD_NAME));
 		}
-		
+
 		private String nodeAsString(JsonNode node) {
 			if (isNull(node)) return null;
 			return node.isContainerNode() ? node.toString() : node.getValueAsText();
@@ -184,5 +185,5 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		}
 
 	}
-	
+
 }

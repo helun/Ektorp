@@ -3,28 +3,31 @@ package org.ektorp.dataload;
 import java.io.*;
 import java.util.*;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.*;
 import org.ektorp.util.*;
 import org.slf4j.*;
 /**
- * 
+ *
  * Helper for DataLoaders
  * @author Henrik Lundgren created 7 nov 2009
- * 
+ *
  */
 public class DefaultDataLoader {
 
 	private final static Logger LOG = LoggerFactory.getLogger(DefaultDataLoader.class);
-	
+
 	private final ObjectMapper objectMapper;
 	protected final CouchDbConnector db;
 
 	public DefaultDataLoader(CouchDbConnector db) {
 		this(db, new ObjectMapper());
 	}
-	
+
 	public DefaultDataLoader(CouchDbConnector db, ObjectMapper objectMapper) {
 		Assert.notNull(db, "CouchDbConnector cannot be null");
 		Assert.notNull(objectMapper, "ObjectMapper cannot be null");
