@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JavaType;
@@ -26,12 +28,15 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
+import com.fasterxml.jackson.databind.deser.impl.MethodProperty;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.util.ClassUtil;
+import com.fasterxml.jackson.databind.util.SimpleBeanPropertyDefinition;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.docref.DocumentReferences;
@@ -52,7 +57,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 
 	@Override
 	public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config,
-			BasicBeanDescription beanDesc, JsonDeserializer<?> deserializer) {
+			BeanDescription beanDesc, JsonDeserializer<?> deserializer) {
 			if (deserializer instanceof BeanDeserializer) {
 				List<ConstructibleAnnotatedCollection> fields = collectFields(config, beanDesc);
 				if (!fields.isEmpty()) {
@@ -66,10 +71,14 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 
 	}
 
-	private List<ConstructibleAnnotatedCollection> collectFields(final DeserializationConfig config, final BasicBeanDescription desc) {
+	private List<ConstructibleAnnotatedCollection> collectFields(final DeserializationConfig config, final BeanDescription desc) {
 		final List<ConstructibleAnnotatedCollection> fields = new ArrayList<ConstructibleAnnotatedCollection>();
 
-		final Map<String, AnnotatedMethod> setters = desc.findSetters(getVisibilityChecker(config, desc));
+		final Map<String, AnnotatedMethod> setters = new LinkedHashMap<String, AnnotatedMethod>();
+		List<BeanPropertyDefinition> properties = desc.findProperties();
+		for (BeanPropertyDefinition beanPropertyDefinition : properties) {
+			setters.put(beanPropertyDefinition.getInternalName(), beanPropertyDefinition.getSetter());
+		}
 
 		ReflectionUtils.eachField(desc.getType().getRawClass(), new Predicate<Field>() {
 			@Override
@@ -89,7 +98,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 	}
 
 	private ConstructibleAnnotatedCollection collectBackrefField(DeserializationConfig config,
-			BasicBeanDescription beanDesc,
+			BeanDescription beanDesc,
 			Map<String, AnnotatedMethod> setters, Field field) {
 
 
@@ -133,7 +142,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 	 * Method copied from org.codehaus.jackson.map.deser.BeanDeserializerFactory
 	 */
 	protected SettableBeanProperty constructSettableProperty(
-			DeserializationConfig config, BasicBeanDescription beanDesc,
+			DeserializationConfig config, BeanDescription beanDesc,
 			String name, AnnotatedMethod setter, JavaType type) {
 		// need to ensure method is callable (for non-public)
 		if (config
@@ -143,7 +152,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 
 		// note: this works since we know there's exactly one arg for methods
 		JavaType t0 = beanDesc.bindingsForBeanType().resolveType(
-				setter.getParameterType(0));
+			setter.getRawParameterType(0));
 		BeanProperty.Std property = new BeanProperty.Std(name, t0,
 				beanDesc.getClassAnnotations(), setter);
 		// did type change?
@@ -157,8 +166,9 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 		 */
 
 		TypeDeserializer typeDeser = type.getTypeHandler();
-		SettableBeanProperty prop = new SettableBeanProperty.MethodProperty(
-				name, type, typeDeser, beanDesc.getClassAnnotations(), setter);
+		SettableBeanProperty prop =
+			new MethodProperty(new SimpleBeanPropertyDefinition(setter), type, typeDeser, beanDesc.getClassAnnotations(),
+				setter);
 
 		// [JACKSON-235]: need to retain name of managed forward references:
 		AnnotationIntrospector.ReferenceProperty ref = config
@@ -206,7 +216,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 
 	@Override
 	public BeanDeserializerBuilder updateBuilder(DeserializationConfig config,
-			BasicBeanDescription beanDesc, BeanDeserializerBuilder builder) {
+			BeanDescription beanDesc, BeanDeserializerBuilder builder) {
 
 		return super.updateBuilder(config, beanDesc, builder);
 	}
