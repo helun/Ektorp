@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
@@ -32,16 +33,19 @@ public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 
 	@Override
 	public boolean hasIgnoreMarker(AnnotatedMember member) {
-		boolean b = super.hasIgnoreMarker(member);
-		return b;
+		if(member instanceof AnnotatedField){
+			return isIgnorableField((AnnotatedField) member);
+		}else if(member instanceof AnnotatedMethod){
+			return isIgnorableMethod((AnnotatedMethod) member);
+		}
+		return false;
 	}
+	
 
-	@Override
 	public boolean isIgnorableField(AnnotatedField f) {
 		return f.hasAnnotation(DocumentReferences.class);
 	}
 
-	@Override
 	public boolean isIgnorableMethod(AnnotatedMethod m) {
 		Set<String> names = ignorableMethods.get(m.getDeclaringClass());
 		if (names == null) {
@@ -53,9 +57,13 @@ public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 	}
 
     @Override
-    public String[] findPropertiesToIgnore(AnnotatedClass ac) {
+    public String[] findPropertiesToIgnore(Annotated ac) {
+    	if(!(ac instanceof AnnotatedClass)){
+    		return null;
+    	}
+    	AnnotatedClass clazz = (AnnotatedClass) ac;
     	List<String> ignoreFields = null;
-    	for (AnnotatedField f : ac.fields()) {
+    	for (AnnotatedField f : clazz.fields()) {
     		if (isIgnorableField(f)) {
     			if (ignoreFields == null) {
     				ignoreFields = new ArrayList<String>();
