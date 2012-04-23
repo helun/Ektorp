@@ -5,9 +5,9 @@ import static org.junit.Assert.*;
 import java.io.*;
 import java.util.*;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.annotate.*;
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.*;
 import org.junit.*;
 
@@ -18,7 +18,7 @@ public class BulkDocumentWriterTest {
 											BulkDeleteDocument.of(new TestDoc("2", "r2", "f2")));
 	ObjectMapper mapper = new ObjectMapper();
 	BulkDocumentWriter bw = new BulkDocumentWriter(mapper);
-	
+
 	@Test
 	public void testWrite() throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -31,12 +31,12 @@ public class BulkDocumentWriterTest {
 	public void testWriteAllOrNothing() throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		bw.write(objects, true, bos);
-		
+
 		JsonNode root = mapper.readTree(bos.toString("UTF-8"));
-		assertTrue(root.get("all_or_nothing").getBooleanValue());
+		assertTrue(root.get("all_or_nothing").booleanValue());
 		assertThatObjectsAreWritten(root);
 	}
-	
+
 	@Test
     public void testCreateInputStreamWrapper() throws Exception {
         ByteArrayInputStream bis = new ByteArrayInputStream("[{\"_id\":\"0\",\"key\":\"key_value\",\"value\":\"doc_value0\"},{\"_id\":\"1\",\"key\":\"key_value\",\"value\":\"doc_value1\"},{\"_id\":\"2\",\"key\":\"key_value\",\"value\":\"doc_value2\"}]".getBytes("UTF-8"));
@@ -44,25 +44,25 @@ public class BulkDocumentWriterTest {
         JsonNode root = mapper.readTree(inputStream);
         assertThatObjectsAreWritten(root);
     }
-	
+
 	private void assertThatObjectsAreWritten(JsonNode root) {
-		Iterator<JsonNode> docs = root.get("docs").getElements();
-		
+		Iterator<JsonNode> docs = root.get("docs").elements();
+
 		JsonNode doc = docs.next();
-		assertEquals("0", doc.get("_id").getTextValue());
-		
+		assertEquals("0", doc.get("_id").textValue());
+
 		doc = docs.next();
-		assertEquals("1", doc.get("_id").getTextValue());
-		
+		assertEquals("1", doc.get("_id").textValue());
+
 		doc = docs.next();
-		assertEquals("2", doc.get("_id").getTextValue());
+		assertEquals("2", doc.get("_id").textValue());
 	}
 
 	public static class TestDoc {
 		String id;
 		String revision;
 		String field;
-		
+
 		public TestDoc(String id, String rev, String field) {
 			this.id = id;
 			this.revision = rev;
@@ -88,7 +88,7 @@ public class BulkDocumentWriterTest {
 		public void setField(String field) {
 			this.field = field;
 		}
-		
-		
+
+
 	}
 }
