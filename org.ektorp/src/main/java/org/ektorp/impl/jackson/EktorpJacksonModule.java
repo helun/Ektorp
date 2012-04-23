@@ -1,24 +1,25 @@
 package org.ektorp.impl.jackson;
 
-import org.codehaus.jackson.Version;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.util.Assert;
 
-public class EktorpJacksonModule extends org.codehaus.jackson.map.Module {
+public class EktorpJacksonModule extends Module {
 
 	private final static Version VERSION = new Version(1,2,0, null);
-	
+
 	private final CouchDbConnector db;
 	private final ObjectMapper objectMapper;
-	
+
 	public EktorpJacksonModule(CouchDbConnector db, ObjectMapper objectMapper) {
 		Assert.notNull(db, "CouchDbConnector may not be null");
 		Assert.notNull(objectMapper, "ObjectMapper may not be null");
 		this.db = db;
 		this.objectMapper = objectMapper;
 	}
-	
+
 	@Override
 	public String getModuleName() {
 		return "EktorpDocRefModule";

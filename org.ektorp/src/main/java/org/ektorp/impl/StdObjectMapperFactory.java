@@ -1,8 +1,8 @@
 package org.ektorp.impl;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig.Feature;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.jackson.EktorpJacksonModule;
 import org.ektorp.util.Assert;

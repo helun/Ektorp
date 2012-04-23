@@ -14,23 +14,23 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.BeanProperty;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonDeserializer;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.TypeDeserializer;
-import org.codehaus.jackson.map.deser.BeanDeserializer;
-import org.codehaus.jackson.map.deser.BeanDeserializerBuilder;
-import org.codehaus.jackson.map.deser.BeanDeserializerModifier;
-import org.codehaus.jackson.map.deser.SettableBeanProperty;
-import org.codehaus.jackson.map.introspect.AnnotatedMethod;
-import org.codehaus.jackson.map.introspect.BasicBeanDescription;
-import org.codehaus.jackson.map.introspect.VisibilityChecker;
-import org.codehaus.jackson.map.type.CollectionType;
-import org.codehaus.jackson.map.util.ClassUtil;
-import org.codehaus.jackson.type.JavaType;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
+import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
+import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
+import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.util.ClassUtil;
+
 import org.ektorp.CouchDbConnector;
 import org.ektorp.docref.DocumentReferences;
 import org.ektorp.impl.docref.BackReferencedBeanDeserializer;
@@ -47,7 +47,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 		this.db = db;
 		this.objectMapper = objectMapper;
 	}
-	
+
 	@Override
 	public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config,
 			BasicBeanDescription beanDesc, JsonDeserializer<?> deserializer) {
@@ -56,19 +56,19 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 				if (!fields.isEmpty()) {
 					return new BackReferencedBeanDeserializer(
 							(BeanDeserializer) deserializer, fields, db, beanDesc
-									.getType().getRawClass(), objectMapper);	
+									.getType().getRawClass(), objectMapper);
 				}
 			}
-			return super.modifyDeserializer(config, beanDesc, deserializer);	
-		
-		
+			return super.modifyDeserializer(config, beanDesc, deserializer);
+
+
 	}
-	
+
 	private List<ConstructibleAnnotatedCollection> collectFields(final DeserializationConfig config, final BasicBeanDescription desc) {
 		final List<ConstructibleAnnotatedCollection> fields = new ArrayList<ConstructibleAnnotatedCollection>();
-		
+
 		final Map<String, AnnotatedMethod> setters = desc.findSetters(getVisibilityChecker(config, desc));
-		
+
 		ReflectionUtils.eachField(desc.getType().getRawClass(), new Predicate<Field>() {
 			@Override
 			public boolean apply(Field input) {
@@ -80,9 +80,9 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 				}
 				return false;
 			}
-			
+
 		});
-		
+
 		return fields;
 	}
 
@@ -90,9 +90,9 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 			BasicBeanDescription beanDesc,
 			Map<String, AnnotatedMethod> setters, Field field) {
 
-		
+
 		JavaType type = objectMapper.getTypeFactory().constructType(field.getGenericType());
-		
+
 		if (!(type instanceof CollectionType)) {
 			return null;
 		}
@@ -109,7 +109,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 											collectionType),
 					collectionType);
 	}
-	
+
 	private VisibilityChecker<?> getVisibilityChecker(
 			DeserializationConfig config, BasicBeanDescription beanDesc) {
 		VisibilityChecker<?> vchecker = config.getDefaultVisibilityChecker();
@@ -124,8 +124,8 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 				beanDesc.getClassInfo(), vchecker);
 		return vchecker;
 	}
-	
-	
+
+
 
 	/**
 	 * Method copied from org.codehaus.jackson.map.deser.BeanDeserializerFactory

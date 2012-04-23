@@ -2,13 +2,13 @@ package org.ektorp.impl;
 
 import java.util.List;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdResponseHandler;
 import org.ektorp.util.Assert;
 /**
  * Reads view result and extracts documents and maps them to the specified type.
- * 
+ *
  * @author henrik lundgren
  *
  * @param <T>

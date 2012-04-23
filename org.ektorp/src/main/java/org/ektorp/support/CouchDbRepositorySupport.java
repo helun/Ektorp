@@ -2,8 +2,8 @@ package org.ektorp.support;
 
 import java.util.*;
 
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 import org.ektorp.*;
 import org.ektorp.impl.*;
 import org.ektorp.util.*;
@@ -11,17 +11,17 @@ import org.slf4j.*;
 
 /**
  * Provides "out of the box" CRUD functionality for sub classes.
- * 
+ *
  * Note that this class will try to access the standard design document named according
  * to this convention:
- * 
+ *
  * _design/[repository type simple name]
- * 
+ *
  *  e.g. _design/Sofa if this repository's handled type is foo.bar.Sofa
- *  
+ *
  *  It is preferable that this design document must define a view named "all".
  *  The "all"-view should only return document id's that refer to documents that can be loaded as this repository's handled type.
- * 
+ *
  * @author henrik lundgren
  * @param <T>
  */
@@ -33,22 +33,22 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	protected static final Logger log = LoggerFactory.getLogger(CouchDbRepositorySupport.class);
 	protected final CouchDbConnector db;
 	protected final Class<T> type;
-	
+
 	protected final String stdDesignDocumentId;
-	
-	private DesignDocumentFactory designDocumentFactory; 
-	
+
+	private DesignDocumentFactory designDocumentFactory;
+
 	protected CouchDbRepositorySupport(Class<T> type, CouchDbConnector db) {
 		this(type, db, true);
 	}
-	
+
 	protected CouchDbRepositorySupport(Class<T> type, CouchDbConnector db, boolean createIfNotExists) {
 		Assert.notNull(db, "CouchDbConnector may not be null");
 		Assert.notNull(type);
 		this.db = db;
 		this.type = type;
 		if (createIfNotExists) {
-			db.createDatabaseIfNotExists();	
+			db.createDatabaseIfNotExists();
 		}
 		stdDesignDocumentId = NameConventions.designDocName(type);
 	}
@@ -78,13 +78,13 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	/**
 	 * If the repository's design document has a view named "all" it will be used
 	 * to fetch all documents of this repository's handled type.
-	 * 
+	 *
 	 * "all" must return document ids that refers documents that are readable by this repository.
-	 * 
+	 *
 	 * If the "all"-view is not defined, all documents in the database (except design documents)
 	 * will be fetched. In this case the database must only contain documents that are readable by
 	 * this repository.
-	 * 
+	 *
 	 * @return all objects of this repository's handled type in the db.
 	 */
 	public List<T> getAll() {
@@ -113,7 +113,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		return all;
 	}
 	/**
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 * @throws DocumentNotFoundException if the document was not found.
@@ -122,7 +122,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		return db.get(type, id);
 	}
 	/**
-	 * 
+	 *
 	 * @param id
 	 * @param options
 	 * @return
@@ -132,7 +132,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		return db.get(type, id, options);
 	}
 	/**
-	 * 
+	 *
 	 * @param id
 	 * @param rev
 	 * @return
@@ -158,7 +158,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	private void assertEntityNotNull(T entity) {
 		Assert.notNull(entity, "entity may not be null");
 	}
-	
+
 	/**
 	 * Creates a ViewQuery pre-configured with correct dbPath, design document id and view name.
 	 * @param viewName
@@ -173,9 +173,9 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	/**
 	 * Allows subclasses to query views with simple String value keys
 	 * and load the result as the repository's handled type.
-	 * 
+	 *
 	 * The viewName must be defined in this repository's design document.
-	 * 
+	 *
 	 * @param viewName
 	 * @param key
 	 * @return
@@ -189,9 +189,9 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	/**
 	 * Allows subclasses to query views with simple String value keys
 	 * and load the result as the repository's handled type.
-	 * 
+	 *
 	 * The viewName must be defined in this repository's design document.
-	 * 
+	 *
 	 * @param viewName
 	 * @param keyValue
 	 * @return
@@ -205,9 +205,9 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	/**
 	 * Allows subclasses to query views with simple String value keys
 	 * and load the result as the repository's handled type.
-	 * 
+	 *
 	 * The viewName must be defined in this repository's design document.
-	 * 
+	 *
 	 * @param viewName
 	 * @param key
 	 * @return
@@ -220,9 +220,9 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	}
 	/**
 	 * Allows subclasses to query a view and load the result as the repository's handled type.
-	 * 
+	 *
 	 * The viewName must be defined in this repository's design document.
-	 * 
+	 *
 	 * @param viewName
 	 * @return
 	 */
@@ -255,14 +255,14 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	 * </p>
 	 * <p>
 	 * Any existing view with the same name will be kept unchanged.
-	 * 
+	 *
  	 * TIP: The generated DesignDocument will be written to the log if debug log level is enabled.
 	 * </p>
 	 */
 	public void initStandardDesignDocument() {
 		initDesignDocInternal(0);
 	}
-	
+
 	private void initDesignDocInternal(int invocations) {
 		DesignDocument designDoc;
 		if (db.contains(stdDesignDocumentId)) {
@@ -279,7 +279,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		if (changed) {
 			log.debug("DesignDocument changed or new. Updating database");
 			try {
-				db.update(designDoc);	
+				db.update(designDoc);
 			} catch (UpdateConflictException e) {
 				log.warn("Update conflict occurred when trying to update design document: {}", designDoc.getId());
 				if (invocations == 0) {
@@ -303,10 +303,10 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 			return;
 		}
 	}
-	
+
 	protected void debugDesignDoc(DesignDocument generated) {
 		ObjectMapper om = new ObjectMapper();
-		om.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);		
+		om.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 		om.getSerializationConfig().setSerializationInclusion(Inclusion.NON_NULL);
 		try {
 			String json = om.writeValueAsString(generated);
@@ -319,19 +319,19 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	public boolean contains(String docId) {
 		return db.contains(docId);
 	}
-	
+
 	public void setDesignDocumentFactory(
 			DesignDocumentFactory df) {
 		this.designDocumentFactory = df;
 	}
-	
+
 	protected DesignDocumentFactory getDesignDocumentFactory() {
 		if (designDocumentFactory == null) {
 			designDocumentFactory = new StdDesignDocumentFactory();
 		}
 		return designDocumentFactory;
 	}
-	
+
 	Class<?> getHandledType() {
 		return type;
 	}

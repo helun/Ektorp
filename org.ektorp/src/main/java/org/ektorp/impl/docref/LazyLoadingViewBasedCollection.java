@@ -2,9 +2,10 @@ package org.ektorp.impl.docref;
 
 import java.lang.reflect.*;
 
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.*;
 import org.ektorp.docref.*;
+
 
 public class LazyLoadingViewBasedCollection extends ViewBasedCollection {
 
