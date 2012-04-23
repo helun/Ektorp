@@ -95,9 +95,9 @@ public class BackReferencedBeanDeserializer extends StdDeserializer<Object>
 		return deserializedObject;
 	}
 
-	public void resolve(DeserializationConfig config,
-			DeserializerProvider provider) throws JsonMappingException {
-		delegate.resolve(config, provider);
+	@Override
+	public void resolve(DeserializationContext ctxt) throws JsonMappingException {
+		delegate.resolve(ctxt);
 	}
 
 }
