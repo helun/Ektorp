@@ -184,7 +184,8 @@ public class QueryResultParser<T> {
 				break;
 			default:
 				if (isInField(ID_FIELD_NAME, lastFieldName)) {
-					state.lastId = jp.readValueAsTree().traverse().getText();
+					 String dirtyId = jp.readValueAsTree().toString();
+					 state.lastId = dirtyId.substring(1,dirtyId.length()-1);
 				} else if (isInField(KEY_FIELD_NAME, lastFieldName)) {
 					state.lastKey = jp.readValueAsTree();
 				} else if (isInField(ERROR_FIELD_NAME, lastFieldName)) {
