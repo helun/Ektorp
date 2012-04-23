@@ -36,12 +36,10 @@ public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 		return b;
 	}
 
-	@Override
 	public boolean isIgnorableField(AnnotatedField f) {
 		return f.hasAnnotation(DocumentReferences.class);
 	}
 
-	@Override
 	public boolean isIgnorableMethod(AnnotatedMethod m) {
 		Set<String> names = ignorableMethods.get(m.getDeclaringClass());
 		if (names == null) {
