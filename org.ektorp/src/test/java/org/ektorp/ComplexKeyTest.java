@@ -4,10 +4,11 @@ import static org.junit.Assert.*;
 
 import java.util.*;
 
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.impl.*;
 import org.ektorp.util.*;
 import org.junit.*;
+
 
 public class ComplexKeyTest {
 	

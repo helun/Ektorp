@@ -2,8 +2,9 @@ package org.ektorp;
 
 import static org.junit.Assert.*;
 
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.*;
+
 
 public class DesignDocInfoTest {
 
@@ -13,7 +14,7 @@ public class DesignDocInfoTest {
 		ObjectMapper om = new ObjectMapper();
 		DesignDocInfo info = om.readValue(getClass().getResourceAsStream("design_doc_info.json"), DesignDocInfo.class);
 		assertEquals("exampleDesignDoc", info.getName());
-		
+
 		DesignDocInfo.ViewIndex idx = info.getViewIndex();
 		assertEquals("javascript", idx.getLanguage());
 		assertEquals(12398, idx.getDiskSize());

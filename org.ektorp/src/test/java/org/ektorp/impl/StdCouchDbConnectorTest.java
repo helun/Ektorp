@@ -17,9 +17,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.*;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
@@ -361,7 +361,7 @@ public class StdCouchDbConnectorTest {
                 .dbPath(TEST_DB_PATH)
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
-                .includeDocs(true)                
+                .includeDocs(true)
                 .keys(Arrays.asList("doc_id0", "doc_id1", "doc_id2", "doc_id3", "doc_id4", "doc_id5", "doc_id6"));
         query.setIgnoreNotFound(true);
 
