@@ -3,6 +3,7 @@ package org.ektorp.impl.jackson;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
+import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
@@ -26,7 +27,7 @@ public class EktorpBeanSerializerModifier extends BeanSerializerModifier {
 
 	@Override
 	public JsonSerializer<?> modifySerializer(SerializationConfig config,
-			BasicBeanDescription beanDesc, JsonSerializer<?> serializer) {
+			BeanDescription beanDesc, JsonSerializer<?> serializer) {
 		if (serializer instanceof BeanSerializer && hasAnnotatedField(beanDesc.getType().getRawClass())) {
 			return new DocumentReferenceSerializer(db, (BeanSerializer)serializer);
 		}
