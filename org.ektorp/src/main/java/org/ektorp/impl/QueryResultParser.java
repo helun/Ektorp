@@ -190,7 +190,7 @@ public class QueryResultParser<T> {
 				} else if (isInField(ERROR_FIELD_NAME, lastFieldName)) {
 					JsonNode error = jp.readValueAsTree();
 					if (ignoreNotFound
-							&& error.getValueAsText().equals("not_found")) {
+							&& error.asText().equals("not_found")) {
                                             lastFieldName = null;
                                             state.inRow = false;
                                             jp.nextToken();
@@ -198,7 +198,7 @@ public class QueryResultParser<T> {
                                             continue;
 					}
 					throw new ViewResultException(state.lastKey,
-							error.getValueAsText());
+							error.asText());
 				} else if (isInField(fieldName, lastFieldName)) {
 					jp.nextToken();
 					return;

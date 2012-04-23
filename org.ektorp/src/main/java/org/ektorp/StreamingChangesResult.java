@@ -81,7 +81,7 @@ public class StreamingChangesResult implements Serializable, Iterable<DocumentCh
 			    JsonNode jsonNode = jp.readValueAs(JsonNode.class);
 			    if (jsonNode == null) {
 			        jsonNode = jp.readValueAs(JsonNode.class);
-			        lastSeq = jsonNode.get("last_seq").getLongValue();
+			        lastSeq = jsonNode.get("last_seq").longValue();
 			        close();
 			        return false;
 			    }

@@ -51,9 +51,9 @@ public class DefaultDataLoader {
 		Set<String> allIds = new HashSet<String>(db.getAllDocIds());
 		JsonNode jn = objectMapper.readValue(in, JsonNode.class);
 
-		for (Iterator<JsonNode> i = jn.getElements(); i.hasNext();) {
+		for (Iterator<JsonNode> i = jn.elements(); i.hasNext();) {
 			JsonNode n = i.next();
-			String id = n.get("_id").getTextValue();
+			String id = n.get("_id").textValue();
 			if (!allIds.contains(id)) {
 				LOG.info("adding {} to database", id);
 				createDocument(n, id);

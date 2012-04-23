@@ -31,15 +31,15 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
         Assert.notNull(resultNode, "resultNode may not be null");
 		Assert.isTrue(resultNode.findPath("rows").isArray(), "result must contain 'rows' field of array type");
 		if (resultNode.get(TOTAL_ROWS_FIELD_NAME) != null) {
-			totalRows = resultNode.get(TOTAL_ROWS_FIELD_NAME).getIntValue();
+			totalRows = resultNode.get(TOTAL_ROWS_FIELD_NAME).intValue();
 		}
 		if (resultNode.get(OFFSET_FIELD_NAME) != null) {
-			offset = resultNode.get(OFFSET_FIELD_NAME).getIntValue();
+			offset = resultNode.get(OFFSET_FIELD_NAME).intValue();
 		}
 		if (resultNode.get(UPDATE_SEQ) != null) {
-			updateSeq = resultNode.get(UPDATE_SEQ).getTextValue();
+			updateSeq = resultNode.get(UPDATE_SEQ).textValue();
                         if(updateSeq == null) {
-                                updateSeq = Long.toString(resultNode.get(UPDATE_SEQ).getIntValue());
+                                updateSeq = Long.toString(resultNode.get(UPDATE_SEQ).intValue());
                         }
 		}
 		JsonNode rowsNode = resultNode.get("rows");
@@ -140,7 +140,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		}
 
 		public String getId() {
-			return rowNode.get(ID_FIELD_NAME).getTextValue();
+			return rowNode.get(ID_FIELD_NAME).textValue();
 		}
 
 		public String getKey() {
@@ -156,7 +156,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		}
 
 		public int getValueAsInt() {
-			return getValueAsNode().getValueAsInt(0);
+			return getValueAsNode().asInt(0);
 		}
 
 		public JsonNode getValueAsNode() {
@@ -177,7 +177,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 
 		private String nodeAsString(JsonNode node) {
 			if (isNull(node)) return null;
-			return node.isContainerNode() ? node.toString() : node.getValueAsText();
+			return node.isContainerNode() ? node.toString() : node.asText();
 		}
 
 		private boolean isNull(JsonNode node) {

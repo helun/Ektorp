@@ -2,7 +2,9 @@ package org.ektorp.support;
 
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 import org.ektorp.*;
 import org.ektorp.impl.*;
@@ -306,8 +308,8 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 
 	protected void debugDesignDoc(DesignDocument generated) {
 		ObjectMapper om = new ObjectMapper();
-		om.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-		om.getSerializationConfig().setSerializationInclusion(Inclusion.NON_NULL);
+		om.configure(SerializationFeature.INDENT_OUTPUT, true);
+		om.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.NON_NULL);
 		try {
 			String json = om.writeValueAsString(generated);
 			log.debug("DesignDocument source:\n" + json);

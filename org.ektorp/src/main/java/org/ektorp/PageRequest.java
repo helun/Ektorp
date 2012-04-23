@@ -55,7 +55,7 @@ public class PageRequest {
 
 			KeyIdPair key = parseNextKey(n);
 			Deque<KeyIdPair> keyHistory = parseKeyHistory(n);
-			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).getIntValue();
+			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).intValue();
 
 			return new PageRequest(key, pageSize, keyHistory);
 		} catch (Exception e) {
@@ -68,7 +68,7 @@ public class PageRequest {
 		ArrayNode h = (ArrayNode) n.get(KEY_HISTORY_FIELD_NAME);
 		if (h != null) {
 			for (JsonNode hn : h) {
-				String docId = hn.getFieldNames().next();
+				String docId = hn.fieldNames().next();
 				keyHistory.addFirst(new KeyIdPair(hn.get(docId), docId));
 			}
 
@@ -80,7 +80,7 @@ public class PageRequest {
 		KeyIdPair key;
 		JsonNode nextKey = n.get(NEXT_KEY_FIELD_NAME);
 		if (nextKey != null) {
-			String docId = nextKey.getFieldNames().next();
+			String docId = nextKey.fieldNames().next();
 			key = new KeyIdPair(nextKey.get(docId), docId);
 		} else {
 			key = null;

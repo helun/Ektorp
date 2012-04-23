@@ -24,16 +24,16 @@ public class StdDocumentChange implements DocumentChange {
 	}
 
 	public int getSequence() {
-		return node.get(SEQ_FIELD_NAME).getIntValue();
+		return node.get(SEQ_FIELD_NAME).intValue();
 	}
 
 	public String getId() {
-		return node.get(ID_FIELD_NAME).getTextValue();
+		return node.get(ID_FIELD_NAME).textValue();
 	}
 
 	public boolean isDeleted() {
 		JsonNode deleted = node.findPath(DELETED_FIELD_NAME);
-		return !deleted.isMissingNode() && deleted.getBooleanValue();
+		return !deleted.isMissingNode() && deleted.booleanValue();
 	}
 
 	public String getDoc() {
@@ -46,7 +46,7 @@ public class StdDocumentChange implements DocumentChange {
 
 	private String nodeAsString(JsonNode node) {
 		if (isNull(node)) return null;
-		return node.isContainerNode() ? node.toString() : node.getValueAsText();
+		return node.isContainerNode() ? node.toString() : node.asText();
 	}
 
 	private boolean isNull(JsonNode node) {
