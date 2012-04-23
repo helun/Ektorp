@@ -131,7 +131,7 @@ public class QueryResultParser<T> {
 			jp.nextToken();
 			if (isEndOfRow(jp)) {
 				state.docFieldName = VALUE_FIELD_NAME;
-				T doc = mapper.readValue(value, type);
+				T doc = mapper.readValue(value.traverse(), type);
 				endRow(jp, state);
 				return doc;
 			}
@@ -189,7 +189,7 @@ public class QueryResultParser<T> {
 				break;
 			default:
 				if (isInField(ID_FIELD_NAME, lastFieldName)) {
-					state.lastId = jp.readValueAsTree().getTextValue();
+					state.lastId = jp.readValueAsTree().traverse().getText();
 				} else if (isInField(KEY_FIELD_NAME, lastFieldName)) {
 					state.lastKey = jp.readValueAsTree();
 				} else if (isInField(ERROR_FIELD_NAME, lastFieldName)) {
