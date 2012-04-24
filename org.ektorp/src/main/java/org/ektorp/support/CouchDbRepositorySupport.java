@@ -266,9 +266,10 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	private void initDesignDocInternal(int invocations) {
 		DesignDocument designDoc;
 		if (db.contains(stdDesignDocumentId)) {
-			designDoc = db.get(DesignDocument.class, stdDesignDocumentId);
+			designDoc = getDesignDocumentFactory().getFromDatabase(db, stdDesignDocumentId);
 		} else {
-			designDoc = new DesignDocument(stdDesignDocumentId);
+			designDoc = getDesignDocumentFactory().newDesignDocumentInstance();
+			designDoc.setId(stdDesignDocumentId);
 		}
 		log.debug("Generating DesignDocument for {}", getHandledType());
 		DesignDocument generated = getDesignDocumentFactory().generateFrom(this);
