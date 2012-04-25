@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.ektorp.CouchDbConnector;
 import org.ektorp.util.Assert;
 import org.ektorp.util.Exceptions;
 import org.ektorp.util.Predicate;
@@ -46,8 +47,22 @@ public class StdDesignDocumentFactory implements DesignDocumentFactory {
 
         return dd;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.ektorp.support.DesignDocumentFactory#getFromDatabase(org.ektorp.CouchDbConnector, java.lang.String)
+     */
+    @Override
+    public DesignDocument getFromDatabase(CouchDbConnector db, String designDocumentId) {
+    	return db.get(DesignDocument.class, designDocumentId);
+    }
 
-    protected DesignDocument newDesignDocumentInstance() {
+    /*
+     * (non-Javadoc)
+     * @see org.ektorp.support.DesignDocumentFactory#newDesignDocumentInstance()
+     */
+    @Override
+    public DesignDocument newDesignDocumentInstance() {
     	return new DesignDocument();
     }
     
