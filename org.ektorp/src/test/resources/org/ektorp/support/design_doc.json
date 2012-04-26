@@ -5,8 +5,7 @@
   "views":
   {
     "all": {
-      "map": "function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }",
-      "module" : "exports.info = {name : 'test', properties : {locatie : {name : 'locatie', type : 'number'}}}"
+      "map": "function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }"
     },
     "by_lastname": {
       "map": "function(doc) { if (doc.Type == 'TestDoc')  emit(doc.LastName, doc) }"

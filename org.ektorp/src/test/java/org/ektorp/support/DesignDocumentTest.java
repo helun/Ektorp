@@ -18,9 +18,7 @@ public class DesignDocumentTest {
 	@Before
 	public void setup() {
 		dd.setRevision("12345");
-		DesignDocument.View view = new DesignDocument.View("function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }");
-		view.setModule("exports.info = {name : 'test', properties : {locatie : {name : 'locatie', type : 'number'}}}");
-		dd.addView("all", view);
+		dd.addView("all", new DesignDocument.View("function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }"));
 		dd.addView("by_lastname", new DesignDocument.View("function(doc) { if (doc.Type == 'TestDoc')  emit(doc.LastName, doc) }"));
 		dd.setLanguage("javascript");
 	}
