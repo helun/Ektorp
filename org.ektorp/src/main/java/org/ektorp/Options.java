@@ -23,7 +23,7 @@ public class Options {
 	 * @return
 	 */
 	public Options includeRevisions() {
-		options.put("revisions", "true");
+		options.put("revs", "true");
 		return this;
 	}
 	/**
