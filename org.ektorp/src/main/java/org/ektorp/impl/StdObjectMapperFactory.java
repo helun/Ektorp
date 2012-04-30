@@ -1,5 +1,6 @@
 package org.ektorp.impl;
 
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
@@ -43,6 +44,7 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 
 	private void applyDefaultConfiguration(ObjectMapper om) {
 		om.configure(Feature.WRITE_DATES_AS_TIMESTAMPS, writeDatesAsTimestamps);
+		om.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		om.getSerializationConfig().setSerializationInclusion(
 				Inclusion.NON_NULL);
 	}
