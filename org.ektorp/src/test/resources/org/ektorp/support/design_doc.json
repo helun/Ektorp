@@ -9,6 +9,9 @@
     },
     "by_lastname": {
       "map": "function(doc) { if (doc.Type == 'TestDoc')  emit(doc.LastName, doc) }"
+    },
+    "lib" : {
+      "module": "exports.info = {artiest : {name : 'artiest', properties : {naam : {name : 'naam', type : 'string', required : true, searchable : true}}}}"
     }
   },
   "lists":{},
