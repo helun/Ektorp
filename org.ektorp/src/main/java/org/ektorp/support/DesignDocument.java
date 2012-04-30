@@ -9,6 +9,7 @@ import org.codehaus.jackson.annotate.JsonAnySetter;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.ektorp.util.Assert;
 
 /**
  * Representation of a CouchDb design document.
@@ -269,6 +270,7 @@ public class DesignDocument extends OpenCouchDbDocument {
         }
 
         public void setMap(String map) {
+        	Assert.hasText(map, "the map function may not be null or empty");
             this.map = map;
         }
 
