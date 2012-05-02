@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonAnyGetter;
+import org.codehaus.jackson.annotate.JsonAnySetter;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
@@ -243,6 +245,7 @@ public class DesignDocument extends OpenCouchDbDocument {
         private String map;
         @JsonProperty
         private String reduce;
+        private Map<String, Object> anonymous;
 
         public View() {
         }
@@ -254,7 +257,6 @@ public class DesignDocument extends OpenCouchDbDocument {
         }
 
         public View(String map) {
-            Assert.hasText(map, "the map function may not be null or empty");
             this.map = map;
         }
 
@@ -268,6 +270,7 @@ public class DesignDocument extends OpenCouchDbDocument {
         }
 
         public void setMap(String map) {
+        	Assert.hasText(map, "the map function may not be null or empty");
             this.map = map;
         }
 
@@ -278,6 +281,35 @@ public class DesignDocument extends OpenCouchDbDocument {
         public void setReduce(String reduce) {
             this.reduce = reduce;
         }
+        
+        /** 
+    	 * @return a Map containing fields that did not map to any other field in the class during object deserializarion from a JSON document.
+    	 */
+    	@JsonAnyGetter
+    	public Map<String, Object> getAnonymous() {
+    		return anonymous();
+    	}
+    	
+    	/**
+    	 * 
+    	 * @param key
+    	 * @param value
+    	 */
+    	@JsonAnySetter
+    	public void setAnonymous(String key, Object value) {
+    		anonymous().put(key, value);
+    	}
+    	
+    	/**
+    	 * Provides lay init for the anonymous Map
+    	 * @return
+    	 */
+    	private Map<String, Object> anonymous() {
+    		if (anonymous == null) {
+    			anonymous = new HashMap<String, Object>();
+    		}
+    		return anonymous;
+    	}
 
         @Override
         public int hashCode() {
@@ -286,6 +318,7 @@ public class DesignDocument extends OpenCouchDbDocument {
             result = prime * result + ((map == null) ? 0 : map.hashCode());
             result = prime * result
                     + ((reduce == null) ? 0 : reduce.hashCode());
+            result = prime * result + ((anonymous == null) ? 0 : anonymous.hashCode());
             return result;
         }
 
@@ -308,6 +341,11 @@ public class DesignDocument extends OpenCouchDbDocument {
                     return false;
             } else if (!reduce.equals(other.reduce))
                 return false;
+            if(anonymous == null){
+            	if(other.anonymous != null)
+            		return false;
+            } else if (!anonymous.equals(other.anonymous))
+            	return false;
             return true;
         }
 
