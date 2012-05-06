@@ -196,7 +196,21 @@ public class StdHttpClient implements HttpClient {
 		public Builder url(URL url){
 			this.host = url.getHost();
 			this.port = url.getPort();
+			if (url.getUserInfo() != null) {
+				String[] userInfoParts = url.getUserInfo().split(":");
+				if (userInfoParts.length == 2) {
+					this.username = userInfoParts[0];
+					this.password = userInfoParts[1];
+				}
+			}
 			enableSSL("https".equals(url.getProtocol()));
+			if (this.port == -1) {
+				if (this.enableSSL) {
+					this.port = 443;
+				} else {
+					this.port = 80;
+				}
+			}
 			return this;
 		}
 		
@@ -276,6 +290,8 @@ public class StdHttpClient implements HttpClient {
 												String authType) {
 										}
 									} }, null);
+						} else {
+							context.init(null, null, null);
 						}
 
 						sslSocketFactory = relaxedSSLSettings ? new SSLSocketFactory(context, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER) : new SSLSocketFactory(context);
