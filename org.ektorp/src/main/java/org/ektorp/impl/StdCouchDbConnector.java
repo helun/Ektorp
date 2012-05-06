@@ -669,7 +669,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
                     @Override
                     public Integer success(HttpResponse hr) throws Exception {
                         JsonNode rlimit = objectMapper.readTree(hr.getContent());
-                        return rlimit.getIntValue();
+                        return rlimit.asInt();
                     }
                 });
     }
