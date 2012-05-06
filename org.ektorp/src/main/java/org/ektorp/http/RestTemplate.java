@@ -43,7 +43,10 @@ public class RestTemplate {
 		return handleResponse(callback, client.put(path, content));
 	}
 
-
+	public <T> T copy(String path, String destinationUri, ResponseCallback<T> callback) {
+		return handleResponse(callback, client.copy(path, destinationUri));
+	}
+	
 	public void put(String path, String content) {
 		handleVoidResponse(client.put(path, content));
 	}

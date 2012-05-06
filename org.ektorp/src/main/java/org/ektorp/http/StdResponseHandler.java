@@ -46,7 +46,7 @@ public class StdResponseHandler<T> implements ResponseCallback<T> {
 	}
 	
 	private static String toPrettyString(JsonNode n) throws IOException {
-		return MAPPER.defaultPrettyPrintingWriter().writeValueAsString(n);
+		return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(n);
 	}
 	
 	private static JsonNode responseBodyAsNode(String s) throws IOException {

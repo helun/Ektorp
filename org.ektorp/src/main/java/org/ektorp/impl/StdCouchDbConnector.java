@@ -374,6 +374,18 @@ public class StdCouchDbConnector implements CouchDbConnector {
                 dbURI.append(id).param("rev", revision).toString(),
                 revisionHandler).getRevision();
     }
+    
+    @Override
+    public String copy(String sourceDocId, String targetDocId) {
+    	return copy(sourceDocId, targetDocId, null);
+    }
+    
+    @Override
+    public String copy(String sourceDocId, String targetDocId,
+    		String targetRevision) {
+    	String destinationUri = targetRevision != null ? targetDocId + "?rev=" + targetRevision : targetDocId;
+    	return restTemplate.copy(dbURI.append(sourceDocId).toString(), destinationUri, revisionHandler).getRevision();
+    }
 
     @Override
     public List<String> getAllDocIds() {
@@ -657,7 +669,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
                     @Override
                     public Integer success(HttpResponse hr) throws Exception {
                         JsonNode rlimit = objectMapper.readTree(hr.getContent());
-                        return rlimit.getValueAsInt();
+                        return rlimit.getIntValue();
                     }
                 });
     }

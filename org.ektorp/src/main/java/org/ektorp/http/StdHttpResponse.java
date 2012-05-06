@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.ektorp.util.Exceptions;
@@ -26,13 +26,13 @@ public class StdHttpResponse implements HttpResponse {
 	private final HttpEntity entity;
 	private final StatusLine status;
 	private final String requestURI;
-	private final HttpRequestBase httpRequest;
+	private final HttpUriRequest httpRequest;
 	
-	public static StdHttpResponse of(org.apache.http.HttpResponse rsp, HttpRequestBase httpRequest) {
+	public static StdHttpResponse of(org.apache.http.HttpResponse rsp, HttpUriRequest httpRequest) {
 		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest);
 	}
 	
-	private StdHttpResponse(HttpEntity e, StatusLine status, HttpRequestBase httpRequest) {
+	private StdHttpResponse(HttpEntity e, StatusLine status, HttpUriRequest httpRequest) {
 		this.httpRequest = httpRequest;
 		this.entity = e != null ? e : NULL_ENTITY;
 		this.status = status;

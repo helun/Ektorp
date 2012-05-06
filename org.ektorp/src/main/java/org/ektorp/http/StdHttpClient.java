@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRoutePNames;
@@ -127,7 +128,7 @@ public class StdHttpClient implements HttpClient {
 		}
 	}
 
-	private HttpResponse executeRequest(HttpRequestBase request, boolean useBackend) {
+	private HttpResponse executeRequest(HttpUriRequest request, boolean useBackend) {
 		try {
 			org.apache.http.HttpResponse rsp;
 			if (useBackend) {
@@ -150,6 +151,11 @@ public class StdHttpClient implements HttpClient {
 		return executeRequest(request, false);
 	}
 
+	@Override
+	public HttpResponse copy(String sourceUri, String destination) {
+		return executeRequest(new HttpCopyRequest(sourceUri, destination), true);
+	}
+	
 	public void shutdown() {
 		client.getConnectionManager().shutdown();
 	}
