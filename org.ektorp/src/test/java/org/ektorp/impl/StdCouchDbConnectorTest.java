@@ -35,7 +35,8 @@ import org.mockito.internal.verification.VerificationModeFactory;
 
 public class StdCouchDbConnectorTest {
 
-    private static final String TEST_DB_PATH = "/test_db/";
+    private static final String OK_RESPONSE_WITH_ID_AND_REV = "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}";
+	private static final String TEST_DB_PATH = "/test_db/";
     StdCouchDbConnector dbCon;
     StdHttpClient httpClient;
     TestDoc td = new TestDoc();
@@ -54,7 +55,7 @@ public class StdCouchDbConnectorTest {
         td.setId("some_id");
         setupNegativeContains(td.getId());
         when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}"));
+                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
@@ -69,7 +70,7 @@ public class StdCouchDbConnectorTest {
         td.setId("http://some/openid?goog");
         setupNegativeContains(escapedId);
         when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}"));
+                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/" + escapedId), ac.capture());
@@ -79,7 +80,7 @@ public class StdCouchDbConnectorTest {
     @Test
     public void testCreateFromJsonNode() throws Exception {
         when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}"));
+                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
         JsonNode root = new ObjectMapper().readValue(getClass().getResourceAsStream("create_from_json_node.json"),
                 JsonNode.class);
         dbCon.create("some_id", root);
@@ -93,7 +94,7 @@ public class StdCouchDbConnectorTest {
         td.name = "Örjan Åäö";
         setupNegativeContains(td.getId());
         when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}"));
+                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
@@ -103,7 +104,7 @@ public class StdCouchDbConnectorTest {
     @Test
     public void create_should_post_if_id_is_missing() {
         when(httpClient.post(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}"));
+                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).post(eq(TEST_DB_PATH), ac.capture());
@@ -176,7 +177,7 @@ public class StdCouchDbConnectorTest {
         td.setId("some_id");
         td.setRevision("123D123");
         when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}"));
+                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
         dbCon.update(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
@@ -438,7 +439,7 @@ public class StdCouchDbConnectorTest {
     public void dates_should_be_serialized_in_ISO_8601_format() {
         setupNegativeContains("some_id");
         when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}"));
+                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
 
         DateTime dt = new DateTime(2010, 4, 25, 20, 11, 24, 555, DateTimeZone.forID("+00:00"));
         Date d = dt.toDate();
@@ -702,6 +703,28 @@ public class StdCouchDbConnectorTest {
 		verify(httpClient).put(expectedPath, inputStream, expectedContentType, documentLength);
 	}
 
+	@Test
+	public void testCopy() {
+		String src = "sourceId";
+		String target = "targetId";
+		when(httpClient.copy(anyString(), anyString())).thenReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+		dbCon.copy(src, target);
+		String expectedPath = "/test_db/" + src;
+		verify(httpClient).copy(expectedPath, target);
+	}
+	
+	@Test
+	public void testCopyRev() {
+		String src = "sourceId";
+		String target = "targetId";
+		String rev = "revision";
+		when(httpClient.copy(anyString(), anyString())).thenReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+		dbCon.copy(src, target, rev);
+		String expectedPath = "/test_db/" + src;
+		String expectedTarget = target + "?rev=" + rev;
+		verify(httpClient).copy(expectedPath, expectedTarget);
+	}
+	
     @SuppressWarnings("serial")
     static class DateDoc extends CouchDbDocument {
 
