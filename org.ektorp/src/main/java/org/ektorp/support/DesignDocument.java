@@ -4,12 +4,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonAnyGetter;
-import org.codehaus.jackson.annotate.JsonAnySetter;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
 import org.ektorp.util.Assert;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Representation of a CouchDb design document.
@@ -281,17 +283,17 @@ public class DesignDocument extends OpenCouchDbDocument {
         public void setReduce(String reduce) {
             this.reduce = reduce;
         }
-        
-        /** 
+
+        /**
     	 * @return a Map containing fields that did not map to any other field in the class during object deserializarion from a JSON document.
     	 */
     	@JsonAnyGetter
     	public Map<String, Object> getAnonymous() {
     		return anonymous();
     	}
-    	
+
     	/**
-    	 * 
+    	 *
     	 * @param key
     	 * @param value
     	 */
@@ -299,7 +301,7 @@ public class DesignDocument extends OpenCouchDbDocument {
     	public void setAnonymous(String key, Object value) {
     		anonymous().put(key, value);
     	}
-    	
+
     	/**
     	 * Provides lay init for the anonymous Map
     	 * @return

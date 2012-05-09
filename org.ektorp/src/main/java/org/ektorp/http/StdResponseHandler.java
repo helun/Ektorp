@@ -3,10 +3,11 @@ package org.ektorp.http;
 import java.io.*;
 
 import org.apache.commons.io.*;
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.node.*;
 import org.ektorp.*;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 
 /**
  *
@@ -46,7 +47,7 @@ public class StdResponseHandler<T> implements ResponseCallback<T> {
 	}
 
 	private static String toPrettyString(JsonNode n) throws IOException {
-		return MAPPER.defaultPrettyPrintingWriter().writeValueAsString(n);
+		return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(n);
 	}
 
 	private static JsonNode responseBodyAsNode(String s) throws IOException {
