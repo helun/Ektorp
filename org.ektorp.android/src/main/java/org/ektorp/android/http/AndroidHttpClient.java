@@ -31,6 +31,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.ektorp.http.HttpClient;
+import org.ektorp.http.HttpCopyRequest;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.IdleConnectionMonitor;
 import org.ektorp.http.PreemptiveAuthRequestInterceptor;
@@ -112,6 +113,11 @@ public class AndroidHttpClient implements HttpClient {
 		HttpPut hp = new HttpPut(uri);
 		hp.setEntity(e);
 		return executeRequest(hp);
+	}
+	
+	@Override
+	public HttpResponse copy(String sourceUri, String destination) {
+		return executeRequest(new HttpCopyRequest(sourceUri, destination), true);
 	}
 
 	private HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,

@@ -22,6 +22,9 @@ public class DesignDocumentTest {
 		dd.setRevision("12345");
 		dd.addView("all", new DesignDocument.View("function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }"));
 		dd.addView("by_lastname", new DesignDocument.View("function(doc) { if (doc.Type == 'TestDoc')  emit(doc.LastName, doc) }"));
+		DesignDocument.View view = new DesignDocument.View();
+		view.setAnonymous("module", "exports.info = {artiest : {name : 'artiest', properties : {naam : {name : 'naam', type : 'string', required : true, searchable : true}}}}");
+		dd.addView("lib", view);
 		dd.setLanguage("javascript");
 	}
 

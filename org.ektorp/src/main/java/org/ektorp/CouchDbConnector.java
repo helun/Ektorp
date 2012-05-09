@@ -71,7 +71,26 @@ public interface CouchDbConnector {
      *             if there was an update conflict.
      */
     String delete(String id, String revision);
-
+    /**
+     * Copies a document to the target document id.
+     * Useful when you want to duplicate docs with large attachments.
+     * 
+     * @param sourceDocId
+     * @param targetDocId
+     * @return revision of the target document.
+     */
+    String copy(String sourceDocId, String targetDocId);
+    /**
+     * 
+     * Copies a document and overwrites the target document.
+     * Useful when you want to duplicate docs with large attachments.
+     * 
+     * @param sourceDocId
+     * @param targetDocId
+     * @param targetRevision
+     * @return revision of the target document.
+     */
+    String copy(String sourceDocId, String targetDocId, String targetRevision);
     /**
      * Permanently removes the references to deleted documents from the database.
      * 
