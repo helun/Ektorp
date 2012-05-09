@@ -84,10 +84,13 @@ public class QueryResultParser<T> {
 			skipToField(jp, state.docFieldName, state);
 			lastId = state.lastId;
 			lastKey = state.lastKey;
+			
 			if (atEndOfRows(jp)) {
 				return;
 			}
-			rows.add(jp.readValueAs(type));
+			if (!state.fieldIsNull) {
+				rows.add(jp.readValueAs(type));
+			}
 			endRow(jp, state);
 		}
 	}
@@ -158,12 +161,13 @@ public class QueryResultParser<T> {
 	}
 
 	private boolean atEndOfRows(JsonParser jp) {
-		return jp.getCurrentToken() != JsonToken.START_OBJECT;
+		return jp.getCurrentToken() != JsonToken.START_OBJECT && jp.getCurrentToken() != JsonToken.END_OBJECT;
 	}
 
 	private void skipToField(JsonParser jp, String fieldName, ParseState state)
 			throws JsonParseException, IOException {
 		String lastFieldName = null;
+		
 		while (jp.getCurrentToken() != null) {
 			switch (jp.getCurrentToken()) {
 			case FIELD_NAME:
@@ -176,6 +180,7 @@ public class QueryResultParser<T> {
 					jp.nextToken();
 				} else {
 					if (isInField(fieldName, lastFieldName)) {
+						state.fieldIsNull = false;
 						return;
 					} else {
 						jp.skipChildren();
@@ -190,16 +195,20 @@ public class QueryResultParser<T> {
 				} else if (isInField(ERROR_FIELD_NAME, lastFieldName)) {
 					JsonNode error = jp.readValueAsTree();
 					if (ignoreNotFound
-							&& error.getValueAsText().equals("not_found")) {
-                                            lastFieldName = null;
-                                            state.inRow = false;
-                                            jp.nextToken();
-                                            jp.nextToken();
-                                            continue;
+							&& error.asText().equals("not_found")) {
+						//lastFieldName = null;
+                        state.inRow = false;
+                        jp.nextToken();
+					} else {
+						throw new ViewResultException(state.lastKey,
+								error.asText());	
 					}
-					throw new ViewResultException(state.lastKey,
-							error.getValueAsText());
 				} else if (isInField(fieldName, lastFieldName)) {
+					if (jp.getCurrentToken() == JsonToken.VALUE_NULL) {
+						state.fieldIsNull = true;
+					} else {
+						state.fieldIsNull = false;
+					}
 					jp.nextToken();
 					return;
 				}
@@ -208,7 +217,7 @@ public class QueryResultParser<T> {
 			}
 		}
 	}
-
+	
 	private boolean isInField(String fieldName, String lastFieldName) {
 		return lastFieldName != null && lastFieldName.equals(fieldName);
 	}
@@ -228,6 +237,7 @@ public class QueryResultParser<T> {
 	}
 
 	private static class ParseState {
+		public boolean fieldIsNull;
 		public String lastId;
 		boolean inRow;
 		JsonNode lastKey;

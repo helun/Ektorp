@@ -362,7 +362,7 @@ public class StdCouchDbConnectorTest {
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
                 .includeDocs(true)                
-                .keys(Arrays.asList("doc_id1", "doc_id2", "doc_id3", "doc_id4"));
+                .keys(Arrays.asList("doc_id0", "doc_id1", "doc_id2", "doc_id3", "doc_id4", "doc_id5", "doc_id6"));
         query.setIgnoreNotFound(true);
 
         when(httpClient.postUncached(anyString(), anyString())).thenReturn(
@@ -370,10 +370,11 @@ public class StdCouchDbConnectorTest {
 
         List<TestDoc> result = dbCon.queryView(query, TestDoc.class);
 
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
         assertEquals(TestDoc.class, result.get(0).getClass());
         assertEquals("doc_id1", result.get(0).getId());
         assertEquals("doc_id3", result.get(1).getId());
+        assertEquals("doc_id6", result.get(2).getId());
         verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
     }
 
