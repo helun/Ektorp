@@ -1,8 +1,11 @@
 package org.ektorp.impl;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig.Feature;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
+
 import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.jackson.EktorpJacksonModule;
 import org.ektorp.util.Assert;
@@ -29,6 +32,7 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 		ObjectMapper objectMapper = new ObjectMapper();
 		applyDefaultConfiguration(objectMapper);
 		objectMapper.registerModule(new EktorpJacksonModule(connector, objectMapper));
+		objectMapper.registerModule(new JodaModule());
 		return objectMapper;
 	}
 
@@ -42,9 +46,8 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 	}
 
 	private void applyDefaultConfiguration(ObjectMapper om) {
-		om.configure(Feature.WRITE_DATES_AS_TIMESTAMPS, writeDatesAsTimestamps);
-		om.getSerializationConfig().setSerializationInclusion(
-				Inclusion.NON_NULL);
+		om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, this.writeDatesAsTimestamps);
+		om.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
 }

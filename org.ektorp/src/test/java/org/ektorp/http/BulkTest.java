@@ -2,8 +2,8 @@ package org.ektorp.http;
 
 import java.util.*;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.*;
 import org.ektorp.impl.*;
 import org.junit.*;
@@ -40,14 +40,14 @@ Caused by: java.net.SocketException: Connection reset
 public class BulkTest {
 
         public static void main(String[] args) throws Exception {
-                
+
                 HttpClient httpClient = new StdHttpClient.Builder().host("localhost").port(5984).cleanupIdleConnections(true).build();
                 CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
                 CouchDbConnector db = dbInstance.createConnector("mutka_local", true);
                 ObjectMapper mapper = new ObjectMapper();
 
                 // create document "myid"
-                try {                   
+                try {
                         db.create("myid", mapper.readTree("{\"i\":0}"));
                 } catch (UpdateConflictException ex) {
                         // already exists - ignore
@@ -55,14 +55,14 @@ public class BulkTest {
                 long start = System.currentTimeMillis();
                 for (int i = 1; i < 1000; i++) {
                         System.out.println("Round "+i);
-                        
+
                         JsonNode doc = db.get(JsonNode.class, "myid");
-                        
-                        Collection<JsonNode> docList = Collections.singleton(doc);      
+
+                        Collection<JsonNode> docList = Collections.singleton(doc);
                         List<DocumentOperationResult> bulkResult = db.executeBulk(docList);
                         if (!bulkResult.isEmpty())
                                 throw new Exception("Got DocumentOperationResult "+bulkResult.get(0));
-                        
+
                         Collection<String> idList = Collections.singleton("myid");
                         ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(idList);
                         db.queryView(q);

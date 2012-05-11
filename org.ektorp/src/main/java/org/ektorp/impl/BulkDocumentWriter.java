@@ -4,11 +4,12 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.commons.io.*;
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.util.*;
 /**
- * 
+ *
  * @author henrik lundgren
  *
  */
@@ -31,7 +32,7 @@ public class BulkDocumentWriter {
 			JsonGenerator jg = objectMapper.getJsonFactory().createJsonGenerator(out, JsonEncoding.UTF8);
 			jg.writeStartObject();
 			if (allOrNothing) {
-				jg.writeBooleanField("all_or_nothing", true);	
+				jg.writeBooleanField("all_or_nothing", true);
 			}
 			jg.writeArrayFieldStart("docs");
 			for (Object o : objects) {
@@ -47,16 +48,16 @@ public class BulkDocumentWriter {
 			IOUtils.closeQuietly(out);
 		}
 	}
-	
+
 	public InputStream createInputStreamWrapper(boolean allOrNothing, InputStream in) {
 	    List<InputStream> seq = new ArrayList<InputStream>(3);
-        
+
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             JsonGenerator jg = objectMapper.getJsonFactory().createJsonGenerator(byteArrayOutputStream, JsonEncoding.UTF8);
             jg.writeStartObject();
             if (allOrNothing) {
-                jg.writeBooleanField("all_or_nothing", true);   
+                jg.writeBooleanField("all_or_nothing", true);
             }
             jg.writeFieldName("docs");
             jg.writeRaw(':');
@@ -70,8 +71,8 @@ public class BulkDocumentWriter {
             seq.add(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
         } catch (Exception e) {
             throw Exceptions.propagate(e);
-        } 
+        }
         return new SequenceInputStream(Collections.enumeration(seq));
     }
-	
+
 }

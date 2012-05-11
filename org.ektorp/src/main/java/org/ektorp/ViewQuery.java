@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.ektorp.http.URI;
 import org.ektorp.impl.StdObjectMapperFactory;
 import org.ektorp.util.Assert;
@@ -30,7 +30,7 @@ public class ViewQuery {
 	private final Map<String, String> queryParams = new TreeMap<String, String>();
 
 	private ObjectMapper mapper;
-	
+
 	private String dbPath;
 	private String designDocId;
 	private String viewName;
@@ -53,7 +53,7 @@ public class ViewQuery {
 	private boolean updateSeq = false;
 
 	private boolean cacheOk = false;
-	
+
 	private String cachedQuery;
 	private String listName;
 
@@ -69,7 +69,7 @@ public class ViewQuery {
 		Assert.notNull(om, "ObjectMapper may not be null");
 		mapper = om;
 	}
-	
+
     public String getDbPath() {
         return dbPath;
     }
@@ -166,9 +166,9 @@ public class ViewQuery {
 	/**
 	 * If set to true, the view query result will be cached and subsequent queries
 	 * (with cacheOk set) may be served from the cache instead of the db.
-	 * 
+	 *
 	 * Note that if the view changes, the cache will be invalidated.
-	 * 
+	 *
 	 * @param b
 	 * @return
 	 */
@@ -177,7 +177,7 @@ public class ViewQuery {
 		cacheOk = b;
 		return this;
 	}
-	
+
 	public boolean isCacheOk() {
 		return cacheOk;
 	}
@@ -199,7 +199,7 @@ public class ViewQuery {
 		key = parseJson(s);
 		return this;
 	}
-	
+
 	private JsonNode parseJson(String s) {
 		try {
 			return mapper.readTree(s);
@@ -566,7 +566,7 @@ public class ViewQuery {
         return keys.toJson(mapper);
     }
 
-    
+
     public Object getStartKey() {
 		return startKey;
 	}
@@ -693,7 +693,7 @@ public class ViewQuery {
 		return s != null;
 	}
 
-	
+
 
 	@Override
 	public int hashCode() {
@@ -853,7 +853,7 @@ public class ViewQuery {
 		public String toJson() {
 			return toJson(DEFAULT_MAPPER);
 		}
-		
+
 		public String toJson(ObjectMapper mapper) {
 			ObjectNode rootNode = mapper.createObjectNode();
 			ArrayNode keysNode = rootNode.putArray("keys");
@@ -868,6 +868,6 @@ public class ViewQuery {
 		}
 	}
 
-	
+
 
 }

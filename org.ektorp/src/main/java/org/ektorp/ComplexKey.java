@@ -2,10 +2,9 @@ package org.ektorp;
 
 import java.util.*;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.annotate.*;
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.node.*;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 /**
  * Class for creating complex keys for view queries.
  * The keys's components can consists of any JSON-encodeable objects, but are most likely to be Strings and Integers.
@@ -13,14 +12,14 @@ import org.codehaus.jackson.node.*;
  *
  */
 public class ComplexKey {
-	
+
 	private final static ObjectMapper mapper = new ObjectMapper();
-	
+
 	private final List<Object> components;
-	
+
 	private static final Object EMPTY_OBJECT = new Object();
 	private static final Object[] EMPTY_ARRAY = new Object[0];
-	
+
 	public static ComplexKey of(Object... components) {
 		return new ComplexKey(components);
 	}
@@ -40,11 +39,11 @@ public class ComplexKey {
 	public static Object[] emptyArray() {
 		return EMPTY_ARRAY;
 	}
-	
+
 	private ComplexKey(Object[] components) {
 		this.components = Arrays.asList(components);
 	}
-	
+
 	@JsonValue
 	public JsonNode toJson() {
 		ArrayNode key = mapper.createArrayNode();

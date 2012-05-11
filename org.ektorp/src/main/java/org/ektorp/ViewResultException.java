@@ -1,6 +1,6 @@
 package org.ektorp;
 
-import org.codehaus.jackson.*;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class ViewResultException extends DbAccessException {
 
@@ -8,17 +8,17 @@ public class ViewResultException extends DbAccessException {
 
 	private final JsonNode key;
 	private final String error;
-	
+
 	public ViewResultException(JsonNode key, String error) {
 		super(String.format("key: %s error: \"%s\"", key, error));
 		this.key = key;
 		this.error = error;
 	}
-	
+
 	public JsonNode getKey() {
 		return key;
 	}
-	
+
 	public String getError() {
 		return error;
 	}

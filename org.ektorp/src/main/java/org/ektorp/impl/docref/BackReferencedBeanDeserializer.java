@@ -4,9 +4,15 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.map.deser.*;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.BeanDeserializer;
+import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.ektorp.*;
 import org.ektorp.docref.*;
 import org.ektorp.util.*;
@@ -89,9 +95,9 @@ public class BackReferencedBeanDeserializer extends StdDeserializer<Object>
 		return deserializedObject;
 	}
 
-	public void resolve(DeserializationConfig config,
-			DeserializerProvider provider) throws JsonMappingException {
-		delegate.resolve(config, provider);
+	@Override
+	public void resolve(DeserializationContext ctxt) throws JsonMappingException {
+		delegate.resolve(ctxt);
 	}
 
 }

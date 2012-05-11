@@ -2,9 +2,9 @@ package org.ektorp;
 
 import java.io.*;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.map.annotate.*;
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.ektorp.util.*;
 /**
  * This class can be used to delete documents in bulk operations.
@@ -26,20 +26,20 @@ public class BulkDeleteDocument implements Serializable {
 	public static BulkDeleteDocument of(Object o) {
 		return new BulkDeleteDocument(Documents.getId(o), Documents.getRevision(o));
 	}
-	
+
 	public BulkDeleteDocument(String id, String rev) {
 		this.id = id;
 		this.revision = rev;
 	}
-	
+
 	public String getId() {
 		return id;
 	}
-	
+
 	public String getRevision() {
 		return revision;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == this) return true;
@@ -49,7 +49,7 @@ public class BulkDeleteDocument implements Serializable {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return id.hashCode();
@@ -62,7 +62,7 @@ public class BulkDeleteDocument implements Serializable {
 	public void setRevision(String s) {
 		// do nothing
 	}
-	
+
 	public static class Serializer extends JsonSerializer<BulkDeleteDocument> {
 
 		@Override
@@ -75,6 +75,6 @@ public class BulkDeleteDocument implements Serializable {
 			jgen.writeBooleanField("_deleted", true);
 			jgen.writeEndObject();
 		}
-		
+
 	}
 }

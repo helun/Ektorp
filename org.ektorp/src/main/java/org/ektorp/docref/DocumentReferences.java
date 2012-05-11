@@ -2,7 +2,8 @@ package org.ektorp.docref;
 
 import java.lang.annotation.*;
 
-import org.codehaus.jackson.annotate.*;
+import com.fasterxml.jackson.annotation.JacksonAnnotation;
+
 
 /**
  * Follow references to other documents when loading and updating this
@@ -11,9 +12,9 @@ import org.codehaus.jackson.annotate.*;
  * of the class or in the design document specified by <code>designDoc</code>.
  * The parameter <code>fetch</code> controls when reference loading is
  * performed. This annotation only has meaning on collection class members.
- * 
+ *
  * @author ragnar rova
- * 
+ *
  */
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
@@ -32,7 +33,7 @@ public @interface DocumentReferences {
 	/**
 	 * If view is left unspecified a view will be generated for this document reference
 	 * (given the persistent type is managed by a repository class based on org.ektorp.support.CouchDbRepositorySupport).
-	 * 
+	 *
 	 * View name for backward references. Backward references are stored in the
 	 * documents on the other side of the reference. References are loaded into
 	 * this collection by performing a view query against the specified view
@@ -51,12 +52,12 @@ public @interface DocumentReferences {
 	/**
 	 * The sort order  of the loaded collection can be specified by this parameter.
 	 * This parameter will refer to a field in the child docs.
-	 * Note: This parameter is only applied if view is not specified. 
+	 * Note: This parameter is only applied if view is not specified.
 	 */
 	public String orderBy() default "";
 	/**
-	 * The name of the back referring field in the child must be specified here. 
-	 * Note: This parameter is only applied if view is not specified. 
+	 * The name of the back referring field in the child must be specified here.
+	 * Note: This parameter is only applied if view is not specified.
 	 */
 	public String backReference() default "";
 	/**

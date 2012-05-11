@@ -8,11 +8,12 @@ import java.lang.reflect.*;
 import java.util.*;
 
 import org.apache.commons.io.*;
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.docref.*;
 import org.ektorp.impl.*;
 import org.ektorp.util.*;
 import org.slf4j.*;
+
 
 public class SimpleViewGenerator {
 
@@ -78,7 +79,7 @@ public class SimpleViewGenerator {
 	 * repository class extends org.ektorp.support.CouchDbRepositorySupport its
 	 * handled type will also examined for annotations eligible for view
 	 * generation.
-	 * 
+	 *
 	 * @param repository
 	 * @return a Map with generated views.
 	 */
@@ -194,7 +195,7 @@ public class SimpleViewGenerator {
 	/**
 	 * Generates views based on annotations found in a persistent class.
 	 * Typically @DocumentReferences annotations.
-	 * 
+	 *
 	 * @param persistentType
 	 * @return a Map with generated views.
 	 */

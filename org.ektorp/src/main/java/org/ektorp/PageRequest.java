@@ -5,18 +5,15 @@ import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.NullNode;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.*;
 import org.ektorp.util.Base64;
 import org.ektorp.util.Exceptions;
 
 /**
- * 
+ *
  * @author henrik lundgren
- * 
+ *
  */
 public class PageRequest {
 
@@ -58,8 +55,8 @@ public class PageRequest {
 
 			KeyIdPair key = parseNextKey(n);
 			Deque<KeyIdPair> keyHistory = parseKeyHistory(n);
-			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).getIntValue();
-			
+			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).intValue();
+
 			return new PageRequest(key, pageSize, keyHistory);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
@@ -71,7 +68,7 @@ public class PageRequest {
 		ArrayNode h = (ArrayNode) n.get(KEY_HISTORY_FIELD_NAME);
 		if (h != null) {
 			for (JsonNode hn : h) {
-				String docId = hn.getFieldNames().next();
+				String docId = hn.fieldNames().next();
 				keyHistory.addFirst(new KeyIdPair(hn.get(docId), docId));
 			}
 
@@ -83,7 +80,7 @@ public class PageRequest {
 		KeyIdPair key;
 		JsonNode nextKey = n.get(NEXT_KEY_FIELD_NAME);
 		if (nextKey != null) {
-			String docId = nextKey.getFieldNames().next();
+			String docId = nextKey.fieldNames().next();
 			key = new KeyIdPair(nextKey.get(docId), docId);
 		} else {
 			key = null;
@@ -147,7 +144,7 @@ public class PageRequest {
 		try {
 			JsonNode keyNode = MAPPER.readTree(MAPPER
 					.writeValueAsString(nextStartKey));
-			
+
 			Deque<KeyIdPair> d = new LinkedList<KeyIdPair>(keyHistory);
 			d.addFirst(this.nextKey != null ? this.nextKey : FIRST_PAGE_NEXT_KEY_PLACEHOLDER);
 
@@ -237,8 +234,8 @@ public class PageRequest {
 				return false;
 			return true;
 		}
-		
-		
+
+
 	}
 
 }

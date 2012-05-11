@@ -44,7 +44,7 @@
 		<mockito.version>1.8.5</mockito.version>
 		<junit.version>4.8.2</junit.version>
 		<joda.time.version>1.6.2</joda.time.version>
-		<jackson.version>1.9.4</jackson.version>
+		<jackson.version>2.0.1</jackson.version>
 		<spring.version>3.1.1.RELEASE</spring.version>
 		<commons.io.version>2.0.1</commons.io.version>
 		<httpclient.version>4.1.2</httpclient.version>
@@ -53,16 +53,26 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.codehaus.jackson</groupId>
-				<artifactId>jackson-core-asl</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.codehaus.jackson</groupId>
-				<artifactId>jackson-mapper-asl</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
+                	<dependency>
+        	                <groupId>com.fasterxml.jackson.core</groupId>
+	                        <artifactId>jackson-annotations</artifactId>
+                        	<version>${jackson.version}</version>
+                	</dependency>
+        	        <dependency>
+	                        <groupId>com.fasterxml.jackson.core</groupId>
+                        	<artifactId>jackson-core</artifactId>
+                	        <version>${jackson.version}</version>
+        	        </dependency>
+	                <dependency>
+                        	<groupId>com.fasterxml.jackson.core</groupId>
+                	        <artifactId>jackson-databind</artifactId>
+        	                <version>${jackson.version}</version>
+	                </dependency>
+                        <dependency>
+                                <groupId>com.fasterxml.jackson.datatype</groupId>
+                                <artifactId>jackson-datatype-joda</artifactId>
+                                <version>${jackson.version}</version>
+                        </dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>

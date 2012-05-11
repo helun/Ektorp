@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.ObjectMapper;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -53,9 +54,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author henrik lundgren
- * 
+ *
  */
 public class StdCouchDbConnector implements CouchDbConnector {
 
@@ -178,7 +179,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
             final String attachmentId) {
         assertDocIdHasValue(id);
         Assert.hasText(attachmentId, "attachmentId may not be null or empty");
-        
+
         if (LOG.isTraceEnabled()) {
             LOG.trace("fetching attachment for doc: {} attachmentId: {}", id,
                     attachmentId);
@@ -192,20 +193,20 @@ public class StdCouchDbConnector implements CouchDbConnector {
     	assertDocIdHasValue(id);
         Assert.hasText(attachmentId, "attachmentId may not be null or empty");
         Assert.hasText(revision, "revision may not be null or empty");
-        
+
         if (LOG.isTraceEnabled()) {
             LOG.trace("fetching attachment for doc: {} attachmentId: {}", id,
                     attachmentId);
         }
         return getAttachment(attachmentId, dbURI.append(id).append(attachmentId).param("rev", revision));
     }
-    
+
     private AttachmentInputStream getAttachment(String attachmentId, URI uri) {
     	HttpResponse r = restTemplate.get(uri.toString());
         return new AttachmentInputStream(attachmentId, r.getContent(),
                 r.getContentType(), r.getContentLength());
     }
-    
+
     @Override
     public String delete(Object o) {
         Assert.notNull(o, "document may not be null");
@@ -301,10 +302,10 @@ public class StdCouchDbConnector implements CouchDbConnector {
                         JsonNode.class);
                 List<Revision> revs = new ArrayList<Revision>();
                 for (Iterator<JsonNode> i = root.get("_revs_info")
-                        .getElements(); i.hasNext();) {
+                        .elements(); i.hasNext();) {
                     JsonNode rev = i.next();
-                    revs.add(new Revision(rev.get("rev").getTextValue(), rev
-                            .get("status").getTextValue()));
+                    revs.add(new Revision(rev.get("rev").textValue(), rev
+                            .get("status").textValue()));
                 }
                 return revs;
             }
@@ -352,7 +353,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
                     public Void success(HttpResponse hr) throws Exception {
                         JsonNode n = objectMapper.readValue(hr.getContent(),
                                 JsonNode.class);
-                        Documents.setRevision(o, n.get("rev").getTextValue());
+                        Documents.setRevision(o, n.get("rev").textValue());
                         return null;
                     }
 
@@ -421,7 +422,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		if (!query.isCacheOk()) {
 			return query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(),
 	                query.getKeysAsJson(), rh) : restTemplate.getUncached(
-	                query.buildQuery(), rh);	
+	                query.buildQuery(), rh);
 		}
 		return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
                 query.getKeysAsJson(), rh) : restTemplate.get(
@@ -441,7 +442,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         }
         PageResponseHandler<T> ph = new PageResponseHandler<T>(pr, type, objectMapper, query.isIgnoreNotFound());
         query = PageRequest.applyPagingParameters(query, pr);
-        
+
         return executeQuery(query, ph);
     }
 
@@ -457,7 +458,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
             }
 
         };
-        
+
         return executeQuery(query, rh);
     }
 
@@ -470,7 +471,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
     public InputStream queryForStream(ViewQuery query) {
         return queryForHttpResponse(query).getContent();
     }
-    
+
     private HttpResponse queryForHttpResponse(ViewQuery query) {
         Assert.notNull(query, "query cannot be null");
         query.dbPath(dbURI.toString());
@@ -578,7 +579,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         restTemplate.post(dbURI.append("_compact").append(designDocumentId)
                 .toString(), "not_used", VOID_RESPONSE_HANDLER);
     }
-    
+
     @Override
     public List<DocumentOperationResult> executeAllOrNothing(
             InputStream inputStream) {
@@ -589,7 +590,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
     public List<DocumentOperationResult> executeBulk(InputStream inputStream) {
         return executeBulk(inputStream, false);
     }
-    
+
     private List<DocumentOperationResult> executeBulk(InputStream inputStream,
             boolean allOrNothing) {
         BulkDocumentWriter writer = new BulkDocumentWriter(objectMapper);
@@ -652,7 +653,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 				allOrNothing);
 		try {
 			List<DocumentOperationResult> result = restTemplate.post(
-					dbURI.append("_bulk_docs").toString(), 
+					dbURI.append("_bulk_docs").toString(),
 					op.getData(),
 					new BulkOperationResponseHandler(objects, objectMapper));
 			op.awaitCompletion();
@@ -709,7 +710,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         }
         return changes;
     }
-    
+
     @Override
     public StreamingChangesResult changesAsStream(ChangesCommand cmd) {
         if (cmd.continuous) {
@@ -719,10 +720,10 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
         ChangesCommand actualCmd = new ChangesCommand.Builder().merge(cmd)
                 .continuous(false).build();
-        
+
         HttpResponse response = restTemplate.get(dbURI.append(actualCmd.toString())
                 .toString());
-        
+
         return new StreamingChangesResult(objectMapper, response);
     }
 
