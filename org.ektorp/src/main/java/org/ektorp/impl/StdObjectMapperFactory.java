@@ -4,7 +4,8 @@ package org.ektorp.impl;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
+
 import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.jackson.EktorpJacksonModule;
 import org.ektorp.util.Assert;
@@ -31,6 +32,7 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 		ObjectMapper objectMapper = new ObjectMapper();
 		applyDefaultConfiguration(objectMapper);
 		objectMapper.registerModule(new EktorpJacksonModule(connector, objectMapper));
+		objectMapper.registerModule(new JodaModule());
 		return objectMapper;
 	}
 
