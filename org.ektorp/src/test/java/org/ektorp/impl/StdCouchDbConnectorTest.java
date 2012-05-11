@@ -17,6 +17,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
+
 import org.ektorp.*;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
@@ -38,14 +40,22 @@ public class StdCouchDbConnectorTest {
 
     private static final String OK_RESPONSE_WITH_ID_AND_REV = "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}";
 	private static final String TEST_DB_PATH = "/test_db/";
-    StdCouchDbConnector dbCon;
+    CouchDbConnector dbCon;
     StdHttpClient httpClient;
     TestDoc td = new TestDoc();
 
     @Before
     public void setUp() throws Exception {
         httpClient = mock(StdHttpClient.class);
-        dbCon = new StdCouchDbConnector("test_db/", new StdCouchDbInstance(httpClient));
+        StdCouchDbInstance dbInstance = new StdCouchDbInstance(httpClient, new StdObjectMapperFactory(){
+        	@Override
+        	public ObjectMapper createObjectMapper(CouchDbConnector connector) {
+        		ObjectMapper mapper = super.createObjectMapper(connector);
+        		mapper.registerModule(new JodaModule());
+        		return mapper;
+        	}
+        });
+		dbCon = dbInstance.createConnector("test_db/",false);
 
         td.name = "nisse";
         td.age = 12;
