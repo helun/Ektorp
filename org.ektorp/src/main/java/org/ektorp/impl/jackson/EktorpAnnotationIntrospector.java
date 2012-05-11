@@ -23,6 +23,7 @@ import org.ektorp.util.ReflectionUtils;
 public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 
 	private final Map<Class<?>, Set<String>> ignorableMethods = new HashMap<Class<?>, Set<String>>();
+	private final Map<Class<?>, Set<String>> explicitAvailableMethods = new HashMap<Class<?>, Set<String>>();
 	private final Set<Class<?>> annotatedClasses = new HashSet<Class<?>>();
 
 
@@ -47,12 +48,11 @@ public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 	}
 
 	public boolean isIgnorableMethod(AnnotatedMethod m) {
-		Set<String> names = ignorableMethods.get(m.getDeclaringClass());
-		if (names == null) {
+		if (!ignorableMethods.containsKey(m.getDeclaringClass())) {
 			initIgnorableMethods(m.getDeclaringClass());
-			names = ignorableMethods.get(m.getDeclaringClass());
 		}
-
+		
+		Set<String> names = ignorableMethods.get(m.getDeclaringClass());
 		return names.contains(m.getName());
 	}
 
@@ -73,20 +73,37 @@ public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
     	}
         return ignoreFields != null ? ignoreFields.toArray(new String[ignoreFields.size()]) : null;
     }
+    
+    @Override
+    public String findDeserializationName(AnnotatedMethod am) {
+    	if(isIgnorableMethod(am)){
+    		return null;
+    	}
+    	if(explicitAvailableMethods.containsKey(am.getDeclaringClass())){
+    		Set<String> names = explicitAvailableMethods.get(am.getDeclaringClass());
+    		if(names.contains(am.getName())){
+    			return am.getName();
+    		}
+    	}
+    	return null;
+    }
 
 	private void initIgnorableMethods(final Class<?> clazz) {
-		final Set<String> names = new HashSet<String>();
+		final Set<String> getterNames = new HashSet<String>();
+		final Set<String> setterNames = new HashSet<String>();
 		ReflectionUtils.eachField(clazz, new Predicate<Field>() {
 			@Override
 			public boolean apply(Field input) {
 				if (ReflectionUtils.hasAnnotation(input, DocumentReferences.class)) {
 					annotatedClasses.add(clazz);
-					names.add(NameConventions.getterName(input.getName()));
+					getterNames.add(NameConventions.getterName(input.getName()));
+					setterNames.add(NameConventions.setterName(input.getName()));
 				}
 				return false;
 			}
 		});
-		ignorableMethods.put(clazz, names);
+		explicitAvailableMethods.put(clazz, setterNames);
+		ignorableMethods.put(clazz, getterNames);
 	}
 
 }

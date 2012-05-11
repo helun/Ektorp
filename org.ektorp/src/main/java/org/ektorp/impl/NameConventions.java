@@ -44,6 +44,10 @@ public class NameConventions {
 	public static String getterName(String property) {
 		return "get" + capitalize(property);
 	}
+	
+	public static String setterName(String property) {
+		return "set" + capitalize(property);
+	}
 
 	/**
 	 * Returns a String which capitalizes the first letter of the string.
