@@ -10,6 +10,7 @@ public interface HttpResponse {
 	String getContentType();
 	long getContentLength();
 	InputStream getContent();
+	String getRevision();
 	void releaseConnection();
 	void abort();
 }

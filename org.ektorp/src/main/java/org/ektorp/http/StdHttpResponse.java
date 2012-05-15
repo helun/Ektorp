@@ -27,16 +27,23 @@ public class StdHttpResponse implements HttpResponse {
 	private final StatusLine status;
 	private final String requestURI;
 	private final HttpUriRequest httpRequest;
-	
+	private final String revision;
+
 	public static StdHttpResponse of(org.apache.http.HttpResponse rsp, HttpUriRequest httpRequest) {
-		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest);
+		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest, rsp.getFirstHeader("ETag"));
 	}
 	
-	private StdHttpResponse(HttpEntity e, StatusLine status, HttpUriRequest httpRequest) {
+	private StdHttpResponse(HttpEntity e, StatusLine status, HttpUriRequest httpRequest, Header eTagHeader) {
 		this.httpRequest = httpRequest;
 		this.entity = e != null ? e : NULL_ENTITY;
 		this.status = status;
 		this.requestURI = httpRequest.getURI().toString();
+		if(eTagHeader != null) {
+			revision = eTagHeader.getValue().replace("\"", "");
+		}
+		else {
+			revision = null;
+		}
 	}
 	
 	
@@ -71,7 +78,11 @@ public class StdHttpResponse implements HttpResponse {
 		}
 	}
 
-	
+	public String getRevision() {
+		return revision;
+	}
+
+
 	public boolean isSuccessful() {
 		return getCode() < 300;
 	}
