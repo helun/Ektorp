@@ -8,6 +8,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -68,7 +69,13 @@ public class StdHttpClient implements HttpClient {
 	public HttpResponse get(String uri) {
 		return executeRequest(new HttpGet(uri));
 	}
-	
+
+	public HttpResponse get(String uri, String accept) {
+		HttpGet getRequest = new HttpGet(uri);
+		getRequest.setHeader(HttpHeaders.ACCEPT, accept);
+		return executeRequest(getRequest);
+	}
+
 	public HttpResponse getUncached(String uri) {
 		return executeRequest(new HttpGet(uri), true);
 	}
