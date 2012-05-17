@@ -63,7 +63,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 				if (!fields.isEmpty()) {
 					return new BackReferencedBeanDeserializer(
 							(BeanDeserializer) deserializer, fields, db, beanDesc
-									.getType().getRawClass(), objectMapper);
+									.getType().getRawClass());
 				}
 			}
 			return super.modifyDeserializer(config, beanDesc, deserializer);

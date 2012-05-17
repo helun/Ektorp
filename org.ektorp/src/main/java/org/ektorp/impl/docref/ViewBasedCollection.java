@@ -6,7 +6,6 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import org.ektorp.*;
 import org.ektorp.docref.*;
@@ -23,13 +22,11 @@ public class ViewBasedCollection implements InvocationHandler {
 	final DocumentReferences referenceMetaData;
 	final ConstructibleAnnotatedCollection constructibleAnnotatedCollection;
 	final Collection<?> collection;
-	final ObjectMapper objectMapper;
 	private final Collection<BulkDeleteDocument> pendingRemoval = new LinkedHashSet<BulkDeleteDocument>();
 
 	public ViewBasedCollection(String id, CouchDbConnector couchDbConnector,
 			Class<?> clazz, DocumentReferences documentReferences,
-			ConstructibleAnnotatedCollection constructibleField,
-			ObjectMapper objectMapper) throws IllegalArgumentException,
+			ConstructibleAnnotatedCollection constructibleField) throws IllegalArgumentException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException {
 		this.id = id;
@@ -38,7 +35,6 @@ public class ViewBasedCollection implements InvocationHandler {
 		this.referenceMetaData = documentReferences;
 		this.constructibleAnnotatedCollection = constructibleField;
 		this.collection = constructibleField.getConstructor().newInstance();
-		this.objectMapper = objectMapper;
 	}
 
 	private List<?> loadFromBackReferences(String thisId,
