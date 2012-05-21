@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore;
+import java.util.Map;
 
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -67,10 +67,8 @@ public class AndroidHttpClient implements HttpClient {
 	}
 
 	@Override
-	public HttpResponse get(String uri, String accept) {
-		HttpGet getRequest = new HttpGet(uri);
-		getRequest.setHeader(HttpHeaders.ACCEPT, accept);
-		return executeRequest(getRequest);
+	public HttpResponse get(String uri, Map<String, String> headers) {
+		return executeRequest(new HttpGet(uri), headers);
 	}
 
 	@Override
@@ -141,6 +139,13 @@ public class AndroidHttpClient implements HttpClient {
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}
+	}
+
+	private HttpResponse executeRequest(HttpRequestBase request, Map<String, String> headers) {
+		for(Map.Entry<String, String> header : headers.entrySet()) {
+			request.setHeader(header.getKey(), header.getValue());
+		}
+		return executeRequest(request);
 	}
 
 	private HttpResponse executeRequest(HttpRequestBase request, boolean useBackend) {

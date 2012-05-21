@@ -1,13 +1,14 @@
 package org.ektorp.http;
 
 import java.io.*;
+import java.util.Map;
 
 
 public interface HttpClient {
 
 	HttpResponse get(String uri);
 
-	HttpResponse get(String uri, String accept);
+	HttpResponse get(String uri, Map<String, String> headers);
 
 	HttpResponse put(String uri, String content);
 
