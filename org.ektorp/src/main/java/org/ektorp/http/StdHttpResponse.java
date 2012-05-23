@@ -78,7 +78,7 @@ public class StdHttpResponse implements HttpResponse {
 		}
 	}
 
-	public String getRevision() {
+	public String getETag() {
 		return revision;
 	}
 

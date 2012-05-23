@@ -31,7 +31,7 @@ public class StdHttpResponseTest
 	}
 
 	@Test
-	public void of_will_cause_getRevision_to_return_the_ETag_value_extracted_from_quotes()
+	public void of_will_cause_getETag_to_return_the_ETag_value_extracted_from_quotes()
 	{
 		String revision = UUID.randomUUID().toString();
 		String eTag = "\"" + revision + "\"";
@@ -39,12 +39,12 @@ public class StdHttpResponseTest
 		stub(eTagHeader.getValue()).toReturn(eTag);
 		stub(apacheResponse.getFirstHeader("ETag")).toReturn(eTagHeader);
 
-		assertThat(StdHttpResponse.of(apacheResponse, uriRequest).getRevision(), is(revision));
+		assertThat(StdHttpResponse.of(apacheResponse, uriRequest).getETag(), is(revision));
 	}
 
 	@Test
-	public void of_will_cause_getRevision_to_return_null_if_ETag_is_not_present()
+	public void of_will_cause_getETag_to_return_null_if_ETag_is_not_present()
 	{
-		assertThat(StdHttpResponse.of(apacheResponse, uriRequest).getRevision(), nullValue());
+		assertThat(StdHttpResponse.of(apacheResponse, uriRequest).getETag(), nullValue());
 	}
 }

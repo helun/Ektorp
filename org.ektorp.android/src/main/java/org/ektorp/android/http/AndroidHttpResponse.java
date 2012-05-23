@@ -64,7 +64,7 @@ public class AndroidHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public String getRevision() {
+	public String getETag() {
 		return revision;
 	}
 

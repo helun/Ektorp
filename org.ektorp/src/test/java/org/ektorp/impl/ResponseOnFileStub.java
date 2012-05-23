@@ -61,7 +61,7 @@ public class ResponseOnFileStub implements HttpResponse {
 		return in;
 	}
 
-	public String getRevision() {
+	public String getETag() {
 		// TODO Auto-generated method stub
 		return null;
 	}
