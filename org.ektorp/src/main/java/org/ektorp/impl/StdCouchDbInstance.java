@@ -106,7 +106,13 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		return db;
 	}
 
-   @Override
+    @Override
+    public CouchDbConnector getReplicatorConnector()
+    {
+        return createConnector("_replicator", false);
+    }
+
+    @Override
     public <T> T getConfiguration(final Class<T> c) {
        return getConfiguration(c, null, null);
     }
