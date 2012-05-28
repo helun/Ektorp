@@ -1,11 +1,14 @@
 package org.ektorp;
 
+import org.codehaus.jackson.annotate.JsonAnySetter;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.ektorp.support.CouchDbDocument;
 
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents Couch documents used by the Couch _replicator database.
@@ -18,6 +21,8 @@ public class ReplicatorDocument extends CouchDbDocument
     {
         private String name;
         private Collection<String> roles;
+
+        private Map<String, Object> unknownFields;
 
         public String getName()
         {
@@ -38,6 +43,22 @@ public class ReplicatorDocument extends CouchDbDocument
         {
             this.roles = roles;
         }
+
+        @JsonAnySetter
+        public void setUnknown(String key, Object value) {
+            unknownFields().put(key, value);
+        }
+
+        public Map<String, Object> getUnknownFields() {
+            return unknownFields();
+        }
+
+        private Map<String, Object> unknownFields() {
+            if (unknownFields == null) {
+                unknownFields = new HashMap<String, Object>();
+            }
+            return unknownFields;
+        }
     }
 
     private String source;
@@ -52,6 +73,8 @@ public class ReplicatorDocument extends CouchDbDocument
     private String replicationId;
     private String replicationState;
     private Calendar replicationStateTime;
+
+    private Map<String, Object> unknownFields;
 
     public String getSource()
     {
@@ -175,5 +198,21 @@ public class ReplicatorDocument extends CouchDbDocument
     public void setReplicationStateTime(Calendar replicationStateTime)
     {
         this.replicationStateTime = replicationStateTime;
+    }
+
+    @JsonAnySetter
+    public void setUnknown(String key, Object value) {
+        unknownFields().put(key, value);
+    }
+
+    public Map<String, Object> getUnknownFields() {
+        return unknownFields();
+    }
+
+    private Map<String, Object> unknownFields() {
+        if (unknownFields == null) {
+            unknownFields = new HashMap<String, Object>();
+        }
+        return unknownFields;
     }
 }
