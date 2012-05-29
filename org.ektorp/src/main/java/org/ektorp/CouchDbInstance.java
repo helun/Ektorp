@@ -35,6 +35,13 @@ public interface CouchDbInstance {
 	 * @return
 	 */
 	CouchDbConnector createConnector(String path, boolean createIfNotExists);
+
+    /**
+     * Returns the Couch _replicator database
+     * @return CouchDbConnector a connector to the replicator database
+     */
+    CouchDbConnector getReplicatorConnector();
+
 	/**
 	 * Convenience method for accessing the underlying HttpClient.
 	 * Preferably used wrapped in a org.ektorp.http.RestTemplate.
