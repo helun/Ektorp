@@ -155,7 +155,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		}
 		
 		public int getValueAsInt() {
-			return getValueAsNode().getValueAsInt(0);
+			return getValueAsNode().asInt(0);
 		}
 		
 		public JsonNode getValueAsNode() {
@@ -176,7 +176,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		
 		private String nodeAsString(JsonNode node) {
 			if (isNull(node)) return null;
-			return node.isContainerNode() ? node.toString() : node.getValueAsText();
+			return node.isContainerNode() ? node.toString() : node.asText();
 		}
 
 		private boolean isNull(JsonNode node) {

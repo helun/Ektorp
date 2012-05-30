@@ -650,6 +650,37 @@ public class ViewQuery {
 		return cachedQuery;
 	}
 
+	public ViewQuery clone() {
+		ViewQuery copy = new ViewQuery();
+		copy.mapper = mapper;
+		copy.cacheOk = cacheOk;
+		copy.dbPath = dbPath;
+		copy.descending = descending;
+		copy.designDocId = designDocId;
+		copy.endDocId = endDocId;
+		copy.endKey = endKey;
+		copy.group = group;
+		copy.groupLevel = groupLevel;
+		copy.ignoreNotFound = ignoreNotFound;
+		copy.includeDocs = includeDocs;
+		copy.inclusiveEnd = inclusiveEnd;
+		copy.key = key;
+		if (keys != null) {
+			copy.keys = keys.clone();
+		}
+		copy.limit = limit;
+		copy.listName = listName;
+		copy.queryParams.putAll(queryParams);
+		copy.reduce = reduce;
+		copy.skip = copy.skip;
+		copy.staleOk = staleOk;
+		copy.startDocId = startDocId;
+		copy.startKey = startKey;
+		copy.updateSeq = updateSeq;
+		copy.viewName = viewName;
+		return copy;
+	}
+	
 	private String jsonEncode(Object key) {
 		try {
 			return mapper.writeValueAsString(key);
@@ -842,12 +873,16 @@ public class ViewQuery {
 			return new Keys(keys);
 		}
 
-		private Keys(Collection<Object> keys) {
+		private Keys(Collection<?> keys) {
 			this.keys = new ArrayList<Object>(keys);
 		}
 
 		private Keys(Object[] keys) {
 			this.keys = Arrays.asList(keys);
+		}
+		
+		public Keys clone() {
+			return new Keys(keys);
 		}
 
 		public String toJson() {

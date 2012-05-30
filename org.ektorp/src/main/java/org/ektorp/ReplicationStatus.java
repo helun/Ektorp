@@ -47,7 +47,7 @@ public class ReplicationStatus implements Serializable {
 	}
 
 	public String getSourceLastSequence() {
-		return sourceLastSequence != null ? sourceLastSequence.getValueAsText() : null;
+		return sourceLastSequence != null ? sourceLastSequence.asText() : null;
 	}
 	
 	public JsonNode getSourceLastSequenceAsNode() {
@@ -128,7 +128,7 @@ public class ReplicationStatus implements Serializable {
 		}
 
 		public String getStartLastSeq() {
-			return startLastSeq != null ? startLastSeq.getValueAsText() : null;
+			return startLastSeq != null ? startLastSeq.asText() : null;
 		}
 		
 		public JsonNode getStartLastSeqAsNode() {
@@ -136,7 +136,7 @@ public class ReplicationStatus implements Serializable {
 		}
 
 		public String getEndLastSeq() {
-			return endLastSeq != null ? endLastSeq.getValueAsText() : null;
+			return endLastSeq != null ? endLastSeq.asText() : null;
 		}
 
 		public JsonNode getEndLastSeqAsNode() {

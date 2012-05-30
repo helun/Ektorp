@@ -66,7 +66,9 @@ public class BulkOperationResponseHandler extends StdResponseHandler<List<Docume
 		String rev = jp.getText();
 		if (objectsIter != null) {
 		    Object o = objectsIter.next();
-    		Documents.setId(o, id);
+		    if (Documents.getId(o) == null) {
+		    	Documents.setId(o, id);
+		    }
     		Documents.setRevision(o, rev);
 		}
 	}
