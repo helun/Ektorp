@@ -196,7 +196,7 @@ public class QueryResultParser<T> {
 					JsonNode error = jp.readValueAsTree();
 					if (ignoreNotFound
 							&& error.asText().equals("not_found")) {
-						//lastFieldName = null;
+						lastFieldName = null;
                         state.inRow = false;
                         jp.nextToken();
 					} else {
