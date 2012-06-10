@@ -114,6 +114,14 @@ public class DesignDocumentTest {
 		ObjectMapper om = new ObjectMapper();
 		assertSerialization(om);
 	}
+	
+	@Test
+	public void view_functions_with_line_breaks_should_serialze_just_fine() throws Exception {
+		dd.addView("by_lastname", new DesignDocument.View("function(doc)\n{ if (doc.Type == 'TestDoc') {\nemit(doc.LastName, doc)\n}\n}"));
+		ObjectMapper om = new ObjectMapper();
+		String json = om.writeValueAsString(dd);
+		assertNotNull(json);
+	}
 
 	@Test
 	public void should_serialize_with_auto_detect_getters_disabled() throws JsonParseException, JsonMappingException, IOException {

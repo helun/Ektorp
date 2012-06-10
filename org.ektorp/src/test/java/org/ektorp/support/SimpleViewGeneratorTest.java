@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.*;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.*;
 import org.ektorp.docref.*;
 import org.junit.*;
@@ -35,7 +36,7 @@ public class SimpleViewGeneratorTest {
 	}
 	
 	@Test
-	public void views_should_be_generated_for_all_annotations() {
+	public void views_should_be_generated_for_all_annotations() throws Exception {
 		Map<String, DesignDocument.View> result = gen.generateViews(new TestRepo());
 		assertTrue(result.containsKey("view_1"));
 		assertTrue(result.containsKey("view_2"));
@@ -64,6 +65,10 @@ public class SimpleViewGeneratorTest {
 		assertTrue(result.containsKey("by_special3"));
 		assertFalse("map function should be loaded from file in classpath", result.get("by_special3").getMap().startsWith("classpath:"));
 		assertNull("reduce function should not be defined", result.get("by_special3").getReduce());
+		
+		// serialize all views so that we know they are valid in json. 
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValueAsString(result);
 	}
 	
 	@Test
