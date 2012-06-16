@@ -1,6 +1,7 @@
 package org.ektorp;
 
 import org.codehaus.jackson.annotate.JsonAnySetter;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.ektorp.support.CouchDbDocument;
@@ -49,6 +50,7 @@ public class ReplicatorDocument extends CouchDbDocument
             unknownFields().put(key, value);
         }
 
+        @JsonIgnore
         public Map<String, Object> getUnknownFields() {
             return unknownFields();
         }
@@ -205,6 +207,7 @@ public class ReplicatorDocument extends CouchDbDocument
         unknownFields().put(key, value);
     }
 
+    @JsonIgnore
     public Map<String, Object> getUnknownFields() {
         return unknownFields();
     }
