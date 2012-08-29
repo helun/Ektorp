@@ -20,8 +20,6 @@ import java.util.List;
  */
 public class AttachmentsInOrderParser
 {
-    private static final String ATTACHMENTS_NAME = "_attachments";
-
     /**
      * Parses a CouchDB document in the form of a JsonParser to get the
      * attachments order. It is important that the JsonParser come straight
@@ -38,7 +36,7 @@ public class AttachmentsInOrderParser
         JsonToken jsonToken;
         while((jsonToken = documentJsonParser.nextToken()) != JsonToken.END_OBJECT)
         {
-            if(ATTACHMENTS_NAME.equals(documentJsonParser.getCurrentName()))
+            if(CouchDbDocument.ATTACHMENTS_NAME.equals(documentJsonParser.getCurrentName()))
             {
                 return readAttachments(documentJsonParser);
             }
@@ -66,7 +64,7 @@ public class AttachmentsInOrderParser
             jsonParser.nextToken();
             if(jsonParser.getCurrentToken() != JsonToken.START_OBJECT)
             {
-                String message = ATTACHMENTS_NAME + " contains an invalid object.";
+                String message = CouchDbDocument.ATTACHMENTS_NAME + " contains an invalid object.";
                 throw new JsonParseException(message, jsonParser.getCurrentLocation());
             }
 
