@@ -29,11 +29,11 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.ContentEncodingHttpClient;
 import org.apache.http.impl.client.DecompressingHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -287,7 +287,7 @@ public class StdHttpClient implements HttpClient {
 				SchemeRegistry schemeRegistry = new SchemeRegistry();
 				schemeRegistry.register(configureScheme());
 
-				ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(schemeRegistry);
+				PoolingClientConnectionManager cm = new PoolingClientConnectionManager(schemeRegistry);
 				cm.setMaxTotal(maxConnections);
 				cm.setDefaultMaxPerRoute(maxConnections);
 				conman = cm;
