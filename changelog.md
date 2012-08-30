@@ -26,6 +26,7 @@ Ektorp 1.3.0 brings support for CouchDB 1.2 and Jackson 1.9
 Andreas Litt
 
 David Venable
+* HttpClient version change to 4.2.1 to enable gzip,deflate
 
 esromneb
 
