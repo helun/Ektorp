@@ -1,0 +1,96 @@
+{
+    "_id": "attachments-test-document",
+    "_attachments": {
+        "washington.html": {
+            "content_type": "text/plain; charset=us-ascii", 
+            "digest": "md5-l8BzdkgEM74VsU/w0WBd0w==",
+            "encoded_length": 278, 
+            "encoding": "gzip", 
+            "follows": true, 
+            "length": 502, 
+            "revpos": 1
+        }, 
+        "idaho.html": {
+            "content_type": "text/html", 
+            "digest": "md5-1O21C+Rq+uG/KCuV2LMwtg==",
+            "encoded_length": 427, 
+            "encoding": "gzip", 
+            "follows": true, 
+            "length": 709, 
+            "revpos": 4
+        }, 
+        "wyoming.html": {
+            "content_type": "text/html", 
+            "digest": "md5-vDYgGS6SsqxsYjMSSLdDlA==",
+            "encoded_length": 1203, 
+            "encoding": "gzip", 
+            "follows": true, 
+            "length": 2712, 
+            "revpos": 2
+        }, 
+        "colorado.html": {
+            "content_type": "text/html", 
+            "digest": "md5-8nSQ7dUFYecARBmfl93YDQ==",
+            "encoded_length": 510, 
+            "encoding": "gzip", 
+            "follows": true, 
+            "length": 998, 
+            "revpos": 2
+        }, 
+        "kansas.html": {
+            "content_type": "text/html", 
+            "digest": "md5-cxvFZTxFeOEB7CwyKh51mQ==",
+            "encoded_length": 571, 
+            "encoding": "gzip", 
+            "follows": true, 
+            "length": 1182, 
+            "revpos": 1
+        }, 
+        "missouri.html": {
+            "content_type": "text/html", 
+            "digest": "md5-W1CMoe1X7PdhZ07lmjAVLg==",
+            "encoded_length": 762, 
+            "encoding": "gzip", 
+            "follows": true, 
+            "length": 1567, 
+            "revpos": 1
+        }, 
+        "tennessee.html": {
+            "content_type": "text/html", 
+            "digest": "md5-q9Tca/ZHK9kAmA8a8hRE6Q==",
+            "encoded_length": 770, 
+            "encoding": "gzip", 
+            "follows": true, 
+            "length": 1719, 
+            "revpos": 4
+        },
+        "georgia.html": {
+            "content_type": "text/html",
+            "digest": "md5-DUzAxXFzzn8BHJzdX4Jyow==",
+            "encoded_length": 1174,
+            "encoding": "gzip",
+            "follows": true,
+            "length": 2449,
+            "revpos": 3
+        },
+        "florida.html": {
+            "content_type": "text/html", 
+            "digest": "md5-Dcmv3Ss5LesAs4CN/g4jjg==",
+            "encoded_length": 391, 
+            "encoding": "gzip", 
+            "follows": true, 
+            "length": 684, 
+            "revpos": 2
+        }
+    }, 
+    "_rev": "4-d8698ded32802dbb59312b25e575cb20",
+    "_revisions": {
+        "ids": [
+            "d8698ded32802dbb59312b25e575cb20",
+            "f162e23593a409ac7d0795150c873bf0",
+            "800c2f50e757679531a749e432848366",
+            "85a0f26dd1f2b8c66757678c6266c51e"
+        ], 
+        "start": 4
+    }
+}
