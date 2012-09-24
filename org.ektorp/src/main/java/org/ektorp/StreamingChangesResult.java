@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.changes.DocumentChange;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.impl.changes.StdDocumentChange;
 
 /**
- * 
+ *
  * @author Sverre Kristian Valskrå
  */
 public class StreamingChangesResult implements Serializable, Iterable<DocumentChange>, Closeable{
@@ -34,8 +34,8 @@ public class StreamingChangesResult implements Serializable, Iterable<DocumentCh
             throw new DbAccessException(e);
         }
 	}
-	
-	
+
+
 	public Iterator<DocumentChange> iterator() {
 		if (iteratorCalled) {
 			throw new IllegalStateException("Iterator can only be called once!");
@@ -43,7 +43,7 @@ public class StreamingChangesResult implements Serializable, Iterable<DocumentCh
 		iteratorCalled = true;
 		return new StreamingResultIterator();
 	}
-	
+
 	/**
 	 * Aborts the stream immediately
 	 */
@@ -60,10 +60,10 @@ public class StreamingChangesResult implements Serializable, Iterable<DocumentCh
 		} catch (IOException e) {
 		}
 	}
-	
+
 	/**
 	 * This method can only be called after stream is fully red
-	 * 
+	 *
 	 * @return
 	 */
 	public long getLastSeq() {
@@ -72,8 +72,8 @@ public class StreamingChangesResult implements Serializable, Iterable<DocumentCh
 	    }
         return lastSeq;
     }
-	
-	
+
+
 	private class StreamingResultIterator implements Iterator<DocumentChange>{
 		private DocumentChange row;
 		public boolean hasNext() {
@@ -81,18 +81,18 @@ public class StreamingChangesResult implements Serializable, Iterable<DocumentCh
 			    JsonNode jsonNode = jp.readValueAs(JsonNode.class);
 			    if (jsonNode == null) {
 			        jsonNode = jp.readValueAs(JsonNode.class);
-			        lastSeq = jsonNode.get("last_seq").getLongValue();
+			        lastSeq = jsonNode.get("last_seq").longValue();
 			        close();
 			        return false;
 			    }
 			    row = new StdDocumentChange(jsonNode);
-			    
+
 				return true;
 			} catch (Exception e) {
 				throw new DbAccessException(e);
 			}
 		}
-		
+
 		public DocumentChange next() {
 			return row;
 		}
@@ -100,5 +100,5 @@ public class StreamingChangesResult implements Serializable, Iterable<DocumentCh
 			throw new UnsupportedOperationException();
 		}
 	}
-	
+
 }

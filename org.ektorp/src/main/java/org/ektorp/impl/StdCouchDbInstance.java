@@ -5,14 +5,14 @@ import static java.lang.String.*;
 import java.io.*;
 import java.util.*;
 
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.type.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.*;
 import org.ektorp.http.*;
 import org.ektorp.util.*;
 import org.slf4j.*;
 /**
- * 
+ *
  * @author henrik lundgren
  *
  */
@@ -20,7 +20,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 
 	private final static Logger LOG = LoggerFactory.getLogger(StdCouchDbInstance.class);
 	private final static TypeReference<List<String>> STRING_LIST_TYPE_DEF = new TypeReference<List<String>>() {};
-	
+
 	private final HttpClient client;
 	private final RestTemplate restTemplate;
 	private final ObjectMapper objectMapper;
@@ -30,7 +30,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	public StdCouchDbInstance(HttpClient client) {
 		this(client, new StdObjectMapperFactory());
 	}
-	
+
 	public StdCouchDbInstance(HttpClient client, ObjectMapperFactory of) {
 		Assert.notNull(client, "HttpClient may not be null");
 		Assert.notNull(of, "ObjectMapperFactory may not be null");
@@ -40,11 +40,11 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
 		this.objectMapperFactory = of;
 	}
-	
+
 	public void createDatabase(String path) {
 		createDatabase(DbPath.fromString(path));
 	}
-	
+
 	public void createDatabase(DbPath db) {
 		if (checkIfDbExists(db)) {
 			throw new DbAccessException(format("A database with path %s already exists", db.getPath()));
@@ -80,7 +80,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 			}
 		});
 	}
-	
+
 	public ReplicationStatus replicate(ReplicationCommand cmd) {
 		try {
 			return restTemplate.post("/_replicate", objectMapper.writeValueAsString(cmd), new StdResponseHandler<ReplicationStatus>() {
@@ -89,7 +89,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 						throws Exception {
 					return objectMapper.readValue(hr.getContent(), ReplicationStatus.class);
 				}
-			});	
+			});
 		} catch (IOException e) {
 			throw Exceptions.propagate(e);
 		}
@@ -98,7 +98,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	public HttpClient getConnection() {
 		return client;
 	}
-	
+
 	public CouchDbConnector createConnector(String path,
 			boolean createIfNotExists) {
 		CouchDbConnector db = new StdCouchDbConnector(path, this, objectMapperFactory);

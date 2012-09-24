@@ -3,13 +3,13 @@ package org.ektorp;
 import java.io.*;
 import java.util.*;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.annotate.*;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * 
+ *
  * Replication response doc is not very well documented in the CouchDB reference...
- * 
+ *
  * @author henrik lundgren
  *
  */
@@ -19,21 +19,21 @@ public class ReplicationStatus implements Serializable {
 
 	@JsonProperty("ok")
 	boolean ok;
-	
+
 	@JsonProperty("no_changes")
 	boolean noChanges;
-	
+
 	@JsonProperty("session_id")
 	String sessionId;
-	
+
 	@JsonProperty("source_last_seq")
 	JsonNode sourceLastSequence;
-	
+
 	@JsonProperty("history")
 	List<History> history;
-	
+
 	private Map<String, Object> unknownFields;
-	
+
 	public boolean isOk() {
 		return ok;
 	}
@@ -49,7 +49,7 @@ public class ReplicationStatus implements Serializable {
 	public String getSourceLastSequence() {
 		return sourceLastSequence != null ? sourceLastSequence.asText() : null;
 	}
-	
+
 	public JsonNode getSourceLastSequenceAsNode() {
 		return sourceLastSequence;
 	}
@@ -64,57 +64,57 @@ public class ReplicationStatus implements Serializable {
 		}
 		return unknownFields;
 	}
-	
+
 	@JsonAnySetter
 	public void setUnknown(String key, Object value) {
 		unknown().put(key, value);
 	}
-	
+
 	public Object getField(String key) {
 		return unknown().get(key);
 	}
-	
+
 	public static class History {
-		
+
 		private Map<String, Object> unknownFields;
-	
+
 		@JsonProperty("session_id")
 		String sessionId;
-		
+
 		@JsonProperty("start_time")
 		String startTime;
-		
+
 		@JsonProperty("end_time")
 		String endTime;
-		
+
 		@JsonProperty("start_last_seq")
 		JsonNode startLastSeq;
-		
+
 		@JsonProperty("end_last_seq")
 		JsonNode endLastSeq;
-		
+
 		@JsonProperty("missing_checked")
 		int missingChecked;
-		
+
 		@JsonProperty("missing_found")
 		int missingFound;
-		
+
 		@JsonProperty("docs_read")
 		int docsRead;
-		
+
 		@JsonProperty("docs_written")
 		int docsWritten;
-		
+
 		@JsonProperty("doc_write_failures")
 		int docWriteFailures;
-		
+
 		@JsonProperty("recorded_seq")
 		int recordedSeq;
-		
+
 		public int getRecordedSeq() {
 			return recordedSeq;
 		}
-		
+
 		public String getSessionId() {
 			return sessionId;
 		}
@@ -130,7 +130,7 @@ public class ReplicationStatus implements Serializable {
 		public String getStartLastSeq() {
 			return startLastSeq != null ? startLastSeq.asText() : null;
 		}
-		
+
 		public JsonNode getStartLastSeqAsNode() {
 			return startLastSeq;
 		}
@@ -142,7 +142,7 @@ public class ReplicationStatus implements Serializable {
 		public JsonNode getEndLastSeqAsNode() {
 			return endLastSeq;
 		}
-		
+
 		public int getMissingChecked() {
 			return missingChecked;
 		}
@@ -169,15 +169,15 @@ public class ReplicationStatus implements Serializable {
 			}
 			return unknownFields;
 		}
-		
+
 		@JsonAnySetter
 		public void setUnknown(String key, Object value) {
 			unknown().put(key, value);
 		}
-		
+
 		public Object getField(String key) {
 			return unknown().get(key);
-		}		
+		}
 	}
-	
+
 }

@@ -2,8 +2,9 @@ package org.ektorp;
 
 import static org.junit.Assert.*;
 
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.*;
+
 
 public class BulkDeleteDocumentTest {
 

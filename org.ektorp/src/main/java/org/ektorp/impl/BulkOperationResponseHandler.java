@@ -6,15 +6,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdResponseHandler;
 import org.ektorp.util.Documents;
 /**
- * 
+ *
  * @author henrik lundgren
  *
  */
@@ -22,16 +22,16 @@ public class BulkOperationResponseHandler extends StdResponseHandler<List<Docume
 
 	private final ObjectMapper objectMapper;
 	private final Collection<?> objects;
-	
+
 	public BulkOperationResponseHandler(ObjectMapper om) {
         this(null, om);
     }
-	
+
 	public BulkOperationResponseHandler(Collection<?> objects,ObjectMapper om) {
 		this.objects = objects;
 		this.objectMapper = om;
 	}
-	
+
 	@Override
 	public List<DocumentOperationResult> success(HttpResponse hr)
 			throws Exception {

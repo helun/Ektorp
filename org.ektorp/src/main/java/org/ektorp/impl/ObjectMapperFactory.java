@@ -1,7 +1,7 @@
 package org.ektorp.impl;
 
-import org.codehaus.jackson.map.*;
 import org.ektorp.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  *
  * @author henrik lundgren

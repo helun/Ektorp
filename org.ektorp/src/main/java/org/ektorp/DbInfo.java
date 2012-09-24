@@ -3,10 +3,10 @@ package org.ektorp;
 import java.io.*;
 import java.util.*;
 
-import org.codehaus.jackson.annotate.*;
+import com.fasterxml.jackson.annotation.*;
 import org.ektorp.util.*;
 /**
- * 
+ *
  * @author henrik lundgren
  *
  */
@@ -15,9 +15,9 @@ public class DbInfo implements Serializable {
 	private static final long serialVersionUID = -6511885014968791685L;
 
 	private final String dbName;
-	
+
 	@JsonProperty("compact_running")
-	boolean compactRunning;	 
+	boolean compactRunning;
 	@JsonProperty("disk_format_version")
     int diskFormatVersion;
 	@JsonProperty("disk_size")
@@ -36,7 +36,7 @@ public class DbInfo implements Serializable {
 	 * Used to future proof this class, if new fields are added by CouchDb they will be found here.
 	 */
 	private Map<String, Object> unknownFields;
-	
+
 	public boolean isCompactRunning() {
 		return compactRunning;
 	}
@@ -101,29 +101,29 @@ public class DbInfo implements Serializable {
 	public boolean isUpdateSeqNumeric() {
 		return updateSeq != null && updateSeq.matches("^\\d*$");
 	}
-	
+
 	@JsonCreator
 	public DbInfo(@JsonProperty("db_name") String dbName) {
 		Assert.hasText(dbName, "dbName may not be null or empty");
 		this.dbName = dbName;
 	}
-	
+
 	@JsonAnySetter
 	public void setUnknown(String key, Object value) {
 		unknownFields().put(key, value);
 	}
-	
+
 	public Map<String, Object> getUnknownFields() {
 		return unknownFields();
 	}
-	
+
 	private Map<String, Object> unknownFields() {
 		if (unknownFields == null) {
 			unknownFields = new HashMap<String, Object>();
 		}
 		return unknownFields;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == this) return true;
@@ -133,10 +133,10 @@ public class DbInfo implements Serializable {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return dbName.hashCode();
 	}
-	
+
 }

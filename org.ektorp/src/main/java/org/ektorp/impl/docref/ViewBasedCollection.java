@@ -4,9 +4,10 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.map.*;
-import org.codehaus.jackson.map.type.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import org.ektorp.*;
 import org.ektorp.docref.*;
 import org.ektorp.impl.*;
@@ -15,7 +16,7 @@ import org.slf4j.*;
 public class ViewBasedCollection implements InvocationHandler {
 
 	private final static Logger LOG = LoggerFactory.getLogger(ViewBasedCollection.class);
-	
+
 	final String id;
 	final CouchDbConnector couchDbConnector;
 	final Class<?> clazz;
@@ -83,7 +84,7 @@ public class ViewBasedCollection implements InvocationHandler {
 			start = end;
 			end = tmp;
 		}
-		
+
 		ViewQuery query = new ViewQuery().designDocId(resolveDesignDocId(ann))
 				.viewName(resolveViewName(ann, fieldName))
 				.includeDocs(true)

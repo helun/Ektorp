@@ -3,7 +3,6 @@ package org.ektorp.impl;
 import java.util.Collections;
 import java.util.List;
 
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.Page;
 import org.ektorp.PageRequest;

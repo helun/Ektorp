@@ -2,7 +2,7 @@ package org.ektorp.impl.docref;
 
 import java.io.*;
 
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.util.*;
 import org.junit.Assert;
 import org.mockito.*;
