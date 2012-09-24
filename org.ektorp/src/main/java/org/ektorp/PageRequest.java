@@ -2,8 +2,6 @@ package org.ektorp;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Deque;
-import java.util.LinkedList;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
@@ -11,41 +9,68 @@ import org.ektorp.util.Base64;
 import org.ektorp.util.Exceptions;
 
 /**
- *
+ * 
  * @author henrik lundgren
- *
+ * 
  */
 public class PageRequest {
 
 	private static final String NEXT_KEY_FIELD_NAME = "k";
-	private static final String KEY_HISTORY_FIELD_NAME = "h";
 	private static final String PAGE_SIZE_FIELD_NAME = "s";
+	private static final String BACK_FIELD_NAME = "b";
+	private static final String PAGE_FIELD_NAME = "p";
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
-	private static final KeyIdPair FIRST_PAGE_NEXT_KEY_PLACEHOLDER = new KeyIdPair(NullNode.instance, "_ektorp_1k");
 
 	private final int pageSize;
 	private final KeyIdPair nextKey;
-	private final Deque<KeyIdPair> keyHistory;
+	private final boolean back;
+	private final int page;
 
 	public static ViewQuery applyPagingParameters(ViewQuery q, PageRequest pr) {
-		if (pr.getStartKey() != null) {
-			q.startKey(pr.getStartKey());
+		ViewQuery pagedQuery = q.clone();
+		if (pr.page > 0) {
+			if (pr.getStartKey() != null) {
+				pagedQuery.startKey(pr.getStartKey());
+			}
+			if (pr.getStartKeyDocId() != null) {
+				pagedQuery.startDocId(pr.getStartKeyDocId());
+			}
+			if (pr.back) {
+				pagedQuery.descending(!pagedQuery.isDescending());
+			}	
 		}
-		if (pr.getStartKeyDocId() != null) {
-			q.startDocId(pr.getStartKeyDocId());
-		}
-		return q.limit(pr.getPageSize() + 1);
+		
+		int offset = pr.back ? 1 : 1;
+		pagedQuery.limit(pr.getPageSize() + offset);
+		return pagedQuery;
 	}
 
+	public int getPageNo() {
+		return page;
+	}
+	
 	public static PageRequest firstPage(int pageSize) {
-		return new PageRequest(null, pageSize, new LinkedList<KeyIdPair>());
+		return new Builder().pageSize(pageSize).build();
+	}
+	
+	public PageRequest.Builder nextRequest(Object nextStartKey,
+			String nextStartDocId) {
+		try {
+			JsonNode keyNode = MAPPER.readTree(MAPPER
+					.writeValueAsString(nextStartKey));
+			return new Builder(this)
+						.nextKey(new KeyIdPair(keyNode, nextStartDocId));
+		} catch (IOException e) {
+			throw Exceptions.propagate(e);
+		}
 	}
 
-	private PageRequest(KeyIdPair nextKey, int pageSize, Deque<KeyIdPair> keyHistory) {
-		this.nextKey = nextKey;
-		this.pageSize = pageSize;
-		this.keyHistory = keyHistory;
+	private PageRequest(Builder b) {
+		this.back = b.back;
+		this.page = b.page;
+		this.nextKey = b.nextKey;
+		this.pageSize = b.pageSize;
 	}
 
 	public static PageRequest fromLink(String link) {
@@ -54,40 +79,36 @@ public class PageRequest {
 					.decode(link, Base64.URL_SAFE)));
 
 			KeyIdPair key = parseNextKey(n);
-			Deque<KeyIdPair> keyHistory = parseKeyHistory(n);
-			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).intValue();
-
-			return new PageRequest(key, pageSize, keyHistory);
+			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).getIntValue();
+			boolean back = n.get(BACK_FIELD_NAME).asInt() == 1;
+			int page = n.get(PAGE_FIELD_NAME).asInt();
+			return new Builder()
+						.nextKey(key)
+						.pageSize(pageSize)
+						.back(back)
+						.page(page)
+						.build();
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}
 	}
 
-	private static Deque<KeyIdPair> parseKeyHistory(JsonNode n) {
-		Deque<KeyIdPair> keyHistory = new LinkedList<KeyIdPair>();
-		ArrayNode h = (ArrayNode) n.get(KEY_HISTORY_FIELD_NAME);
-		if (h != null) {
-			for (JsonNode hn : h) {
-				String docId = hn.fieldNames().next();
-				keyHistory.addFirst(new KeyIdPair(hn.get(docId), docId));
-			}
-
-		}
-		return keyHistory;
+	private static KeyIdPair parseNextKey(JsonNode n) {
+		return parseKey(NEXT_KEY_FIELD_NAME, n);
 	}
 
-	private static KeyIdPair parseNextKey(JsonNode n) {
+	private static KeyIdPair parseKey(String fieldName, JsonNode n) {
 		KeyIdPair key;
-		JsonNode nextKey = n.get(NEXT_KEY_FIELD_NAME);
+		JsonNode nextKey = n.get(fieldName);
 		if (nextKey != null) {
-			String docId = nextKey.fieldNames().next();
+			String docId = nextKey.getFieldNames().next();
 			key = new KeyIdPair(nextKey.get(docId), docId);
 		} else {
 			key = null;
 		}
 		return key;
-	}
-
+	} 
+	
 	public String asLink() {
 		try {
 			return Base64.encodeBytes(MAPPER.writeValueAsBytes(asJson()),
@@ -103,12 +124,8 @@ public class PageRequest {
 			n.putObject(NEXT_KEY_FIELD_NAME).put(nextKey.docId, nextKey.key);
 		}
 		n.put(PAGE_SIZE_FIELD_NAME, pageSize);
-		if (!keyHistory.isEmpty()) {
-			ArrayNode h = n.putArray(KEY_HISTORY_FIELD_NAME);
-			for (KeyIdPair k : keyHistory) {
-				h.addObject().put(k.docId, k.key);
-			}
-		}
+		n.put(BACK_FIELD_NAME, back ? 1 : 0);
+		n.put(PAGE_FIELD_NAME, page);
 		return n;
 	}
 
@@ -124,44 +141,36 @@ public class PageRequest {
 		return nextKey != null ? nextKey.docId : null;
 	}
 	/**
-	 * @return the previous PageRequest or null if no previous page exists
+	 * 
+	 * @param startKey
+	 * @param startDocId
+	 * @return
 	 */
 	public PageRequest getPreviousPageRequest() {
-		Deque<KeyIdPair> d = new LinkedList<KeyIdPair>(keyHistory);
-		KeyIdPair previousKey = d.pollFirst();
-		if (previousKey == null) {
-			return null;
-		}
-		if (FIRST_PAGE_NEXT_KEY_PLACEHOLDER.equals(previousKey)) {
-			d.clear();
-			previousKey = null;
-		}
-		return new PageRequest(previousKey, pageSize, d);
+		return new Builder(this)
+					.page(this.page-1)
+					.build();
 	}
 
-	public PageRequest getNextPageRequest(Object nextStartKey,
-			String nextStartDocId) {
-		try {
-			JsonNode keyNode = MAPPER.readTree(MAPPER
-					.writeValueAsString(nextStartKey));
-
-			Deque<KeyIdPair> d = new LinkedList<KeyIdPair>(keyHistory);
-			d.addFirst(this.nextKey != null ? this.nextKey : FIRST_PAGE_NEXT_KEY_PLACEHOLDER);
-
-			return new PageRequest(new KeyIdPair(keyNode, nextStartDocId), pageSize, d);
-		} catch (IOException e) {
-			throw Exceptions.propagate(e);
-		}
-
+	
+	public boolean isBack() {
+		return back;
 	}
 
+	@Override
+	public String toString() {
+		return asJson().toString();
+	}
+
+	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((keyHistory == null) ? 0 : keyHistory.size());
+		result = prime * result + (back ? 1231 : 1237);
 		result = prime * result + ((nextKey == null) ? 0 : nextKey.hashCode());
+		result = prime * result + page;
 		result = prime * result + pageSize;
 		return result;
 	}
@@ -175,26 +184,77 @@ public class PageRequest {
 		if (getClass() != obj.getClass())
 			return false;
 		PageRequest other = (PageRequest) obj;
-		if (keyHistory == null) {
-			if (other.keyHistory != null)
-				return false;
-		} else if (keyHistory.size() != other.keyHistory.size())
+		if (back != other.back)
 			return false;
 		if (nextKey == null) {
 			if (other.nextKey != null)
 				return false;
 		} else if (!nextKey.equals(other.nextKey))
 			return false;
+		if (page != other.page)
+			return false;
 		if (pageSize != other.pageSize)
 			return false;
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return asJson().toString();
-	}
 
+
+	public static class Builder {
+		
+		private int pageSize;
+		private KeyIdPair nextKey;
+		private boolean back;
+		private int page;
+		
+		public Builder() {
+			
+		}
+		
+		public Builder(PageRequest prototype) {
+			this.back = prototype.back;
+			this.nextKey = prototype.nextKey;
+			this.page = prototype.page;
+			this.pageSize = prototype.pageSize; 
+		}
+		
+		public Builder pageSize(int i) {
+			this.pageSize = i;
+			return this;
+		}
+		
+		public Builder page(int i) {
+			this.page = i;
+			return this;
+		}
+		
+		public Builder back(boolean b) {
+			this.back = b;
+			return this;
+		}
+		
+		public Builder nextKey(KeyIdPair k) {
+			this.nextKey = k;
+			return this;
+		}
+		
+		public PageRequest build() {
+			return new PageRequest(this);
+		}
+
+		public int getPageNo() {
+			return page;
+		}
+		
+		public int getNextPage() {
+			return page + 1;
+		}
+		
+		public int getPrevPage() {
+			return page - 1;
+		}
+	} 
+	
 	private static final class KeyIdPair {
 		final JsonNode key;
 		final String docId;
@@ -234,8 +294,8 @@ public class PageRequest {
 				return false;
 			return true;
 		}
-
-
+		
+		
 	}
 
 }

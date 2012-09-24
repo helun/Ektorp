@@ -9,7 +9,7 @@
   <info>
     <title>Ektorp Reference Documentation</title>
 
-    <releaseinfo>Version: 1.2.2</releaseinfo>
+    <releaseinfo>Version: 1.3.0</releaseinfo>
 
     <author>
       <personname><firstname>Henrik</firstname><surname>Lundgren</surname></personname>
@@ -92,7 +92,7 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp&lt;/artifactId&gt;
-    &lt;version&gt;1.2.2&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
         <para>Spring support module:</para>
@@ -100,7 +100,7 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp.spring&lt;/artifactId&gt;
-    &lt;version&gt;1.2.2&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
       </section>
 
@@ -112,14 +112,14 @@
         <programlisting language="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp&lt;/artifactId&gt;
-    &lt;version&gt;1.3.0-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;1.3.1-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;
 
 
 &lt;dependency&gt;
     &lt;groupId&gt;org.ektorp&lt;/groupId&gt;
     &lt;artifactId&gt;org.ektorp.spring&lt;/artifactId&gt;
-    &lt;version&gt;1.3.0-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;1.3.1-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
 
         <para>You can find the snapshots at

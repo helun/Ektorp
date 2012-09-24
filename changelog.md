@@ -1,5 +1,50 @@
 Change log
 ==========
+Changes in version 1.3.0
+------------------------
+Ektorp 1.3.0 brings support for CouchDB 1.2 and Jackson 1.9
+### Fixes
+ * #78: Fix bug in Options with includeRevisions.
+ * #71: Fix bug where enableSSL=true and relaxedSSLSettings=false doesn't initialize SSLContext
+ * #71: Fix bug where configuration using StdHttpClient.Builder.url() without port doesn't work
+ * #70: Fixed bug where rows where ignored after first non-existent row was found
+ * #67: Issues with paging backwards
+ * #65: Wrong use of total_rows field in QueryResultParser
+ * #62: Sequence id type
+### Improvements
+ * Allow username and password to be included in StdHttpClient.Builder.url()
+ * #85: Replicator Documents and Connector
+ * #83: Support for Multipart Requests
+ * #77: Change needed to support LuceneDesignDocument
+ * #75: Common-js modules support for Views
+ * #63: Add abort method to streamingviewresult
+ * #58: ContentLength isn't long enough
+ * #29: Support Document Copy
+### Other Changes
+* Jackson Version changed to 1.9.7
+### Contributors
+Andreas Litt
+
+David Venable
+
+esromneb
+
+fireflyrox
+
+Geir Ove Grønmo
+
+Jake Goulding
+
+Henrik Lundgren
+
+Mark van Cuijk
+
+Millau Julien
+
+seanadkinson
+
+thesverre
+
 Changes in version 1.2.2
 ------------------------
 1.2.2 is a bug fix release.

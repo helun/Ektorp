@@ -1,9 +1,10 @@
-{"total_rows":4,"rows":[
+{"total_rows":8,"rows":[
 {"key":"doc_id0","error":"not_found"},
 {"id":"doc_id1","key":"doc_id1","value":null,"doc":{"_id":"doc_id1", "_rev":"rev1", "name":"foo", "age":12}},
 {"key":"doc_id2","error":"not_found"},
 {"id":"doc_id3","key":"doc_id3","value":null,"doc":{"_id":"doc_id3", "_rev":"rev3", "name":"bar", "age":99}},
 {"key":"doc_id4","error":"not_found"},
 {"id":"doc_id5","key":"doc_id5","value":{"rev":"rev4","deleted":true},"doc":null},
-{"id":"doc_id6","key":"doc_id6","value":null,"doc":{"_id":"doc_id6", "_rev":"rev1", "name":"baz", "age":76}}
+{"id":"doc_id6","key":"doc_id6","value":null,"doc":{"_id":"doc_id6", "_rev":"rev1", "name":"baz", "age":76}},
+{"key":"doc_id7","error":"not_found"}
 ]}

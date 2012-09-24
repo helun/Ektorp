@@ -61,6 +61,11 @@ public class ResponseOnFileStub implements HttpResponse {
 		return in;
 	}
 
+	public String getETag() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public boolean isSuccessful() {
 		return code < 300;
 	}

@@ -26,6 +26,11 @@ public class HttpResponseStub implements HttpResponse {
 		return new ByteArrayInputStream(body.getBytes());
 	}
 
+	public String getETag() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public boolean isSuccessful() {
 		return code < 300;
 	}

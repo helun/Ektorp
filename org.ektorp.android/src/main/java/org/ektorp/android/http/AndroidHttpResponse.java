@@ -25,16 +25,23 @@ public class AndroidHttpResponse implements HttpResponse {
 	private final StatusLine status;
 	private final String requestURI;
 	private final HttpRequestBase httpRequest;
+	private final String revision;
 
 	public static AndroidHttpResponse of(org.apache.http.HttpResponse rsp, HttpRequestBase httpRequest) {
-		return new AndroidHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest);
+		return new AndroidHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest, rsp.getFirstHeader("ETag"));
 	}
 
-	private AndroidHttpResponse(HttpEntity e, StatusLine status, HttpRequestBase httpRequest) {
+	private AndroidHttpResponse(HttpEntity e, StatusLine status, HttpRequestBase httpRequest, Header eTagHeader) {
 		this.httpRequest = httpRequest;
 		this.entity = e != null ? e : NULL_ENTITY;
 		this.status = status;
 		this.requestURI = httpRequest.getURI().toString();
+		if(eTagHeader != null) {
+			revision = eTagHeader.getValue().replace("\"", "");
+		}
+		else {
+			revision = null;
+		}
 	}
 
 	@Override
@@ -54,6 +61,11 @@ public class AndroidHttpResponse implements HttpResponse {
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}
+	}
+
+	@Override
+	public String getETag() {
+		return revision;
 	}
 
 	@Override

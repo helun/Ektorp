@@ -18,6 +18,8 @@ import org.ektorp.util.*;
 @JsonInclude(Include.NON_NULL)
 public class CouchDbDocument implements Serializable {
 
+    public static final String ATTACHMENTS_NAME = "_attachments";
+
 	private static final long serialVersionUID = 1L;
 	private String id;
 	private String revision;
@@ -60,13 +62,13 @@ public class CouchDbDocument implements Serializable {
 	public boolean isNew() {
 		return revision == null;
 	}
-
-	@JsonProperty("_attachments")
+	
+	@JsonProperty(ATTACHMENTS_NAME)
 	public Map<String, Attachment> getAttachments() {
 		return attachments;
 	}
-
-	@JsonProperty("_attachments")
+	
+	@JsonProperty(ATTACHMENTS_NAME)
 	void setAttachments(Map<String, Attachment> attachments) {
 		this.attachments = attachments;
 	}
