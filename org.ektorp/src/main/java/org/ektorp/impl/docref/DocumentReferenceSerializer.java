@@ -10,10 +10,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.JsonSerializer;
-import org.codehaus.jackson.map.SerializerProvider;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
@@ -22,7 +22,7 @@ import org.ektorp.util.Exceptions;
 import org.ektorp.util.Predicate;
 import org.ektorp.util.ReflectionUtils;
 /**
- * 
+ *
  * @author ragnar rova
  * @author henrik lundgren
  *
@@ -32,7 +32,7 @@ public class DocumentReferenceSerializer extends JsonSerializer<Object> {
 
 	private final CouchDbConnector couchDbConnector;
 	private final JsonSerializer<Object> delegate;
-	
+
 	public DocumentReferenceSerializer(CouchDbConnector db, JsonSerializer<Object> delegate) {
 		this.couchDbConnector = db;
 		this.delegate = delegate;
@@ -44,7 +44,7 @@ public class DocumentReferenceSerializer extends JsonSerializer<Object> {
 			JsonProcessingException {
 		try {
 			final Set<Object> docsToSave = new HashSet<Object>();
-			
+
 			ReflectionUtils.eachField(value.getClass(), new Predicate<Field>() {
 				@Override
 				public boolean apply(Field input) {
@@ -54,7 +54,7 @@ public class DocumentReferenceSerializer extends JsonSerializer<Object> {
 							try {
 								input.setAccessible(true);
 								Collection<?> d = findDocumentsToSave((Set<?>) input.get(value));
-								docsToSave.addAll(d);	
+								docsToSave.addAll(d);
 							} catch (IllegalAccessException e) {
 								throw Exceptions.propagate(e);
 							}
@@ -65,7 +65,7 @@ public class DocumentReferenceSerializer extends JsonSerializer<Object> {
 					return false;
 				}
 			});
-			
+
 			if (!docsToSave.isEmpty()) {
 				List<DocumentOperationResult> res = couchDbConnector
 						.executeBulk(docsToSave);

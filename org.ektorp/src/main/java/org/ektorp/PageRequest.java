@@ -3,9 +3,8 @@ package org.ektorp;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.*;
 import org.ektorp.util.Base64;
 import org.ektorp.util.Exceptions;
 

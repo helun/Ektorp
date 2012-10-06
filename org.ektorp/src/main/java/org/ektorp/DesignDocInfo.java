@@ -1,12 +1,11 @@
 package org.ektorp;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ektorp.support.OpenCouchDbDocument;
-
 /**
- * 
+ *
  * @author EronenP
- * 
+ *
  */
 public class DesignDocInfo extends OpenCouchDbDocument {
 
@@ -43,7 +42,7 @@ public class DesignDocInfo extends OpenCouchDbDocument {
 		}
 		/**
 		 * Indicates if the view is currently being updated.
-		 * 
+		 *
 		 * @return
 		 */
 		public boolean isUpdaterRunning() {
@@ -86,7 +85,7 @@ public class DesignDocInfo extends OpenCouchDbDocument {
 		}
 		/**
 		 * The update sequence of the corresponding database that has been indexed.
-		 * 
+		 *
 		 * @return
 		 */
 		public long getUpdateSeq() {

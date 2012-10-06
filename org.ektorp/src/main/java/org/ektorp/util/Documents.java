@@ -4,9 +4,9 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import org.codehaus.jackson.*;
-import org.codehaus.jackson.annotate.*;
-import org.codehaus.jackson.node.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.ektorp.*;
 import org.slf4j.*;
 
@@ -14,17 +14,17 @@ import org.slf4j.*;
  * Class for handling id and revision for persistent classes.
  * A persistent class must either declare setters and getters for the properties id and revision or
  * annotate equivalent methods with org.codehaus.jackson.annotate.JsonProperty("_id") and JsonProperty("_rev")
- * 
+ *
  * Map can be used as a document class, the map must contain the id field with key "_id" and revision with the key "_rev".
- * 
+ *
  * org.codehaus.jackson.node.ObjectNode can olso be used as a document class.
- * 
+ *
  * For special needs, a custom document accessor can be registered through the method registerAccessor(Class<?> documentType, DocumentAccessor accessor)
- * 
+ *
  * @author henrik lundgren
  * @author bjohnson.professional
  * @author Pascal G√©linas (issue 99)
- * 
+ *
  */
 public final class Documents {
 
@@ -37,7 +37,7 @@ public final class Documents {
 		accessors.put(Map.class, new MapAccessor());
 		putAccessor(ObjectNode.class, new ObjectNodeAccessor());
 	}
-	
+
 	/**
 	 * Used to register a custom DocumentAccessor for a particular class.
 	 * Any existing accessor for the class will be overridden.
@@ -62,7 +62,7 @@ public final class Documents {
 	/**
 	 * Will set the id property on the document IF a mutator exists. Otherwise
 	 * nothing happens.
-	 * 
+	 *
 	 * @param document
 	 * @param id
 	 */
@@ -84,11 +84,11 @@ public final class Documents {
 	public static boolean isNew(Object document) {
 		return getRevision(document) == null;
 	}
-	
+
 	private static <T> void putAccessor(Class<? extends T> documentType, DocumentAccessor accessor){
 		accessors.put(documentType, accessor);
 	}
-	
+
 	private static DocumentAccessor getAccessor(Class<?> documentType){
 		return accessors.get(documentType);
 	}
@@ -152,7 +152,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#hasIdMutator()
 		 */
 		public boolean hasIdMutator() {
@@ -197,7 +197,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#getId(java.lang.Object)
 		 */
 		public String getId(Object o) {
@@ -210,7 +210,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#setId(java.lang.Object,
 		 * java.lang.String)
 		 */
@@ -224,7 +224,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#getRevision(java.lang.Object)
 		 */
 		public String getRevision(Object o) {
@@ -237,7 +237,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#setRevision(java.lang.Object,
 		 * java.lang.String)
 		 */
@@ -322,7 +322,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#hasIdMutator()
 		 */
 		public boolean hasIdMutator() {
@@ -376,7 +376,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#getId(java.lang.Object)
 		 */
 		public String getId(Object o) {
@@ -389,7 +389,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#setId(java.lang.Object,
 		 * java.lang.String)
 		 */
@@ -403,7 +403,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#getRevision(java.lang.Object)
 		 */
 		public String getRevision(Object o) {
@@ -416,7 +416,7 @@ public final class Documents {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.ektorp.util.DocumentAccessor#setRevision(java.lang.Object,
 		 * java.lang.String)
 		 */
@@ -450,7 +450,7 @@ public final class Documents {
 		public void setRevision(Object o, String rev) {
 			cast(o).put(REV_FIELD_NAME, rev);
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		private Map<String, String> cast(Object o) {
 			return (Map<String, String>)o;
@@ -491,7 +491,7 @@ public final class Documents {
 				throw Exceptions.newRTE("field %s in node: %s is not textual ",
 						fieldName, target);
 			}
-			return field.getTextValue();
+			return field.textValue();
 		}
 
 		private void setField(Object o, String fieldName, String fieldValue) {

@@ -2,13 +2,13 @@ package org.ektorp.support;
 
 import static org.junit.Assert.*;
 
-import org.codehaus.jackson.map.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.*;
 
 public class CouchDbDocumentTest {
 
 	ObjectMapper mapper = new ObjectMapper();
-	
+
 	@Test
 	public void loadBasicDoc() throws Exception {
 		TestDoc td = mapper.readValue(getClass().getResourceAsStream("basic_doc.json"), TestDoc.class);
@@ -24,9 +24,9 @@ public class CouchDbDocumentTest {
 		// serialize just to provoke any serialization errors
 		mapper.writeValueAsString(td);
 	}
-	
+
 	public static class TestDoc extends CouchDbDocument {
-		
+
 		private static final long serialVersionUID = 1L;
 		private String field;
 
@@ -37,7 +37,7 @@ public class CouchDbDocumentTest {
 		public void setField(String field) {
 			this.field = field;
 		}
-		
+
 	}
 
 }

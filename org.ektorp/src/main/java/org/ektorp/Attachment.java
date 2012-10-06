@@ -4,17 +4,17 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.*;
-import org.codehaus.jackson.map.annotate.*;
-import org.codehaus.jackson.map.annotate.JsonSerialize.*;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import org.ektorp.util.*;
 
 /**
- * 
+ *
  * @author henrik lundgren
  *
  */
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class Attachment implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -26,13 +26,13 @@ public class Attachment implements Serializable {
 	private int revpos;
 	private String digest;
 	private Map<String, Object> anonymous;
-	
+
 	/**
 	 * Constructor that takes data as String.
 	 * The data must be base64 encoded single line of characters, so pre-process your data to remove any carriage returns and newlines
-	 * 
+	 *
 	 * Useful if you want to save the attachment as an inline attachent.
-	 * 
+	 *
 	 * @param id
 	 * @param data base64-encoded
 	 * @param contentType
@@ -47,7 +47,7 @@ public class Attachment implements Serializable {
 		this.dataBase64 = data;
 		this.length = data.getBytes().length;
 	}
-	
+
 	Attachment() {}
 
 	@JsonProperty("content_type")
@@ -93,29 +93,29 @@ public class Attachment implements Serializable {
 	void setStub(boolean stub) {
 		this.stub = stub;
 	}
-	
+
 	public int getRevpos() {
 		return revpos;
 	}
-	
+
 	public void setRevpos(int revpos) {
 		this.revpos = revpos;
 	}
-	
+
 	public String getDigest() {
 		return digest;
 	}
 
-	/** 
+	/**
 	 * @return a Map containing fields that did not map to any other field in the class during object deserializarion from a JSON document.
 	 */
 	@JsonAnyGetter
 	public Map<String, Object> getAnonymous() {
 		return anonymous();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param key
 	 * @param value
 	 */

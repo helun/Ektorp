@@ -10,8 +10,8 @@ import java.io.IOException;
 
 import junit.framework.Assert;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.StreamingChangesResult;
 import org.ektorp.changes.DocumentChange;
 import org.ektorp.http.HttpResponse;

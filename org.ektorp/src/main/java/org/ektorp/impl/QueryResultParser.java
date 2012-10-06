@@ -8,13 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.JsonToken;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.DbAccessException;
 import org.ektorp.ViewResultException;
 
@@ -28,29 +28,29 @@ public class QueryResultParser<T> {
 	private static final String INCLUDED_DOC_FIELD_NAME = "doc";
 	private static final String TOTAL_ROWS_FIELD_NAME = "total_rows";
 	private static final String OFFSET_FIELD_NAME = "offset";
-	
+
 	private int totalRows = -1;
 	private int offset = -1;
 	private List<T> rows;
-	
+
 	private String firstId;
 	private JsonNode firstKey;
-	
+
 	private String lastId;
 	private JsonNode lastKey;
-	
+
 	private final ObjectMapper mapper;
 	private final Class<T> type;
 	private boolean ignoreNotFound;
-	
+
 	public QueryResultParser(Class<T> type, ObjectMapper mapper) {
 		this.type = type;
 		this.mapper = mapper;
 	}
-	
+
 	public void parseResult(InputStream json) throws JsonParseException, IOException {
 		JsonParser jp = mapper.getJsonFactory().createJsonParser(json);
-		
+
 		if (jp.nextToken() != JsonToken.START_OBJECT) {
 			throw new RuntimeException("Expected data to start with an Object");
 		}
@@ -68,7 +68,7 @@ public class QueryResultParser<T> {
 				return;
 			}
 		}
-		
+
 		rows = new ArrayList<T>();
 
 		ParseState state = new ParseState();
@@ -94,7 +94,7 @@ public class QueryResultParser<T> {
 			endRow(jp, state);
 		}
 	}
-	
+
 	public int getTotalRows() {
 		return totalRows;
 	}
@@ -110,7 +110,7 @@ public class QueryResultParser<T> {
 	public void setIgnoreNotFound(boolean b) {
 		this.ignoreNotFound = b;
 	}
-	
+
 	private void assertNoErrors(Map<String, String> fields) {
 		if (fields.containsKey("error")) {
 			JsonNode error = mapper.convertValue(fields, JsonNode.class);
@@ -121,7 +121,7 @@ public class QueryResultParser<T> {
 	private T parseFirstRow(JsonParser jp, ParseState state)
 			throws JsonParseException, IOException, JsonProcessingException,
 			JsonMappingException {
-		
+
 		skipToField(jp, VALUE_FIELD_NAME, state);
 		firstId = state.lastId;
 		firstKey = state.lastKey;

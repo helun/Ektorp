@@ -4,13 +4,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
-import org.codehaus.jackson.map.deser.SettableBeanProperty;
-import org.codehaus.jackson.map.type.CollectionType;
+import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
+import com.fasterxml.jackson.databind.type.CollectionType;
 
 /**
- * 
+ *
  * @author ragnar rova
- * 
+ *
  */
 public class ConstructibleAnnotatedCollection {
 

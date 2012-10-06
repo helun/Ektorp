@@ -1,6 +1,6 @@
 package org.ektorp.changes;
 
-import org.codehaus.jackson.*;
+import com.fasterxml.jackson.databind.JsonNode;
 /**
  * Represents a document change within a database.
  * @author henrik lundgren
@@ -12,17 +12,17 @@ public interface DocumentChange {
 	 */
 	int getSequence();
 	/**
-	 * 
+	 *
 	 * @return the id of the changed document.
 	 */
 	String getId();
 	/**
-	 * 
+	 *
 	 * @return the revision the document had at the time of change.
 	 */
 	String getRevision();
 	/**
-	 * 
+	 *
 	 * @return true if the changed document has been deleted.
 	 */
 	boolean isDeleted();
