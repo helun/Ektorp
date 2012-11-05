@@ -9,15 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ektorp.docref.DocumentReferences;
+import org.ektorp.impl.NameConventions;
+import org.ektorp.util.Predicate;
+import org.ektorp.util.ReflectionUtils;
+
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
-import org.ektorp.docref.DocumentReferences;
-import org.ektorp.impl.NameConventions;
-import org.ektorp.util.Predicate;
-import org.ektorp.util.ReflectionUtils;
 
 public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 
