@@ -1,3 +1,5 @@
+# Ektorp [![build status](https://secure.travis-ci.org/pdeschen/Ektorp.png)](http://travis-ci.org/pdeschen/Ektorp)
+
 Ektorp is a persistence API that uses [CouchDB](http://couchdb.apache.org/) as storage engine. The goal of Ektorp is to combine JPA like functionality with the simplicity and flexibility that CouchDB provides.
 
 Features
