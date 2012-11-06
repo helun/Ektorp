@@ -3,7 +3,6 @@ package org.ektorp.impl;
 import java.util.Collections;
 import java.util.List;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.ektorp.Page;
 import org.ektorp.PageRequest;
 import org.ektorp.http.HttpResponse;
@@ -11,6 +10,9 @@ import org.ektorp.http.StdResponseHandler;
 import org.ektorp.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * 
  * @author henrik

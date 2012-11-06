@@ -9,15 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ektorp.docref.DocumentReferences;
+import org.ektorp.impl.NameConventions;
+import org.ektorp.util.Predicate;
+import org.ektorp.util.ReflectionUtils;
+
+import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
-import org.ektorp.docref.DocumentReferences;
-import org.ektorp.impl.NameConventions;
-import org.ektorp.util.Predicate;
-import org.ektorp.util.ReflectionUtils;
 
 public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 
@@ -50,7 +52,14 @@ public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 		return names.contains(m.getName());
 	}
 
-    @Override
+	@Override
+	public String[] findPropertiesToIgnore(Annotated ac) {
+		if(ac instanceof AnnotatedClass){
+			return findPropertiesToIgnore((AnnotatedClass) ac);
+		}
+		return super.findPropertiesToIgnore(ac);
+	}
+	
     public String[] findPropertiesToIgnore(AnnotatedClass ac) {
     	List<String> ignoreFields = null;
     	for (AnnotatedField f : ac.fields()) {

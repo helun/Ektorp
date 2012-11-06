@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -29,18 +28,15 @@ public class BackReferencedBeanDeserializer extends StdDeserializer<Object>
 	private final BeanDeserializer delegate;
 	private final List<ConstructibleAnnotatedCollection> backReferencedFields;
 	private final Class<?> clazz;
-	private final ObjectMapper objectMapper;
 
 	public BackReferencedBeanDeserializer(BeanDeserializer deserializer,
 			List<ConstructibleAnnotatedCollection> fields,
-			CouchDbConnector couchDbConnector, Class<?> clazz,
-			ObjectMapper objectMapper) {
+			CouchDbConnector couchDbConnector, Class<?> clazz) {
 		super(clazz);
 		this.clazz = clazz;
 		this.delegate = deserializer;
 		this.couchDbConnector = couchDbConnector;
 		this.backReferencedFields = fields;
-		this.objectMapper = objectMapper;
 	}
 
 	@Override
@@ -64,12 +60,11 @@ public class BackReferencedBeanDeserializer extends StdDeserializer<Object>
 
 				if (ann.fetch().equals(FetchType.EAGER)) {
 					handler = new ViewBasedCollection(id, couchDbConnector,
-							clazz, ann, constructibleField, objectMapper);
+							clazz, ann, constructibleField);
 					handler.initialize();
 				} else {
 					handler = new LazyLoadingViewBasedCollection(id,
-							couchDbConnector, clazz, ann, constructibleField,
-							objectMapper);
+							couchDbConnector, clazz, ann, constructibleField);
 
 				}
 
