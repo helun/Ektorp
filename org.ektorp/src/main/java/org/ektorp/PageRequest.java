@@ -79,7 +79,7 @@ public class PageRequest {
 					.decode(link, Base64.URL_SAFE)));
 
 			KeyIdPair key = parseNextKey(n);
-			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).getIntValue();
+			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).intValue();
 			boolean back = n.get(BACK_FIELD_NAME).asInt() == 1;
 			int page = n.get(PAGE_FIELD_NAME).asInt();
 			return new Builder()
@@ -101,7 +101,7 @@ public class PageRequest {
 		KeyIdPair key;
 		JsonNode nextKey = n.get(fieldName);
 		if (nextKey != null) {
-			String docId = nextKey.getFieldNames().next();
+			String docId = nextKey.fieldNames().next();
 			key = new KeyIdPair(nextKey.get(docId), docId);
 		} else {
 			key = null;

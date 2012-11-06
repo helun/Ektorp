@@ -4,7 +4,7 @@ package org.ektorp.impl;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
+
 import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.jackson.EktorpJacksonModule;
 import org.ektorp.util.Assert;

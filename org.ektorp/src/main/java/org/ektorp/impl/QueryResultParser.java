@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ektorp.DbAccessException;
+import org.ektorp.ViewResultException;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,8 +18,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ektorp.DbAccessException;
-import org.ektorp.ViewResultException;
 
 public class QueryResultParser<T> {
 
@@ -131,7 +132,7 @@ public class QueryResultParser<T> {
 			jp.nextToken();
 			if (isEndOfRow(jp)) {
 				state.docFieldName = VALUE_FIELD_NAME;
-				T doc = mapper.readValue(value, type);
+				T doc = mapper.readValue(value.traverse(), type);
 				endRow(jp, state);
 				return doc;
 			}
@@ -189,7 +190,7 @@ public class QueryResultParser<T> {
 				break;
 			default:
 				if (isInField(ID_FIELD_NAME, lastFieldName)) {
-					state.lastId = jp.readValueAsTree().getTextValue();
+					state.lastId = jp.<JsonNode>readValueAsTree().asText();
 				} else if (isInField(KEY_FIELD_NAME, lastFieldName)) {
 					state.lastKey = jp.readValueAsTree();
 				} else if (isInField(ERROR_FIELD_NAME, lastFieldName)) {

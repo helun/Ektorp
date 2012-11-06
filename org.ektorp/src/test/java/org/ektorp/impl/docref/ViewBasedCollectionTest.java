@@ -58,7 +58,7 @@ public class ViewBasedCollectionTest {
 	@SuppressWarnings("unchecked")
 	private void setupHandlerAndProxy(DocumentReferences cascadeNone) {
 		try {
-			collectionHandler = new ViewBasedCollection("test", db, TestType.class, cascadeNone, cac, mapper);
+			collectionHandler = new ViewBasedCollection("test", db, TestType.class, cascadeNone, cac);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}

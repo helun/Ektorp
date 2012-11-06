@@ -1,14 +1,20 @@
 package org.ektorp.support;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.ektorp.*;
-import org.ektorp.docref.*;
-import org.junit.*;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.docref.DocumentReferences;
+import org.junit.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SimpleViewGeneratorTest {
 
