@@ -234,6 +234,15 @@ public interface CouchDbConnector {
     List<Revision> getRevisions(String id);
 
     /**
+     * Obtain the current revision of a document using a lightweight request.
+     * @param id
+     * @return
+     * @throws DocumentNotFoundException
+     *             if the document was not found.
+     */
+    String getCurrentRevision(String id);
+    
+    /**
      * Reads an attachment from the database.
      * 
      * Please note that the stream has to be closed after usage, otherwise http connection leaks will occur and the
