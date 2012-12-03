@@ -425,14 +425,17 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
 	private <T> T executeQuery(final ViewQuery query,
 			ResponseCallback<T> rh) {
+		LOG.debug("Querying CouchDb view at {}.", query);
+		T result;
 		if (!query.isCacheOk()) {
-			return query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(),
-	                query.getKeysAsJson(), rh) : restTemplate.getUncached(
-	                query.buildQuery(), rh);
+			result = query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(), query.getKeysAsJson(), rh)
+					: restTemplate.getUncached(query.buildQuery(), rh);
+		} else {
+			result = query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(), query.getKeysAsJson(), rh)
+					: restTemplate.get(query.buildQuery(), rh);
 		}
-		return query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(),
-                query.getKeysAsJson(), rh) : restTemplate.get(
-                query.buildQuery(), rh);
+		LOG.debug("Answer from view query: {}.", result);
+		return result;
 	}
 
     @Override

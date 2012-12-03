@@ -860,6 +860,11 @@ public class ViewQuery {
 	public boolean isIgnoreNotFound() {
 		return ignoreNotFound;
 	}
+	
+	@Override
+	public String toString() {
+		return buildQuery();
+	}
 
 	public static class Keys {
 
