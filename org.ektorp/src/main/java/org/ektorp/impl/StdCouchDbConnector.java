@@ -180,10 +180,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         assertDocIdHasValue(id);
         Assert.hasText(attachmentId, "attachmentId may not be null or empty");
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("fetching attachment for doc: {} attachmentId: {}", id,
-                    attachmentId);
-        }
+		LOG.trace("fetching attachment for doc: {} attachmentId: {}", id, attachmentId);
         return getAttachment(attachmentId, dbURI.append(id).append(attachmentId));
     }
 
@@ -194,10 +191,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         Assert.hasText(attachmentId, "attachmentId may not be null or empty");
         Assert.hasText(revision, "revision may not be null or empty");
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("fetching attachment for doc: {} attachmentId: {}", id,
-                    attachmentId);
-        }
+		LOG.trace("fetching attachment for doc: {} attachmentId: {}", id, attachmentId);
         return getAttachment(attachmentId, dbURI.append(id).append(attachmentId).param("rev", revision));
     }
 
@@ -448,10 +442,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
         Assert.notNull(type, "type may not be null");
 
         query.dbPath(dbURI.toString());
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("startKey: {}", pr.getStartKey());
-            LOG.debug("startDocId: {}", pr.getStartKeyDocId());
-        }
+		LOG.debug("startKey: {}", pr.getStartKey());
+		LOG.debug("startDocId: {}", pr.getStartKeyDocId());
         PageResponseHandler<T> ph = new PageResponseHandler<T>(pr, type, objectMapper, query.isIgnoreNotFound());
         query = PageRequest.applyPagingParameters(query, pr);
 

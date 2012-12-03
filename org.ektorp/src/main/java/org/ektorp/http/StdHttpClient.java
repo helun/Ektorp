@@ -122,9 +122,7 @@ public class StdHttpClient implements HttpClient {
 	private HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,
 			String content, boolean useBackend) {
 		try {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Content: {}", content);
-			}
+			LOG.trace("Content: {}", content);
 			StringEntity e = new StringEntity(content, "UTF-8");
 			e.setContentType("application/json");
 			request.setEntity(e);
@@ -151,11 +149,8 @@ public class StdHttpClient implements HttpClient {
 			} else {
 				rsp = client.execute((HttpHost)client.getParams().getParameter(ClientPNames.DEFAULT_HOST), request);				
 			}
-			if (LOG.isTraceEnabled()) {
-				LOG.trace(String.format("%s %s %s %s", request.getMethod(),
-						request.getURI(), rsp.getStatusLine().getStatusCode(),
-						rsp.getStatusLine().getReasonPhrase()));
-			}
+			LOG.trace("{} {} {} {}", new Object[] { request.getMethod(), request.getURI(),
+					rsp.getStatusLine().getStatusCode(), rsp.getStatusLine().getReasonPhrase() });
 			return StdHttpResponse.of(rsp, request);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
