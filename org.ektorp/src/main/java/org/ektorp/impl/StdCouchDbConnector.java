@@ -321,6 +321,18 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     @Override
+    public String getCurrentRevision(String id) {
+    	assertDocIdHasValue(id);
+    	return restTemplate.head(dbURI.append(id).toString(), new StdResponseHandler<String>(){
+    		@Override
+    		public String success(HttpResponse hr) throws Exception {
+    			return hr.getETag();
+    		}
+    	});
+    }
+    
+    
+    @Override
     public InputStream getAsStream(String id) {
         assertDocIdHasValue(id);
         return getAsStream(id, EMPTY_OPTIONS);

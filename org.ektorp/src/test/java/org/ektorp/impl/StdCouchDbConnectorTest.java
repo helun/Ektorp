@@ -1,10 +1,7 @@
 package org.ektorp.impl;
 
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -261,6 +258,20 @@ public class StdCouchDbConnectorTest {
         assertEquals(8, l.size());
         assertEquals(new Revision("8-8395fd3a7a2dd04022cc1330a4d20e66", "available"), l.get(0));
     }
+    
+    @Test
+	public void return_current_revision() {
+		final String revision = UUID.randomUUID().toString();
+		when(httpClient.head("/test_db/some_doc_id")).thenReturn(
+				new HttpResponseStub(200, "") {
+					@Override
+					public String getETag() {
+						return revision;
+					}
+				});
+		String currentRevision = dbCon.getCurrentRevision("some_doc_id");
+		assertEquals(revision, currentRevision);
+	}
 
     @Test
     public void return_null_revisions_when_doc_is_missing() {
