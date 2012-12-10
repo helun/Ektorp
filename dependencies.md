@@ -2,20 +2,20 @@ Dependencies
 ============
 If you are not using Maven or some other dependency management tool that can understand Maven repositories, the list below is what you need to run Ektorp.
 
-Runtime Dependencies for Ektorp 1.2.2
+Runtime Dependencies for Ektorp 1.4.0
 -------------------------------------
-* jackson-core-asl 1.8.6
-* jackson-mapper-asl 1.8.6
-* httpclient 4.1.1
-* httpcore 4.1
-* httpclient-cache 4.1.1 (only if caching is enabled)
+* jackson-core 2.1.0
+* jackson-databind 2.1.0
+* httpclient 4.2.1
+* httpcore 4.2.1
+* httpclient-cache 4.2.1 (only if caching is enabled)
 * commons-codec 1.4
 * commons-io 2.0.1
 * slf4j-api 1.6.1
 
-Runtime Dependencies for Ektorp Spring 1.2.2
+Runtime Dependencies for Ektorp Spring 1.4.0
 --------------------------------------------
-* org.ektorp 1.2.2
+* org.ektorp 1.4.0
 * spring-context 3.0.5
 * spring-aop 3.0.5
 * spring-beans 3.0.5
