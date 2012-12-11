@@ -28,7 +28,19 @@ public class DesignDocument extends OpenCouchDbDocument {
 
     public final static String ID_PREFIX = "_design/";
     private final static String DEFAULT_LANGUAGE = "javascript";
+    /**
+     * @deprecated use {@link #mergeWith(DesignDocument, boolean)} instead if
+     *             you wish to specify wheter to update on design doc difference
+     *             or only add new elements.
+     */
+    @Deprecated
     public static final String AUTO_UPDATE_VIEW_ON_CHANGE = "org.ektorp.support.AutoUpdateViewOnChange";
+    /**
+     * @deprecated use {@link #mergeWith(DesignDocument, boolean)} instead if
+     *             you wish to specify wheter to update on design doc difference
+     *             or only add new elements.
+     */
+    @Deprecated
     public static final String UPDATE_ON_DIFF = "org.ektorp.support.UpdateDesignDocOnDiff";
 
     private Map<String, View> views;
@@ -182,14 +194,35 @@ public class DesignDocument extends OpenCouchDbDocument {
         filters().remove(name);
     }
 
-    public boolean mergeWith(DesignDocument dd) {
-        boolean updateOnDiff = updateOnDiff();
+    /**
+     * Merge this design document with the specified document, the result being
+     * stored in this design document.
+     * 
+     * @param dd
+     *            the design document to merge with
+     * @param updateOnDiff
+     *            true to overwrite existing views/functions in this document
+     *            with the views/functions in the specified document; false will
+     *            only add new views/functions.
+     * @return true if there was any modification to this document, false otherwise.
+     */
+    public boolean mergeWith(DesignDocument dd, boolean updateOnDiff) {
         boolean changed = mergeViews(dd.views(), updateOnDiff);
         changed = mergeFunctions(lists(), dd.lists(), updateOnDiff) || changed;
         changed = mergeFunctions(shows(), dd.shows(), updateOnDiff) || changed;
         changed = mergeFunctions(filters(), dd.filters(), updateOnDiff) || changed;
         changed = mergeFunctions(updates(), dd.updates(), updateOnDiff) || changed;
         return changed;
+    }
+    
+    /**
+     * This method will check for the two system properties boolean
+     * {@link #AUTO_UPDATE_VIEW_ON_CHANGE} and {@link #UPDATE_ON_DIFF}, then call
+     * {@link #mergeWith(DesignDocument, boolean)}. The default value is false for both.
+     * 
+     */
+    public boolean mergeWith(DesignDocument dd) {
+        return mergeWith(dd, updateOnDiff());
     }
 
     private boolean mergeFunctions(Map<String, String> existing, Map<String, String> mergeFunctions,
