@@ -1,5 +1,27 @@
 Change log
 ==========
+Changes in version 1.4.0
+------------------------
+Ektorp 1.4.0 updated dependencies of Jackson and HttpClient.
+### Fixes
+### Improvements
+* Added support for the HEAD request of a document to obtain the latest revision.
+* Added support for handling compressed content.
+### Other Changes
+* Jackson version changed to 2.1.0.
+* HttpClient version change to 4.2.1 (fixes an issue related to gzip,deflate).
+
+### Contributors
+Pascal Gélinas
+
+Pascal Deschenes
+
+Vladislav Fedotov
+
+David Venable
+
+Henrik Lundgren
+
 Changes in version 1.3.0
 ------------------------
 Ektorp 1.3.0 brings support for CouchDB 1.2 and Jackson 1.9
@@ -26,7 +48,6 @@ Ektorp 1.3.0 brings support for CouchDB 1.2 and Jackson 1.9
 Andreas Litt
 
 David Venable
-* HttpClient version change to 4.2.1 to enable gzip,deflate
 
 esromneb
 
