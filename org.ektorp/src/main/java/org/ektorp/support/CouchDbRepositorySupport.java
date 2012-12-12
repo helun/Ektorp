@@ -291,7 +291,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 					initDesignDocInternal(1);
 				}
 			}
-		} else if (log.isDebugEnabled()){
+		} else {
 			log.debug("DesignDocument was unchanged. Database was not updated.");
 		}
 	}

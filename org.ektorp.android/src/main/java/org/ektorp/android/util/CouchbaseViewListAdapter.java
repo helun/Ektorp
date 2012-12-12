@@ -113,9 +113,7 @@ public abstract class CouchbaseViewListAdapter extends BaseAdapter {
 					}
 
 					if(lastUpdateChangesFeed > lastUpdateView) {
-						if (LOG.isDebugEnabled()) {
-				            LOG.debug("Finished, but still behind " + lastUpdateChangesFeed + " > " + lastUpdateView);
-						}
+						LOG.debug("Finished, but still behind {} > {}", lastUpdateChangesFeed, lastUpdateView);
 						updateListItems();
 					}
 

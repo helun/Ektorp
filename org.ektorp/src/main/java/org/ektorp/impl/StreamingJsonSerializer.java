@@ -81,12 +81,9 @@ public class StreamingJsonSerializer implements JsonSerializer {
 	 */
 	public String toJson(Object o) {
 		try {
-			if (LOG.isDebugEnabled()) {
-				String json = objectMapper.writeValueAsString(o);
-				LOG.debug(json);
-				return json;
-			}
-			return objectMapper.writeValueAsString(o);
+			String json = objectMapper.writeValueAsString(o);
+			LOG.debug(json);
+			return json;
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}
