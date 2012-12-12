@@ -67,11 +67,7 @@ public class QueryResultParser<T> {
 		    } else if(TOTAL_ROWS_FIELD_NAME.equals(currentName)){
 		        totalRows = jp.getIntValue();
 		    } else if (ROWS_FIELD_NAME.equals(currentName)){
-		        if(totalRows == -1){
-		            rows = new ArrayList<T>();
-		        }else{
-		            rows = new ArrayList<T>(totalRows);
-		        }
+                rows = new ArrayList<T>();
 		        parseRows(jp);
 		    }else{
 		        // Handle cloudant errors.
