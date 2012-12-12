@@ -52,9 +52,17 @@ public class QueryResultParser<T> {
 	}
 
 	public void parseResult(InputStream json) throws IOException {
-		JsonParser jp = mapper.getFactory().createJsonParser(json);
+        JsonParser jp = mapper.getFactory().createParser(json);
 
-		if (jp.nextToken() != JsonToken.START_OBJECT) {
+        try {
+            parseResult(jp);
+        } finally {
+            jp.close();
+        }
+	}
+
+    private void parseResult(JsonParser jp) throws IOException {
+        if (jp.nextToken() != JsonToken.START_OBJECT) {
 			throw new DbAccessException("Expected data to start with an Object");
 		}
 
@@ -79,7 +87,7 @@ public class QueryResultParser<T> {
 		    JsonNode error = mapper.convertValue(errorFields, JsonNode.class);
             throw new DbAccessException(error.toString());
 		}
-	}
+    }
 
 	private void parseRows(JsonParser jp) throws IOException{
 	    if (jp.getCurrentToken() != JsonToken.START_ARRAY) {
