@@ -3,7 +3,6 @@ package org.ektorp.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,17 +10,20 @@ import java.util.Map;
 import org.ektorp.DbAccessException;
 import org.ektorp.ViewResultException;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * @author Henrik Lundgren (original implementation)
+ * @author Pascal Gélinas (rewrite for issue #98)
+ */
 public class QueryResultParser<T> {
-
-	private static final String ROWS_FIELD_NAME = "rows";
+	private static final String NOT_FOUND_ERROR = "not_found";
+    private static final String ROWS_FIELD_NAME = "rows";
 	private static final String VALUE_FIELD_NAME = "value";
 	private static final String ID_FIELD_NAME = "id";
 	private static final String ERROR_FIELD_NAME = "error";
@@ -49,52 +51,106 @@ public class QueryResultParser<T> {
 		this.mapper = mapper;
 	}
 
-	public void parseResult(InputStream json) throws JsonParseException, IOException {
-		JsonParser jp = mapper.getJsonFactory().createJsonParser(json);
+	public void parseResult(InputStream json) throws IOException {
+		JsonParser jp = mapper.getFactory().createJsonParser(json);
 
 		if (jp.nextToken() != JsonToken.START_OBJECT) {
-			throw new RuntimeException("Expected data to start with an Object");
+			throw new DbAccessException("Expected data to start with an Object");
 		}
 
-		Map<String, String> fields = readHeaderFields(jp);
-		assertNoErrors(fields);
-
-		if (fields.containsKey(OFFSET_FIELD_NAME)) {
-			offset = Integer.parseInt(fields.get(OFFSET_FIELD_NAME));
+		Map<String,String> errorFields = new HashMap<String, String>();
+		// Issue #98: Can't assume order of JSON fields.
+		while(jp.nextValue() != JsonToken.END_OBJECT){
+		    String currentName = jp.getCurrentName();
+		    if(OFFSET_FIELD_NAME.equals(currentName)){
+		        offset = jp.getIntValue();
+		    } else if(TOTAL_ROWS_FIELD_NAME.equals(currentName)){
+		        totalRows = jp.getIntValue();
+		    } else if (ROWS_FIELD_NAME.equals(currentName)){
+		        if(totalRows == -1){
+		            rows = new ArrayList<T>();
+		        }else{
+		            rows = new ArrayList<T>(totalRows);
+		        }
+		        parseRows(jp);
+		    }else{
+		        // Handle cloudant errors.
+		        errorFields.put(jp.getCurrentName(), jp.getText());
+		    }
 		}
-		if (fields.containsKey(TOTAL_ROWS_FIELD_NAME)) {
-			totalRows = Integer.parseInt(fields.get(TOTAL_ROWS_FIELD_NAME));
-			if (totalRows == 0) {
-				rows = Collections.emptyList();
-				return;
-			}
-		}
-
-		rows = new ArrayList<T>();
-
-		ParseState state = new ParseState();
-
-		T first = parseFirstRow(jp, state);
-		if (first == null) {
-			rows = Collections.emptyList();
-		} else {
-			rows.add(first);
-		}
-
-		while (jp.getCurrentToken() != null) {
-			skipToField(jp, state.docFieldName, state);
-			lastId = state.lastId;
-			lastKey = state.lastKey;
-			
-			if (atEndOfRows(jp)) {
-				return;
-			}
-			if (!state.fieldIsNull) {
-				rows.add(jp.readValueAs(type));
-			}
-			endRow(jp, state);
+		
+		if(!errorFields.isEmpty()){
+		    JsonNode error = mapper.convertValue(errorFields, JsonNode.class);
+            throw new DbAccessException(error.toString());
 		}
 	}
+
+	private void parseRows(JsonParser jp) throws IOException{
+	    if (jp.getCurrentToken() != JsonToken.START_ARRAY) {
+            throw new DbAccessException("Expected rows to start with an Array");
+        }
+	    
+	    // Parses the first row that isn't an error row to find out which field to use (doc or value).
+	    String dataField = null;
+	    while (dataField == null && jp.nextToken() == JsonToken.START_OBJECT) {
+            Row row = jp.readValueAs(Row.class);
+            if (row.error != null) {
+                if (!ignoreError(row.error)){
+                    throw new ViewResultException(row.key, row.error);
+                }
+                continue;
+            } 
+            if (row.doc != null) {
+                dataField = INCLUDED_DOC_FIELD_NAME;
+                rows.add(mapper.readValue(row.doc.traverse(), type));
+            } else {
+                dataField = VALUE_FIELD_NAME;
+                rows.add(mapper.readValue(row.value.traverse(), type));
+            }
+            firstId = row.id;
+            firstKey = row.key;
+        }
+	    // After the while, either we point at END_ARRAY but we have no dataField (all rows were error), 
+	    // or we point at an END_OBJECT (end of a row) and have determined which data field to use.
+	    if(dataField == null) return;
+
+	    // Parse all the remaining rows; jp points at START_OBJECT except after the last row
+	    while(jp.nextToken() != JsonToken.END_ARRAY){
+	        String currentId = null;
+	        JsonNode currentKey = null;
+            String error = null;
+	        T value = null;
+	        // Parse the fields of a row; jp points at a value token except after the last field.
+	        while(jp.nextValue() != JsonToken.END_OBJECT){
+	            String currentName = jp.getCurrentName();
+	            if(ID_FIELD_NAME.equals(currentName)){
+	                currentId = jp.getText();
+	            } else if (KEY_FIELD_NAME.equals(currentName)){
+	                currentKey = jp.readValueAsTree();
+	            } else if(dataField.equals(currentName)){
+	                value = jp.readValueAs(type);
+	            } else if(ERROR_FIELD_NAME.equals(currentName)){
+                    error = jp.getText();
+                } else {
+                    // Skip fields value that are of no interest to us.
+                    jp.skipChildren();
+                }
+	        }
+	        if (error != null && !ignoreError(error)){
+                throw new ViewResultException(currentKey, error);
+	        }
+	        // If the current row is an error row, then value will be null
+	        if(value != null){
+	            lastId = currentId;
+	            lastKey = currentKey;
+	            rows.add(value);
+	        }
+	    }
+	}
+
+    private boolean ignoreError(String error) {
+        return ignoreNotFound && NOT_FOUND_ERROR.equals(error);
+    }
 
 	public int getTotalRows() {
 		return totalRows;
@@ -107,157 +163,33 @@ public class QueryResultParser<T> {
 	public List<T> getRows() {
 		return rows;
 	}
-
-	public void setIgnoreNotFound(boolean b) {
-		this.ignoreNotFound = b;
-	}
-
-	private void assertNoErrors(Map<String, String> fields) {
-		if (fields.containsKey("error")) {
-			JsonNode error = mapper.convertValue(fields, JsonNode.class);
-			throw new DbAccessException(error.toString());
-		}
-	}
-
-	private T parseFirstRow(JsonParser jp, ParseState state)
-			throws JsonParseException, IOException, JsonProcessingException,
-			JsonMappingException {
-
-		skipToField(jp, VALUE_FIELD_NAME, state);
-		firstId = state.lastId;
-		firstKey = state.lastKey;
-		JsonNode value = null;
-		if (atObjectStart(jp)) {
-			value = jp.readValueAsTree();
-			jp.nextToken();
-			if (isEndOfRow(jp)) {
-				state.docFieldName = VALUE_FIELD_NAME;
-				T doc = mapper.readValue(value.traverse(), type);
-				endRow(jp, state);
-				return doc;
-			}
-		}
-		skipToField(jp, INCLUDED_DOC_FIELD_NAME, state);
-		if (atObjectStart(jp)) {
-			state.docFieldName = INCLUDED_DOC_FIELD_NAME;
-			T doc = jp.readValueAs(type);
-			endRow(jp, state);
-			return doc;
-		}
-		return null;
-	}
-
-	private boolean isEndOfRow(JsonParser jp) {
-		return jp.getCurrentToken() == JsonToken.END_OBJECT;
-	}
-
-	private void endRow(JsonParser jp, ParseState state) throws IOException,
-			JsonParseException {
-		state.inRow = false;
-		jp.nextToken();
-	}
-
-	private boolean atObjectStart(JsonParser jp) {
-		return jp.getCurrentToken() == JsonToken.START_OBJECT;
-	}
-
-	private boolean atEndOfRows(JsonParser jp) {
-		return jp.getCurrentToken() != JsonToken.START_OBJECT && jp.getCurrentToken() != JsonToken.END_OBJECT;
-	}
-
-	private void skipToField(JsonParser jp, String fieldName, ParseState state)
-			throws JsonParseException, IOException {
-		String lastFieldName = null;
-		
-		while (jp.getCurrentToken() != null) {
-			switch (jp.getCurrentToken()) {
-			case FIELD_NAME:
-				lastFieldName = jp.getCurrentName();
-				jp.nextToken();
-				break;
-			case START_OBJECT:
-				if (!state.inRow) {
-					state.inRow = true;
-					jp.nextToken();
-				} else {
-					if (isInField(fieldName, lastFieldName)) {
-						state.fieldIsNull = false;
-						return;
-					} else {
-						jp.skipChildren();
-					}
-				}
-				break;
-			default:
-				if (isInField(ID_FIELD_NAME, lastFieldName)) {
-					state.lastId = jp.<JsonNode>readValueAsTree().asText();
-				} else if (isInField(KEY_FIELD_NAME, lastFieldName)) {
-					state.lastKey = jp.readValueAsTree();
-				} else if (isInField(ERROR_FIELD_NAME, lastFieldName)) {
-					JsonNode error = jp.readValueAsTree();
-					if (ignoreNotFound
-							&& error.asText().equals("not_found")) {
-						lastFieldName = null;
-                        state.inRow = false;
-                        jp.nextToken();
-					} else {
-						throw new ViewResultException(state.lastKey,
-								error.asText());	
-					}
-				} else if (isInField(fieldName, lastFieldName)) {
-					if (jp.getCurrentToken() == JsonToken.VALUE_NULL) {
-						state.fieldIsNull = true;
-					} else {
-						state.fieldIsNull = false;
-					}
-					jp.nextToken();
-					return;
-				}
-				jp.nextToken();
-				break;
-			}
-		}
-	}
 	
-	private boolean isInField(String fieldName, String lastFieldName) {
-		return lastFieldName != null && lastFieldName.equals(fieldName);
-	}
-
-	private Map<String, String> readHeaderFields(JsonParser jp)
-			throws JsonParseException, IOException {
-		Map<String, String> map = new HashMap<String, String>();
-		jp.nextToken();
-		String nextFieldName = jp.getCurrentName();
-		while (nextFieldName != null && !ROWS_FIELD_NAME.equals(nextFieldName)) {
-			jp.nextToken();
-			map.put(nextFieldName, jp.getText());
-			jp.nextToken();
-			nextFieldName = jp.getCurrentName();
-		}
-		return map;
-	}
-
-	private static class ParseState {
-		public boolean fieldIsNull;
-		public String lastId;
-		boolean inRow;
-		JsonNode lastKey;
-		String docFieldName = "";
-	}
-
-	public String getFirstId() {
-		return firstId;
-	}
-	
-	public JsonNode getFirstKey() {
-		return firstKey;
-	}
-
 	public String getLastId() {
-		return lastId;
-	}
+        return lastId;
+    }
 	
 	public JsonNode getLastKey() {
-		return lastKey;
+        return lastKey;
+    }
+	
+	public String getFirstId() {
+        return firstId;
+    }
+	
+	public JsonNode getFirstKey() {
+        return firstKey;
+    }
+
+	public void setIgnoreNotFound(boolean ignoreNotFound) {
+		this.ignoreNotFound = ignoreNotFound;
+	}
+
+	@JsonAutoDetect(fieldVisibility=Visibility.ANY)
+	private static class Row {
+		private String id;
+		private JsonNode key;
+		private JsonNode value;
+		private JsonNode doc;
+		private String error;
 	}
 }
