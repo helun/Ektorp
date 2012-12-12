@@ -121,6 +121,18 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		return rows.isEmpty();
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder("{\n\"total_rows\":");
+		builder.append(totalRows);
+		builder.append(",\n\"offset\":");
+		builder.append(offset);
+		builder.append(",\n\"rows\":");
+		builder.append(rows.toString());
+		builder.append("\n}");
+		return builder.toString();
+	}
+	
 	public static class Row {
 
 		static final String VALUE_FIELD_NAME = "value";
@@ -184,6 +196,10 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 			return node == null || node.isNull() || node.isMissingNode();
 		}
 
+		@Override
+		public String toString() {
+			return rowNode.toString();
+		}
 	}
 
 }
