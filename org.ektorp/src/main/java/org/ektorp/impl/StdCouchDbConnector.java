@@ -116,7 +116,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         String json = jsonSerializer.toJson(o);
         String id = Documents.getId(o);
         DocumentOperationResult result;
-        if (id != null && !id.length() == 0) {
+        if (id != null && id.length() != 0) {
             result = restTemplate.put(URIWithDocId(id), json, revisionHandler);
         } else {
             result = restTemplate.post(dbURI.toString(), json, revisionHandler);
