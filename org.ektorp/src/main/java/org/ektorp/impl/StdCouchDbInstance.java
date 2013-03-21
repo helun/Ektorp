@@ -7,7 +7,6 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 import org.ektorp.*;
 import org.ektorp.http.*;
@@ -39,7 +38,6 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		this.client = client;
 		this.restTemplate = new RestTemplate(client);
 		this.objectMapper = of.createObjectMapper();
-		objectMapper.registerModule(new JodaModule());
 		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
 		this.objectMapperFactory = of;
 	}

@@ -1,10 +1,10 @@
 package org.ektorp;
 
-import org.joda.time.DateTime;
+import java.util.Date;
 
 public interface ActiveTask {
     String getPid();
     int getProgress();
-    DateTime getStartedOn();
-    DateTime getUpdatedOn();
+    Date getStartedOn();
+    Date getUpdatedOn();
 }

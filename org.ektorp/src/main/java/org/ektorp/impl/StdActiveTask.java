@@ -1,12 +1,13 @@
 package org.ektorp.impl;
 
+import java.util.Date;
+
 import org.ektorp.ActiveTask;
-import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(
    use = JsonTypeInfo.Id.NAME,
@@ -21,8 +22,8 @@ public abstract class StdActiveTask implements ActiveTask {
 
     private String pid;
     private int progress;
-    private DateTime startedOn;
-    private DateTime updatedOn;
+    private Date startedOn;
+    private Date updatedOn;
 
     @Override
     public String getPid() {
@@ -43,22 +44,22 @@ public abstract class StdActiveTask implements ActiveTask {
     }
 
     @Override
-    public DateTime getStartedOn() {
+    public Date getStartedOn() {
         return startedOn;
     }
 
     @JsonProperty(value = "started_on")
-    public void setStartedOn(DateTime startedOn) {
+    public void setStartedOn(Date startedOn) {
         this.startedOn = startedOn;
     }
 
     @Override
-    public DateTime getUpdatedOn() {
+    public Date getUpdatedOn() {
         return updatedOn;
     }
 
     @JsonProperty(value = "updated_on")
-    public void setUpdatedOn(DateTime updatedOn) {
+    public void setUpdatedOn(Date updatedOn) {
         this.updatedOn = updatedOn;
     }
 }
