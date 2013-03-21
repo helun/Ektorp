@@ -101,4 +101,8 @@ public interface CouchDbInstance {
      */
     String deleteConfiguration(String section, String key);
 
+    /**
+     * @return all active tasks
+     */
+    Collection<ActiveTask> getActiveTasks();
 }
