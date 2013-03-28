@@ -23,6 +23,7 @@ public interface CouchDbInstance {
 	 * @return true if the database exists.
 	 */
 	boolean checkIfDbExists(DbPath db);
+	boolean checkIfDbExists(String path);
 
 	void createDatabase(DbPath path);
 	void createDatabase(String path);
