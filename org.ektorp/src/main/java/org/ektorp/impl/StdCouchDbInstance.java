@@ -58,6 +58,11 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		Assert.notNull(path);
 		restTemplate.delete(DbPath.fromString(path).getPath());
 	}
+	
+	@Override
+	public boolean checkIfDbExists(String path) {
+	    return checkIfDbExists(DbPath.fromString(path));
+	}
 
 	@Override
 	public boolean checkIfDbExists(DbPath db) {
