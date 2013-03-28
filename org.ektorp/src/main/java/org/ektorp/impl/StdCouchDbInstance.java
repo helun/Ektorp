@@ -7,6 +7,7 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.ektorp.*;
 import org.ektorp.http.*;
 import org.ektorp.util.*;
@@ -174,5 +175,27 @@ public class StdCouchDbInstance implements CouchDbInstance {
                 return s;
              }
          });
+   }
+
+   @Override
+   public Collection<ActiveTask> getActiveTasks() {
+      String url = "/_active_tasks";
+      List<StdActiveTask> tasks = restTemplate.get(url,
+         new StdResponseHandler<List<StdActiveTask>>() {
+         @Override
+         public List<StdActiveTask> success(HttpResponse hr) throws Exception {
+            List<StdActiveTask> tasks = objectMapper.readValue(hr.getContent(), new TypeReference<List<StdActiveTask>>() {});
+            return tasks;
+         }
+      });
+
+      // We have to copy the list here because Java lacks covariance (i.e. we can't just return
+      // the List<StdActiveTask> because it's not a Collection<ActiveTask>).
+      Collection<ActiveTask> ret = new ArrayList<ActiveTask>();
+      for (StdActiveTask task : tasks) {
+          ret.add(task);
+      }
+
+      return ret;
    }
 }
