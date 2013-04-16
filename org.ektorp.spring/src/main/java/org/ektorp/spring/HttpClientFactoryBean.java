@@ -171,11 +171,10 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient>, Initializ
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		LOG.info("Starting couchDb connector on {}:{}...",  new Object[]{host,port});
 		if (couchDBProperties != null) {
 			new DirectFieldAccessor(this).setPropertyValues(couchDBProperties);
 		}
-		
+		LOG.info("Starting couchDb connector on {}:{}...",  new Object[]{host,port});
 		LOG.debug("host: {}", host);
 		LOG.debug("port: {}", port);
 		LOG.debug("url: {}", url);
