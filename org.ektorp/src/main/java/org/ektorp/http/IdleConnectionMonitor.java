@@ -1,5 +1,6 @@
 package org.ektorp.http;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
@@ -21,21 +22,33 @@ public class IdleConnectionMonitor {
 		}
 	});
 	
-	public static void monitor(ClientConnectionManager cm) {
-		executorService.scheduleWithFixedDelay(new CleanupTask(cm), DEFAULT_IDLE_CHECK_INTERVAL, DEFAULT_IDLE_CHECK_INTERVAL, TimeUnit.SECONDS);
-	}
+    public static void monitor(ClientConnectionManager cm) {
+        CleanupTask cleanupTask = new CleanupTask(cm);
+        ScheduledFuture<?> cleanupFuture = executorService.scheduleWithFixedDelay(cleanupTask, DEFAULT_IDLE_CHECK_INTERVAL, 
+                                                                                DEFAULT_IDLE_CHECK_INTERVAL, TimeUnit.SECONDS);
+        cleanupTask.setFuture(cleanupFuture);
+    }
 	
 	private static class CleanupTask implements Runnable {
 
-		final ClientConnectionManager cm;
-		
-		CleanupTask(ClientConnectionManager cm) {
-			this.cm = cm;
-		}
-		
-		public void run() {
-			cm.closeExpiredConnections();
-		}
+        private final WeakReference<ClientConnectionManager> cm;
+        private ScheduledFuture<?> thisFuture;
+
+        CleanupTask(ClientConnectionManager cm) {
+            this.cm = new WeakReference<ClientConnectionManager>(cm);
+        }
+
+        public void setFuture(ScheduledFuture<?> future) {
+            thisFuture = future;
+        }
+
+        public void run() {
+            if (cm.get() != null) {
+                cm.get().closeExpiredConnections();
+            } else if (thisFuture != null) {
+                thisFuture.cancel(false);
+            }
+        }
 		
 	}
 	
