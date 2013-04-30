@@ -109,10 +109,10 @@ public class ReplicationStatus implements Serializable {
 		int docWriteFailures;
 
 		@JsonProperty("recorded_seq")
-		int recordedSeq;
+		JsonNode recordedSeq;
 
-		public int getRecordedSeq() {
-			return recordedSeq;
+		public String getRecordedSeq() {
+			return recordedSeq != null ? recordedSeq.asText() : null;
 		}
 
 		public String getSessionId() {
@@ -178,6 +178,11 @@ public class ReplicationStatus implements Serializable {
 		public Object getField(String key) {
 			return unknown().get(key);
 		}
+
+        @Override
+        public String toString() {
+            return "Replication history: " + getSessionId() + ", " + getRecordedSeq();
+        }
 	}
 
 }
