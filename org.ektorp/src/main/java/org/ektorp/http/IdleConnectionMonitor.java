@@ -14,7 +14,7 @@ public class IdleConnectionMonitor {
 		private final AtomicInteger threadCount = new AtomicInteger(0);
 		
 		public Thread newThread(Runnable r) {
-			Thread t = new Thread();
+			Thread t = new Thread(r);
 			t.setDaemon(true);
 			t.setName(String.format("ektorp-idle-connection-monitor-thread-%s", threadCount.incrementAndGet()));
 			return t;
