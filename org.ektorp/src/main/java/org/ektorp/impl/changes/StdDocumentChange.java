@@ -3,6 +3,11 @@ package org.ektorp.impl.changes;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.ektorp.changes.*;
 import org.ektorp.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  *
  * @author henrik lundgren
@@ -15,10 +20,11 @@ public class StdDocumentChange implements DocumentChange {
 	private static final String ID_FIELD_NAME = "id";
 	private static final String DOC_FIELD_NAME = "doc";
 	private static final String DELETED_FIELD_NAME = "deleted";
+    private static final String CHANGES_FIELD_NAME = "changes";
 
-	private final JsonNode node;
+    private final JsonNode node;
 
-	public StdDocumentChange(JsonNode node) {
+    public StdDocumentChange(JsonNode node) {
 		Assert.notNull(node, "node may not be null");
 		this.node = node;
 	}
@@ -54,8 +60,16 @@ public class StdDocumentChange implements DocumentChange {
 	}
 
 	public String getRevision() {
-		return nodeAsString(node.findPath(REV_FIELD_NAME));
+        return nodeAsString(node.findValue(REV_FIELD_NAME));
 	}
+
+    public List<String> getRevisions() {
+        List<String> revisions = new ArrayList<String>();
+        for (JsonNode changesNode : node.get(CHANGES_FIELD_NAME)) {
+            revisions.add(nodeAsString(changesNode.get(REV_FIELD_NAME)));
+        }
+        return Collections.unmodifiableList(revisions);
+    }
 
 	@Override
 	public String toString() {
