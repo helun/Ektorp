@@ -52,6 +52,13 @@ public class QueryResultParserTest {
 	}
 
 	@Test
+	public void test_updateSeq() throws Exception {
+		parser.parseResult(loadData("update_seq_view_result.json"));
+		List<TestDoc> result = parser.getRows();
+		assertEquals(5, result.size());
+	}
+	
+	@Test
 	public void given_both_value_and_docs_contains_objects_then_doc_should_be_used() throws Exception {
 		parser.parseResult(loadData("all_docs_result.json"));
 		List<TestDoc> result = parser.getRows();

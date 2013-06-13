@@ -31,10 +31,12 @@ public class QueryResultParser<T> {
     private static final String INCLUDED_DOC_FIELD_NAME = "doc";
     private static final String TOTAL_ROWS_FIELD_NAME = "total_rows";
     private static final String OFFSET_FIELD_NAME = "offset";
+    private static final String UPDATE_SEQUENCE_FIELD_NAME = "update_seq";
 
     private int totalRows = -1;
     private int offset = -1;
     private List<T> rows;
+    private int updateSeq = -1;
 
     private String firstId;
     private JsonNode firstKey;
@@ -77,7 +79,11 @@ public class QueryResultParser<T> {
             } else if (ROWS_FIELD_NAME.equals(currentName)) {
                 rows = new ArrayList<T>();
                 parseRows(jp);
-            } else {
+            } else if (UPDATE_SEQUENCE_FIELD_NAME.equals(currentName)) {
+            	updateSeq = jp.getIntValue();
+            }
+            
+            else {
                 // Handle cloudant errors.
                 errorFields.put(jp.getCurrentName(), jp.getText());
             }
