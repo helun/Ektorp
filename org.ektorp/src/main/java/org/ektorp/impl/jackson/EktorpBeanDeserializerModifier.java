@@ -16,14 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
@@ -153,8 +146,9 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 		// note: this works since we know there's exactly one arg for methods
 		JavaType t0 = beanDesc.bindingsForBeanType().resolveType(
 			setter.getRawParameterType(0));
-		BeanProperty.Std property = new BeanProperty.Std(name, t0,
-				beanDesc.getClassAnnotations(), setter);
+
+		BeanProperty.Std property = new BeanProperty.Std(name, t0, PropertyName.USE_DEFAULT,
+				beanDesc.getClassAnnotations(), setter, true);
 		// did type change?
 		if (type != t0) {
 			property = property.withType(type);
