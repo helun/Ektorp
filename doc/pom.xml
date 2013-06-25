@@ -4,7 +4,7 @@
 	<groupId>org.ektorp</groupId>
 	<artifactId>documentation</artifactId>
 	<name>Ektorp Parent</name>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.4.0-SNAPSHOT</version>
 	<description>Documentation for Ektorp</description>
 	<build>
 		<plugins>
