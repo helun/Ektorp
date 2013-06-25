@@ -118,8 +118,7 @@ public class RestTemplate {
 	private HttpResponse handleRawResponse(HttpResponse hr) {
 		try {
 			if (!hr.isSuccessful()) {
-				DbAccessException ex = StdResponseHandler.createDbAccessException(hr);
-				throw ex;
+				throw StdResponseHandler.createDbAccessException(hr);
 			}
 			return hr;
 		} catch (Exception e) {

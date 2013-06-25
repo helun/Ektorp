@@ -303,8 +303,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 			Thread.sleep(new Random().nextInt(400));
 		} catch (InterruptedException ie) {
 			Thread.currentThread().interrupt();
-			return;
-		}
+        }
 	}
 
 	protected void debugDesignDoc(DesignDocument generated) {

@@ -91,9 +91,8 @@ public class ViewBasedCollectionTest {
 
 	@SuppressWarnings("unchecked")
 	private Constructor<Collection<Object>> findCtor(Class<?> clazz) {
-		Class<?> collectionClass = clazz;
 		return ClassUtil.findConstructor(
-				(Class<Collection<Object>>) collectionClass, true);
+				(Class<Collection<Object>>) clazz, true);
 	}
 
 	@SuppressWarnings("serial")

@@ -143,17 +143,6 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 			setter.fixAccess();
 		}
 
-		// note: this works since we know there's exactly one arg for methods
-		JavaType t0 = beanDesc.bindingsForBeanType().resolveType(
-			setter.getRawParameterType(0));
-
-		BeanProperty.Std property = new BeanProperty.Std(name, t0, PropertyName.USE_DEFAULT,
-				beanDesc.getClassAnnotations(), setter, true);
-		// did type change?
-		if (type != t0) {
-			property = property.withType(type);
-		}
-
 		/*
 		 * First: does the Method specify the deserializer to use? If so, let's
 		 * use it.

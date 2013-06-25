@@ -92,7 +92,7 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 		private Row row;
 		public boolean hasNext() {
 			try {
-			    JsonNode node = null;
+			    JsonNode node;
 			    do {
     				String doc = reader.readLine();
     				if (doc == null || doc.equals("]}")) {

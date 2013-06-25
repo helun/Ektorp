@@ -12,7 +12,7 @@ public class CouchDBNamespaceTest {
 	
 	@Test
 	public void test_single_connector() {
-		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/ektorp/spring/xml/couchdb-namespace-test-context.xml");;
+		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/ektorp/spring/xml/couchdb-namespace-test-context.xml");
 		CouchDbConnector db = ctx.getBean("testDatabase", CouchDbConnector.class);
 		assertNotNull(db);
 		ctx.close();
@@ -21,7 +21,7 @@ public class CouchDBNamespaceTest {
 	@Test
 	public void test_dbInstance() throws Exception {
 		try {
-			ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/ektorp/spring/xml/couchdb-instance-namespace-test-context.xml");;
+			ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/ektorp/spring/xml/couchdb-instance-namespace-test-context.xml");
 			CouchDbConnector db = ctx.getBean("testDatabase", CouchDbConnector.class);
 			assertNotNull(db);
 			ctx.close();

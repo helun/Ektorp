@@ -42,7 +42,7 @@ public class ReplicationCommandTest {
 									.cancel(true)
 									.continuous(true)
 									.createTarget(true)
-									.docIds(Arrays.asList(new String[] {"foo", "bar", "baz"}))
+									.docIds(Arrays.asList("foo", "bar", "baz"))
 									.queryParams(queryParams)
 									.build();
 		

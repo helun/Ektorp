@@ -638,7 +638,7 @@ public class ViewQuery {
 			query.param("group_level", groupLevel);
 		}
 
-		if (queryParams != null && !queryParams.isEmpty()) {
+		if (!queryParams.isEmpty()) {
 			appendQueryParams(query);
 		}
 

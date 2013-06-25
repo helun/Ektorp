@@ -92,7 +92,7 @@ public class StdHttpResponse implements HttpResponse {
 		try {
 			if (entity.getContent() != null) {
 				entity.getContent().close();
-			}; 
+			}
 		} catch (IOException e) {
 			// ignore
 		}

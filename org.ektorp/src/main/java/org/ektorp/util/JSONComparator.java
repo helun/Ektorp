@@ -43,11 +43,8 @@ public class JSONComparator {
 			return false;
 		}
 		ValueComparator vp = getComparator(aValue);
-		if (!vp.equals(aValue, bValue)) {
-			return false;
-		}
-		return true;
-	}
+        return vp.equals(aValue, bValue);
+    }
 
 	private static ValueComparator getComparator(Object aValue) {
 		ValueComparator vp = valueComparators.get(aValue.getClass());

@@ -93,7 +93,7 @@ public class UpdateHandlerRequest {
 
     public String buildRequestUri() {
         URI uri = buildUpdateHandlerRequestPath();
-        if (queryParams != null && !queryParams.isEmpty()) {
+        if (!queryParams.isEmpty()) {
             appendQueryParams(uri);
         }
 

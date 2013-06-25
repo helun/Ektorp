@@ -64,10 +64,8 @@ public class Person extends CouchDbDocument implements Comparable<Person> {
 				return false;
 		} else if (!getId().equals(other.getId()))
 			return false;
-		if (shoeSize != other.shoeSize)
-			return false;
-		return true;
-	}
+        return shoeSize == other.shoeSize;
+    }
 
 	public int compareTo(Person o) {
 		if (o == null) {

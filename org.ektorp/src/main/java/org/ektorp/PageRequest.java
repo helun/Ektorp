@@ -193,10 +193,8 @@ public class PageRequest {
 			return false;
 		if (page != other.page)
 			return false;
-		if (pageSize != other.pageSize)
-			return false;
-		return true;
-	}
+        return pageSize == other.pageSize;
+    }
 
 
 

@@ -26,7 +26,7 @@ public class ClassHierarchyMap<V> implements  Map<Class<?>, V>{
 	}
 
 	public boolean containsKey(Object key) {
-		return map.containsKey(key) ? true : get(key) != null;
+		return map.containsKey(key) || get(key) != null;
 	}
 
 	public boolean containsValue(Object value) {

@@ -161,8 +161,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
          new StdResponseHandler<String>() {
             @Override
             public String success(HttpResponse hr) throws Exception {
-               String s = objectMapper.readValue(hr.getContent(), String.class);
-               return s;
+               return objectMapper.readValue(hr.getContent(), String.class);
             }
          });
     }
@@ -176,8 +175,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
           new StdResponseHandler<String>() {
              @Override
              public String success(HttpResponse hr) throws Exception {
-                String s = objectMapper.readValue(hr.getContent(), String.class);
-                return s;
+                return objectMapper.readValue(hr.getContent(), String.class);
              }
          });
    }
@@ -189,8 +187,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
          new StdResponseHandler<List<StdActiveTask>>() {
          @Override
          public List<StdActiveTask> success(HttpResponse hr) throws Exception {
-            List<StdActiveTask> tasks = objectMapper.readValue(hr.getContent(), new TypeReference<List<StdActiveTask>>() {});
-            return tasks;
+            return objectMapper.readValue(hr.getContent(), new TypeReference<List<StdActiveTask>>() {});
          }
       });
 

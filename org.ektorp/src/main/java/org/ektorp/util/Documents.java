@@ -337,27 +337,19 @@ public final class Documents {
 		}
 
 		private Field resolveRevAccessor(Class<?> clazz) throws Exception {
-			Field f = null;
-			f = findAnnotatedField(clazz, "_rev");
-			return f;
+			return findAnnotatedField(clazz, "_rev");
 		}
 
 		private Field resolveIdAccessor(Class<?> clazz) throws Exception {
-			Field f = null;
-			f = findAnnotatedField(clazz, "_id");
-			return f;
+			return findAnnotatedField(clazz, "_id");
 		}
 
 		private Field resolveIdMutator(Class<?> clazz) throws Exception {
-			Field f = null;
-			f = findAnnotatedField(clazz, "_id");
-			return f;
+			return findAnnotatedField(clazz, "_id");
 		}
 
 		private Field resolveRevMutator(Class<?> clazz) throws Exception {
-			Field f = null;
-			f = findAnnotatedField(clazz, "_rev");
-			return f;
+			return findAnnotatedField(clazz, "_rev");
 		}
 
 		private Field findAnnotatedField(Class<?> clazz,

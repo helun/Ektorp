@@ -406,7 +406,6 @@ public class StdCouchDbConnectorTest {
         keys.add("key1");
         keys.add("key2");
         keys.add("key3");
-        ;
 
         ViewQuery query = new ViewQuery()
                 .dbPath(TEST_DB_PATH)

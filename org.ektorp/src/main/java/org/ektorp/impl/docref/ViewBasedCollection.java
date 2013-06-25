@@ -81,12 +81,11 @@ public class ViewBasedCollection implements InvocationHandler {
 			end = tmp;
 		}
 
-		ViewQuery query = new ViewQuery().designDocId(resolveDesignDocId(ann))
+		return new ViewQuery().designDocId(resolveDesignDocId(ann))
 				.viewName(resolveViewName(ann, fieldName))
 				.includeDocs(true)
 				.descending(ann.descendingSortOrder()).startKey(start)
 				.endKey(end);
-		return query;
 	}
 
 	private String resolveViewName(DocumentReferences ann, String fieldName) {
@@ -117,7 +116,7 @@ public class ViewBasedCollection implements InvocationHandler {
 			addToPendingRemoval(args[0]);
 		}
 		if (method.getName().equals("removeAll")) {
-			addToPendingRemoval((Collection<? extends Object>) args[0]);
+			addToPendingRemoval(args[0]);
 		}
 		if (method.getName().equals("retainAll")) {
 			addToPendingRemoval(difference(collection, (Collection<?>) args[0]));

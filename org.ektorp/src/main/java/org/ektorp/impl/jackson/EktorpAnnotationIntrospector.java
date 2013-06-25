@@ -34,8 +34,7 @@ public class EktorpAnnotationIntrospector extends NopAnnotationIntrospector {
 
 	@Override
 	public boolean hasIgnoreMarker(AnnotatedMember member) {
-		boolean b = super.hasIgnoreMarker(member);
-		return b;
+		return super.hasIgnoreMarker(member);
 	}
 
 	public boolean isIgnorableField(AnnotatedField f) {
