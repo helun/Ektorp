@@ -17,8 +17,8 @@ Ektorp 1.4.0 updated dependencies of Jackson and HttpClient.
 * Updated the DocumentChange interface to include a getter for all revisions, including conflicts, if they are provided by the changes feed.
 * Workaround for issue #88 - use AsyncTask.THREAD_POOL_EXECUTOR for long running tasks so that other async tasks can be used in parallel.
 ### Other Changes
-* Jackson version changed to 2.1.0.
-* HttpClient version change to 4.2.1 (fixes an issue related to gzip,deflate).
+* Jackson version changed to 2.2.0.
+* HttpClient version change to 4.2.5 (fixes an issue related to gzip,deflate).
 
 ### Contributors
 Pascal Gélinas
