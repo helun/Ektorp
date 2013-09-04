@@ -1,10 +1,10 @@
 package org.ektorp.http;
 
+import org.apache.http.conn.ClientConnectionManager;
+
 import java.lang.ref.WeakReference;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-
-import org.apache.http.conn.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class IdleConnectionMonitor {
 
@@ -27,6 +27,10 @@ public class IdleConnectionMonitor {
         ScheduledFuture<?> cleanupFuture = executorService.scheduleWithFixedDelay(cleanupTask, DEFAULT_IDLE_CHECK_INTERVAL, 
                                                                                 DEFAULT_IDLE_CHECK_INTERVAL, TimeUnit.SECONDS);
         cleanupTask.setFuture(cleanupFuture);
+    }
+
+    public static void shutdown() {
+        executorService.shutdown();
     }
 	
 	private static class CleanupTask implements Runnable {
