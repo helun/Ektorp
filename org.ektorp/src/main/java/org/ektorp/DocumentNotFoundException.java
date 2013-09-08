@@ -29,12 +29,24 @@ public class DocumentNotFoundException extends DbAccessException {
 		this.body = null;
 	}
 
-	public boolean isDocumentDeleted() {
+	private boolean checkReason(String expect) {
 		if (body == null) {
 			return false;
 		}
 		JsonNode reason = body.findPath("reason");
-		return !reason.isMissingNode() ? reason.textValue().equals("deleted") : false;
+		return !reason.isMissingNode() ? reason.textValue().equals(expect) : false;
+	}
+
+	public boolean isDocumentDeleted() {
+		return checkReason("deleted");
+	}
+
+	public boolean isDatabaseDeleted() {
+		return checkReason("no_db_file");
+	}
+
+	public JsonNode getBody() {
+		return body;
 	}
 
 	public String getPath() {
