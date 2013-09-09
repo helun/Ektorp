@@ -15,12 +15,24 @@ public @interface View {
 	 */
 	String name();
 	/**
-	 * Map function.
+	 * Map function or path to function.
+     * <p>
+     * This value may be a string of code to use for the function.
+     * Alternatively, the string may specify a file to load for
+     * the function by starting the string with <i>classpath:</i>.
+     * The rest of the string then represents a relative path to
+     * the function.
 	 * @return
 	 */
 	String map() default "";
 	/**
-	 * Reduce function.
+	 * Reduce function or path to function.
+     * <p>
+     * This value may be a string of code to use for the function.
+     * Alternatively, the string may specify a file to load for
+     * the function by starting the string with <i>classpath:</i>.
+     * The rest of the string then represents a relative path to
+     * the function.
 	 * @return
 	 */
 	String reduce() default "";
