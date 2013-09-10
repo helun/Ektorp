@@ -1,21 +1,20 @@
 package org.ektorp.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.ektorp.DbAccessException;
-import org.ektorp.ViewResultException;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.ektorp.DbAccessException;
+import org.ektorp.ViewResultException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Henrik Lundgren (original implementation)
@@ -31,10 +30,12 @@ public class QueryResultParser<T> {
     private static final String INCLUDED_DOC_FIELD_NAME = "doc";
     private static final String TOTAL_ROWS_FIELD_NAME = "total_rows";
     private static final String OFFSET_FIELD_NAME = "offset";
+    private static final String UPDATE_SEQUENCE_NAME = "update_seq";
 
     private int totalRows = -1;
     private int offset = -1;
     private List<T> rows;
+    private Long updateSequence;
 
     private String firstId;
     private JsonNode firstKey;
@@ -77,6 +78,8 @@ public class QueryResultParser<T> {
             } else if (ROWS_FIELD_NAME.equals(currentName)) {
                 rows = new ArrayList<T>();
                 parseRows(jp);
+            } else if (UPDATE_SEQUENCE_NAME.equals(currentName)) {
+                updateSequence = jp.getLongValue();
             } else {
                 // Handle cloudant errors.
                 errorFields.put(jp.getCurrentName(), jp.getText());
@@ -192,6 +195,10 @@ public class QueryResultParser<T> {
 
     public void setIgnoreNotFound(boolean ignoreNotFound) {
         this.ignoreNotFound = ignoreNotFound;
+    }
+
+    public Long getUpdateSequence() {
+        return updateSequence;
     }
 
     @JsonAutoDetect(fieldVisibility = Visibility.ANY)
