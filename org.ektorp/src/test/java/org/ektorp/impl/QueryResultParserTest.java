@@ -1,18 +1,19 @@
 package org.ektorp.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.DbAccessException;
 import org.ektorp.ViewResultException;
 import org.ektorp.support.CouchDbDocument;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class QueryResultParserTest {
 
@@ -69,7 +70,23 @@ public class QueryResultParserTest {
 		assertEquals("Silverchair", parser.getLastKey().textValue());
 	}
 
-	@Test( expected = ViewResultException.class )
+    @Test
+    public void test_update_sequence_should_be_parsed() throws Exception {
+        parser.parseResult(loadData("view_result_with_update_seq.json"));
+        List<TestDoc> result = parser.getRows();
+        assertEquals(2, result.size());
+        assertEquals(75, (long)parser.getUpdateSequence());
+    }
+
+    @Test
+    public void test_update_sequence_should_be_null_when_it_is_not_present() throws Exception {
+        parser.parseResult(loadData("view_result_with_included_docs.json"));
+        List<TestDoc> result = parser.getRows();
+        assertEquals(2, result.size());
+        assertNull(parser.getUpdateSequence());
+    }
+
+    @Test( expected = ViewResultException.class )
 	public void given_view_result_contains_error_then_exception_should_be_thrown() throws Exception {
 		parser.parseResult(loadData("view_result_with_error.json"));
 	}
