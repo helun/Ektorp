@@ -184,7 +184,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		}
 
 		private String getError() {
-			return nodeAsString(rowNode.findValue(ERROR_FIELD_NAME));
+			return nodeAsString(rowNode.get(ERROR_FIELD_NAME));
 		}
 
 		private String nodeAsString(JsonNode node) {

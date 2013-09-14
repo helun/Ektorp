@@ -1,0 +1,14 @@
+{"total_rows":2,"offset":0,"rows":[
+    {"_id" : "foobar", "_rev": 1,
+        "foo" : {
+            "bar" : "baz",
+            "error":"This document contains No error"
+        }
+    },
+    {"_id" : "foobar2", "_rev": 1,
+        "foo" : {
+            "bar" : "baz",
+            "error":"This document contains No error"
+        }
+    }
+]}
