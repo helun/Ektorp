@@ -26,8 +26,13 @@ public class StdResponseHandler<T> implements ResponseCallback<T> {
 	public static DbAccessException createDbAccessException(HttpResponse hr) {
 		JsonNode responseBody;
 		try {
-			responseBody = responseBodyAsNode(IOUtils.toString(hr.getContent()));
-		} catch (IOException e) {
+            InputStream content = hr.getContent();
+            if (content != null) {
+                responseBody = responseBodyAsNode(IOUtils.toString(content));
+            } else {
+                responseBody = NullNode.getInstance();
+            }
+		} catch (Exception e) {
 			responseBody = NullNode.getInstance();
 		}
 		switch (hr.getCode()) {
