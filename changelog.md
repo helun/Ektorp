@@ -1,5 +1,18 @@
 Change log
 ==========
+Changes in version 1.4.1
+------------------------
+Ektorp 1.4.1 fixes some issues found in 1.4.0
+### Fixes
+* "127: Ektorp throws a NullPointerException if the connection to CouchDB is lost mid-read
+* #124: Returning error when using a view query if the document contains an error property at any level
+
+
+### Improvements
+* #132: Support update_seq in view result
+* #131: Added extra reason check for "no_db_file"
+* #129: Added a shutdown method to the IdleConnectionMonitor
+
 Changes in version 1.4.0
 ------------------------
 Ektorp 1.4.0 updated dependencies of Jackson and HttpClient.
