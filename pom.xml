@@ -49,6 +49,7 @@
         <commons.io.version>2.0.1</commons.io.version>
         <httpclient.version>4.2.5</httpclient.version>
         <aspectj.version>1.6.9</aspectj.version>
+        <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -202,6 +203,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
