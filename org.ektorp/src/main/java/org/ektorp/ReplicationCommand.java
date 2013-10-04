@@ -52,13 +52,8 @@ public class ReplicationCommand implements Serializable {
 		continuous = b.continuous ? Boolean.TRUE : null;
 		cancel = b.cancel ? Boolean.TRUE : null;
 		createTarget = b.createTarget ? Boolean.TRUE : null;
-
-        if(b.sinceSeqLong!=null) {
-            sinceSeq = b.sinceSeqLong;
-        } else {
-            sinceSeq = b.sinceSeqString;
-        }
-		queryParams = b.queryParams;
+        sinceSeq = b.sinceSeqAsLong != null ? b.sinceSeqAsLong : b.sinceSeqAsString;
+        queryParams = b.queryParams;
 	}
 
 	public static class Builder {
@@ -71,8 +66,8 @@ public class ReplicationCommand implements Serializable {
 		private boolean continuous;
 		private boolean cancel;
 		private boolean createTarget;
-        private String sinceSeqString;
-        private Long sinceSeqLong;
+        private String sinceSeqAsString;
+        private Long sinceSeqAsLong;
 		private Object queryParams;
 		/**
 		 * Source and target can both point at local databases, remote databases and any combination of these.
@@ -172,9 +167,9 @@ public class ReplicationCommand implements Serializable {
          */
         public Builder sinceSeq(String sinceSeq) {
             try {
-                this.sinceSeqLong =  Long.parseLong(sinceSeq);
+                this.sinceSeqAsLong =  Long.parseLong(sinceSeq);
             } catch (NumberFormatException e) {
-                this.sinceSeqString = sinceSeq;
+                this.sinceSeqAsString = sinceSeq;
             }
             return this;
         }
