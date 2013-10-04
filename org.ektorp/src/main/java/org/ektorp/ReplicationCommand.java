@@ -41,7 +41,7 @@ public class ReplicationCommand implements Serializable {
 	public final Boolean createTarget;
 
     @JsonProperty("since_seq")
-    public final Long sinceSeq;
+    public final Object sinceSeq;
 
     private ReplicationCommand(Builder b) {
 		source = b.source;
@@ -52,8 +52,8 @@ public class ReplicationCommand implements Serializable {
 		continuous = b.continuous ? Boolean.TRUE : null;
 		cancel = b.cancel ? Boolean.TRUE : null;
 		createTarget = b.createTarget ? Boolean.TRUE : null;
-        sinceSeq = b.sinceSeq;
-		queryParams = b.queryParams;
+        sinceSeq = b.sinceSeqAsLong != null ? b.sinceSeqAsLong : b.sinceSeqAsString;
+        queryParams = b.queryParams;
 	}
 
 	public static class Builder {
@@ -66,7 +66,8 @@ public class ReplicationCommand implements Serializable {
 		private boolean continuous;
 		private boolean cancel;
 		private boolean createTarget;
-        private Long sinceSeq;
+        private String sinceSeqAsString;
+        private Long sinceSeqAsLong;
 		private Object queryParams;
 		/**
 		 * Source and target can both point at local databases, remote databases and any combination of these.
@@ -156,25 +157,20 @@ public class ReplicationCommand implements Serializable {
 		}
         /**
          * The sequence from which the replication should start
-         * @see http://docs.couchdb.org/en/latest/json-structure.html#replication-settings
+         * See http://docs.couchdb.org/en/latest/json-structure.html#replication-settings for details
          *
-         * @param sinceSeq as Long
-         * @return
-         */
-        public Builder sinceSeq(Long sinceSeq) {
-            this.sinceSeq = sinceSeq;
-            return this;
-        }
-
-        /**
-         * The sequence from which the replication should start
-         * @see http://docs.couchdb.org/en/latest/json-structure.html#replication-settings
+         * CouchDB expects a Long value for the sequence
+         * Cloudant expects a String value for the sequence
          *
          * @param sinceSeq as String
          * @return
          */
         public Builder sinceSeq(String sinceSeq) {
-            this.sinceSeq = Long.valueOf(sinceSeq);
+            try {
+                this.sinceSeqAsLong =  Long.parseLong(sinceSeq);
+            } catch (NumberFormatException e) {
+                this.sinceSeqAsString = sinceSeq;
+            }
             return this;
         }
 
