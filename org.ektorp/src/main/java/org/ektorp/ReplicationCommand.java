@@ -1,11 +1,12 @@
 package org.ektorp;
 
-import java.io.*;
-import java.util.*;
-
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import org.ektorp.util.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.ektorp.util.Assert;
+
+import java.io.Serializable;
+import java.util.Collection;
 
 @JsonInclude(Include.NON_NULL)
 public class ReplicationCommand implements Serializable {
@@ -39,7 +40,10 @@ public class ReplicationCommand implements Serializable {
 	@JsonProperty("create_target")
 	public final Boolean createTarget;
 
-	private ReplicationCommand(Builder b) {
+    @JsonProperty("since_seq")
+    public final Long sinceSeq;
+
+    private ReplicationCommand(Builder b) {
 		source = b.source;
 		target = b.target;
 		proxy = b.proxy;
@@ -48,6 +52,7 @@ public class ReplicationCommand implements Serializable {
 		continuous = b.continuous ? Boolean.TRUE : null;
 		cancel = b.cancel ? Boolean.TRUE : null;
 		createTarget = b.createTarget ? Boolean.TRUE : null;
+        sinceSeq = b.sinceSeq;
 		queryParams = b.queryParams;
 	}
 
@@ -61,6 +66,7 @@ public class ReplicationCommand implements Serializable {
 		private boolean continuous;
 		private boolean cancel;
 		private boolean createTarget;
+        private Long sinceSeq;
 		private Object queryParams;
 		/**
 		 * Source and target can both point at local databases, remote databases and any combination of these.
@@ -148,6 +154,29 @@ public class ReplicationCommand implements Serializable {
 			createTarget = b;
 			return this;
 		}
+        /**
+         * The sequence from which the replication should start
+         * @see http://docs.couchdb.org/en/latest/json-structure.html#replication-settings
+         *
+         * @param sinceSeq as Long
+         * @return
+         */
+        public Builder sinceSeq(Long sinceSeq) {
+            this.sinceSeq = sinceSeq;
+            return this;
+        }
+
+        /**
+         * The sequence from which the replication should start
+         * @see http://docs.couchdb.org/en/latest/json-structure.html#replication-settings
+         *
+         * @param sinceSeq as String
+         * @return
+         */
+        public Builder sinceSeq(String sinceSeq) {
+            this.sinceSeq = Long.valueOf(sinceSeq);
+            return this;
+        }
 
 		public ReplicationCommand build() {
 			Assert.hasText(source, "source may not be null or empty");
