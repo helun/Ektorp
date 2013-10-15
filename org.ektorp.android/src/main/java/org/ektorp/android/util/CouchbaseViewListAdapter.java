@@ -13,6 +13,7 @@ import org.ektorp.changes.DocumentChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.os.Build;
 import android.os.AsyncTask;
 import android.widget.BaseAdapter;
 
@@ -110,7 +111,7 @@ public abstract class CouchbaseViewListAdapter extends BaseAdapter {
 								.build();
 
 						couchChangesAsyncTask = new CouchbaseListChangesAsyncTask(couchDbConnector, changesCmd);
-						couchChangesAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+						executeTask(couchChangesAsyncTask);
 
 					}
 
@@ -129,8 +130,16 @@ public abstract class CouchbaseViewListAdapter extends BaseAdapter {
 
 			};
 
-			updateListItemsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+			executeTask(updateListItemsTask);
 
+		}
+	}
+	
+	private void executeTask(AsyncTask<Void, ?, ?> asyncTask) {
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		} else {
+			asyncTask.execute();
 		}
 	}
 
