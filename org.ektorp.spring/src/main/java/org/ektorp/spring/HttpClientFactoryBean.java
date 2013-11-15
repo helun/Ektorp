@@ -191,7 +191,7 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient>, Initializ
 		LOG.debug("cleanupIdleConnections: {}", cleanupIdleConnections);
 		LOG.debug("enableSSL: {}", enableSSL);
 		LOG.debug("relaxedSSLSettings: {}", relaxedSSLSettings);
-		LOG.debug("useEpecteContinue: {}", useExpectContinue);
+		LOG.debug("useEpectContinue: {}", useExpectContinue);
 
 		
 		client = new StdHttpClient.Builder()
