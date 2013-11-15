@@ -48,6 +48,7 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient>, Initializ
 	public boolean caching = true;
 	public int maxCacheEntries = 1000;
 	public int maxObjectSizeBytes = 8192;
+	public boolean useExpectContinue = true;
 	
 	private SSLSocketFactory sslSocketFactory;
 	
@@ -93,6 +94,10 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient>, Initializ
 	
 	public void setPassword(String s) {
 		this.password = s;
+	}
+	
+	public void setUseExpectContinue(boolean value) {
+		this.useExpectContinue = value;
 	}
 	
 	public void setTestConnectionAtStartup(boolean b) {
@@ -186,6 +191,8 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient>, Initializ
 		LOG.debug("cleanupIdleConnections: {}", cleanupIdleConnections);
 		LOG.debug("enableSSL: {}", enableSSL);
 		LOG.debug("relaxedSSLSettings: {}", relaxedSSLSettings);
+		LOG.debug("useEpecteContinue: {}", useExpectContinue);
+
 		
 		client = new StdHttpClient.Builder()
 								.host(host)
@@ -196,6 +203,7 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient>, Initializ
 								.username(username)
 								.password(password)
 								.cleanupIdleConnections(cleanupIdleConnections)
+								.useExpectContinue(useExpectContinue)
 								.enableSSL(enableSSL)
 								.relaxedSSLSettings(relaxedSSLSettings)
 								.sslSocketFactory(sslSocketFactory)
