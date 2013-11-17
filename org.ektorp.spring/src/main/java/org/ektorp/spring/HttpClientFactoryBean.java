@@ -48,23 +48,23 @@ public class HttpClientFactoryBean implements FactoryBean<HttpClient>, Initializ
 	public boolean caching = true;
 	public int maxCacheEntries = 1000;
 	public int maxObjectSizeBytes = 8192;
-	
-	private SSLSocketFactory sslSocketFactory;
-	
-	private Properties couchDBProperties;
+
+	protected SSLSocketFactory sslSocketFactory;
+
+	protected Properties couchDBProperties;
 	
 	@Override
 	public HttpClient getObject() throws Exception {
 		return client;
 	}
-	
-	private void configureAutoUpdateViewOnChange() {
+
+	protected void configureAutoUpdateViewOnChange() {
 		if (autoUpdateViewOnChange && !Boolean.getBoolean(CouchDbRepositorySupport.AUTO_UPDATE_VIEW_ON_CHANGE)) {
 			System.setProperty(CouchDbRepositorySupport.AUTO_UPDATE_VIEW_ON_CHANGE, Boolean.TRUE.toString());
 		}
 	}
 
-	private void testConnect(HttpClient client) {
+	protected void testConnect(HttpClient client) {
 		try {
 			RestTemplate rt = new RestTemplate(client);
 			rt.head("/", new StdResponseHandler<Void>());
