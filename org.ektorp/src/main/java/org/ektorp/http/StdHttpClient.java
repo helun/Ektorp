@@ -64,6 +64,14 @@ public class StdHttpClient implements HttpClient {
 		this.backend = backend;
 	}
 
+	public org.apache.http.client.HttpClient getClient() {
+		return client;
+	}
+
+	public org.apache.http.client.HttpClient getBackend() {
+		return backend;
+	}
+
 	public HttpResponse delete(String uri) {
 		return executeRequest(new HttpDelete(uri));
 	}
@@ -119,7 +127,7 @@ public class StdHttpClient implements HttpClient {
 		return executeRequest(new HttpHead(uri));
 	}
 
-	private HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,
+	protected HttpResponse executePutPost(HttpEntityEnclosingRequestBase request,
 			String content, boolean useBackend) {
 		try {
 			LOG.trace("Content: {}", content);
@@ -134,20 +142,20 @@ public class StdHttpClient implements HttpClient {
 
 
 
-	private HttpResponse executeRequest(HttpRequestBase request, Map<String, String> headers) {
+	protected HttpResponse executeRequest(HttpRequestBase request, Map<String, String> headers) {
 		for(Map.Entry<String, String> header : headers.entrySet()) {
 			request.setHeader(header.getKey(), header.getValue());
 		}
 		return executeRequest(request);
 	}
 
-	private HttpResponse executeRequest(HttpUriRequest request, boolean useBackend) {
+	protected HttpResponse executeRequest(HttpUriRequest request, boolean useBackend) {
 		try {
 			org.apache.http.HttpResponse rsp;
 			if (useBackend) {
 				rsp = backend.execute(request);
 			} else {
-				rsp = client.execute((HttpHost)client.getParams().getParameter(ClientPNames.DEFAULT_HOST), request);				
+				rsp = client.execute(getHttpHost(), request);
 			}
 			LOG.trace("{} {} {} {}", new Object[] { request.getMethod(), request.getURI(),
 					rsp.getStatusLine().getStatusCode(), rsp.getStatusLine().getReasonPhrase() });
@@ -156,8 +164,8 @@ public class StdHttpClient implements HttpClient {
 			throw Exceptions.propagate(e);
 		}		
 	}
-	
-	private HttpResponse executeRequest(HttpRequestBase request) {
+
+	protected HttpResponse executeRequest(HttpRequestBase request) {
 		return executeRequest(request, false);
 	}
 
@@ -170,29 +178,33 @@ public class StdHttpClient implements HttpClient {
 		client.getConnectionManager().shutdown();
 	}
 
+	protected HttpHost getHttpHost() {
+		return (HttpHost)client.getParams().getParameter(ClientPNames.DEFAULT_HOST);
+	}
+
 	public static class Builder {
-		String host = "localhost";
-		int port = 5984;
-		int maxConnections = 20;
-		int connectionTimeout = 1000;
-		int socketTimeout = 10000;
-		ClientConnectionManager conman;
-		int proxyPort = -1;
-		String proxy = null;
+		protected String host = "localhost";
+		protected int port = 5984;
+		protected int maxConnections = 20;
+		protected int connectionTimeout = 1000;
+		protected int socketTimeout = 10000;
+		protected ClientConnectionManager conman;
+		protected int proxyPort = -1;
+		protected String proxy = null;
 
-		boolean enableSSL = false;
-		boolean relaxedSSLSettings = false;
-		SSLSocketFactory sslSocketFactory;
+		protected boolean enableSSL = false;
+		protected boolean relaxedSSLSettings = false;
+		protected SSLSocketFactory sslSocketFactory;
 
-		String username;
-		String password;
+		protected String username;
+		protected String password;
 
-		boolean cleanupIdleConnections = true;
-		boolean useExpectContinue = true;
-		boolean caching = true;
-		boolean compression; // Default is false;
-		int maxObjectSizeBytes = 8192;
-		int maxCacheEntries = 1000;
+		protected boolean cleanupIdleConnections = true;
+		protected boolean useExpectContinue = true;
+		protected boolean caching = true;
+		protected boolean compression; // Default is false;
+		protected int maxObjectSizeBytes = 8192;
+		protected int maxCacheEntries = 1000;
 
 		public Builder url(String s) throws MalformedURLException {
 			if (s == null) return this;
@@ -294,7 +306,7 @@ public class StdHttpClient implements HttpClient {
 			return conman;
 		}
 
-		private Scheme configureScheme() {
+		protected Scheme configureScheme() {
 			if (enableSSL) {
 				try {
 					if (sslSocketFactory == null) {
@@ -487,7 +499,7 @@ public class StdHttpClient implements HttpClient {
 	}
 
         // separate class to avoid runtime dependency to httpclient-cache unless using caching
-	private static class WithCachingBuilder {
+	public static class WithCachingBuilder {
 		public static org.apache.http.client.HttpClient withCaching(org.apache.http.client.HttpClient client, int maxCacheEntries, int maxObjectSizeBytes) {
 			CacheConfig cacheConfig = new CacheConfig();  
 			cacheConfig.setMaxCacheEntries(maxCacheEntries);
