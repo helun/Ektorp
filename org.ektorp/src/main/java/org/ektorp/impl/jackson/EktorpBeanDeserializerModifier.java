@@ -15,28 +15,31 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.deser.BeanDeserializer;
-import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
-import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
-import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
-import com.fasterxml.jackson.databind.deser.impl.MethodProperty;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
-import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.util.ClassUtil;
-import com.fasterxml.jackson.databind.util.SimpleBeanPropertyDefinition;
-
 import org.ektorp.CouchDbConnector;
 import org.ektorp.docref.DocumentReferences;
 import org.ektorp.impl.docref.BackReferencedBeanDeserializer;
 import org.ektorp.impl.docref.ConstructibleAnnotatedCollection;
 import org.ektorp.util.Predicate;
 import org.ektorp.util.ReflectionUtils;
+
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.BeanDeserializer;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
+import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
+import com.fasterxml.jackson.databind.deser.impl.MethodProperty;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.util.ClassUtil;
+import com.fasterxml.jackson.databind.util.SimpleBeanPropertyDefinition;
 
 public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 
@@ -114,23 +117,6 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 					collectionType);
 	}
 
-	private VisibilityChecker<?> getVisibilityChecker(
-			DeserializationConfig config, BasicBeanDescription beanDesc) {
-		VisibilityChecker<?> vchecker = config.getDefaultVisibilityChecker();
-		if (!config
-				.isEnabled(MapperFeature.AUTO_DETECT_SETTERS)) {
-			vchecker = vchecker.withSetterVisibility(Visibility.NONE);
-		}
-		if (!config.isEnabled(MapperFeature.AUTO_DETECT_FIELDS)) {
-			vchecker = vchecker.withFieldVisibility(Visibility.NONE);
-		}
-		vchecker = config.getAnnotationIntrospector().findAutoDetectVisibility(
-				beanDesc.getClassInfo(), vchecker);
-		return vchecker;
-	}
-
-
-
 	/**
 	 * Method copied from org.codehaus.jackson.map.deser.BeanDeserializerFactory
 	 */
@@ -150,7 +136,7 @@ public class EktorpBeanDeserializerModifier extends BeanDeserializerModifier {
 
 		TypeDeserializer typeDeser = type.getTypeHandler();
 		SettableBeanProperty prop =
-			new MethodProperty(new SimpleBeanPropertyDefinition(setter), type, typeDeser, beanDesc.getClassAnnotations(),
+			new MethodProperty(SimpleBeanPropertyDefinition.construct(config, setter), type, typeDeser, beanDesc.getClassAnnotations(),
 				setter);
 
 		// [JACKSON-235]: need to retain name of managed forward references:

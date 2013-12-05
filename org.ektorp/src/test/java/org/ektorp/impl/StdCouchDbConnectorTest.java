@@ -153,6 +153,7 @@ public class StdCouchDbConnectorTest {
         assertEquals(12, getted.age);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testGetWithConflicts() {
         setupGetDocResponse();

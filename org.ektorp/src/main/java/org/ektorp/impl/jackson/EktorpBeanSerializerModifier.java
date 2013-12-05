@@ -3,19 +3,18 @@ package org.ektorp.impl.jackson;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
-import com.fasterxml.jackson.databind.ser.BeanSerializer;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
-
 import org.ektorp.CouchDbConnector;
 import org.ektorp.docref.CascadeType;
 import org.ektorp.docref.DocumentReferences;
 import org.ektorp.impl.docref.DocumentReferenceSerializer;
 import org.ektorp.util.Predicate;
 import org.ektorp.util.ReflectionUtils;
+
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.ser.BeanSerializer;
+import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 
 public class EktorpBeanSerializerModifier extends BeanSerializerModifier {
 

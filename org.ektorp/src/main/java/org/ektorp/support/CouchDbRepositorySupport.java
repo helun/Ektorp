@@ -1,15 +1,24 @@
 package org.ektorp.support;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.ektorp.ComplexKey;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentNotFoundException;
+import org.ektorp.Options;
+import org.ektorp.UpdateConflictException;
+import org.ektorp.ViewQuery;
+import org.ektorp.impl.NameConventions;
+import org.ektorp.util.Assert;
+import org.ektorp.util.Documents;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
-import org.ektorp.*;
-import org.ektorp.impl.*;
-import org.ektorp.util.*;
-import org.slf4j.*;
 
 /**
  * Provides "out of the box" CRUD functionality for sub classes.

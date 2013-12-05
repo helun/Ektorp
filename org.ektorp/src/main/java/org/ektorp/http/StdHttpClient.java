@@ -34,7 +34,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -503,7 +502,7 @@ public class StdHttpClient implements HttpClient {
 		public static org.apache.http.client.HttpClient withCaching(org.apache.http.client.HttpClient client, int maxCacheEntries, int maxObjectSizeBytes) {
 			CacheConfig cacheConfig = new CacheConfig();  
 			cacheConfig.setMaxCacheEntries(maxCacheEntries);
-			cacheConfig.setMaxObjectSizeBytes(maxObjectSizeBytes);
+			cacheConfig.setMaxObjectSize(maxObjectSizeBytes);
 			return new CachingHttpClient(client, cacheConfig);
 		}
 	}

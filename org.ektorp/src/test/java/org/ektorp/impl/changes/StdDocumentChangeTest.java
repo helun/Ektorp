@@ -89,6 +89,7 @@ public class StdDocumentChangeTest {
             Assert.assertEquals(++i, documentChange.getSequence());
         }
         Assert.assertEquals(5, changes.getLastSeq());
+        changes.close();
     }
 
 	private JsonNode load(String id) throws IOException {

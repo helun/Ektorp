@@ -38,7 +38,7 @@ public class AttachmentsInOrderParserTest
         InputStream attachmentsInputStream = getClass().getResourceAsStream("attachments.json");
 
         JsonFactory jsonFactory = new JsonFactory();
-        attachmentsJsonParser = jsonFactory.createJsonParser(attachmentsInputStream);
+        attachmentsJsonParser = jsonFactory.createParser(attachmentsInputStream);
 
         knownOrderList = Arrays.asList(KNOWN_ORDER);
     }

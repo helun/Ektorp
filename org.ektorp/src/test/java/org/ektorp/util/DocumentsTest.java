@@ -282,7 +282,6 @@ public class DocumentsTest {
 			return revisjon;
 		}
 
-		@SuppressWarnings("unused")
 		@JsonProperty("_rev")
 		private void setRevisjon(String revisjon) {
 			this.revisjon = revisjon;
