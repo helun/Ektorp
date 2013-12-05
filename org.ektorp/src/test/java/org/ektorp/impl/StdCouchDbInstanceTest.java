@@ -59,6 +59,7 @@ public class StdCouchDbInstanceTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testGetFullConfiguration() {
 	    when(client.get("/_config")).thenReturn(HttpResponseStub.valueOf(200, "{\"httpd\": {" +
 	       "\"bind_address\": \"0.0.0.0\",\"port\": \"5984\"}, \"ssl\": {\"port\": \"6984\"}}"));
@@ -67,6 +68,7 @@ public class StdCouchDbInstanceTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testGetConfigurationSection() {
 		when(client.get("/_config/httpd")).thenReturn(HttpResponseStub.valueOf(200, "{\"httpd\": {" +
 			"\"bind_address\": \"0.0.0.0\",\"port\": \"5984\"}}"));

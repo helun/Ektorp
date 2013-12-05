@@ -2,7 +2,6 @@ package org.ektorp.http;
 
 import java.io.InputStream;
 
-import org.ektorp.DbAccessException;
 import org.ektorp.util.Exceptions;
 /**
  * 

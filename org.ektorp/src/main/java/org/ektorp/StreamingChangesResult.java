@@ -26,7 +26,7 @@ public class StreamingChangesResult implements Serializable, Iterable<DocumentCh
 	public StreamingChangesResult(ObjectMapper objectMapper, HttpResponse response) {
 		this.response = response;
         try{
-		    jp = objectMapper.getJsonFactory().createJsonParser(response.getContent());
+		    jp = objectMapper.getFactory().createParser(response.getContent());
 		    jp.nextValue();
 		    jp.nextValue();
 		    jp.nextToken();

@@ -105,7 +105,6 @@ public class ViewBasedCollection implements InvocationHandler {
 		collection.addAll(list);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
 		if (method.getName().equals("set")) {

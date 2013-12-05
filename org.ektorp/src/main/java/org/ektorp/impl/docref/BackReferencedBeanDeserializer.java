@@ -1,20 +1,21 @@
 package org.ektorp.impl.docref;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.io.IOException;
+import java.lang.reflect.Proxy;
+import java.util.List;
+
+import org.ektorp.CouchDbConnector;
+import org.ektorp.docref.DocumentReferences;
+import org.ektorp.docref.FetchType;
+import org.ektorp.util.Documents;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import org.ektorp.*;
-import org.ektorp.docref.*;
-import org.ektorp.util.*;
 
 /**
  *

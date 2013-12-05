@@ -20,12 +20,12 @@ public class DocIdResponseHandler extends StdResponseHandler<List<String>> {
 	private final JsonFactory jsonFactory;
 
 	public DocIdResponseHandler(ObjectMapper om) {
-		jsonFactory = om.getJsonFactory();
+		jsonFactory = om.getFactory();
 	}
 
 	@Override
 	public List<String> success(HttpResponse hr) throws Exception {
-		JsonParser jp = jsonFactory.createJsonParser(hr.getContent());
+		JsonParser jp = jsonFactory.createParser(hr.getContent());
 		if (jp.nextToken() != JsonToken.START_OBJECT) {
 			throw new DbAccessException("Expected data to start with an Object");
 		}
