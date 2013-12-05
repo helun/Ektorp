@@ -185,8 +185,7 @@ public class StdHttpClient implements HttpClient {
 	}
 
 	protected HttpResponse createStdHttpResponse(org.apache.http.HttpResponse rsp, HttpUriRequest httpRequest) {
-		// TODO : also make the constructor of StdHttpResponse public
-		return StdHttpResponse.of(rsp, httpRequest);
+		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest, rsp.getFirstHeader("ETag"));
 	}
 
 	protected HttpResponse executeRequest(HttpRequestBase request) {
