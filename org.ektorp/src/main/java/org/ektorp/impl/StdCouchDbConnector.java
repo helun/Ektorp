@@ -38,13 +38,7 @@ import org.ektorp.ViewResult;
 import org.ektorp.changes.ChangesCommand;
 import org.ektorp.changes.ChangesFeed;
 import org.ektorp.changes.DocumentChange;
-import org.ektorp.http.HttpClient;
-import org.ektorp.http.HttpResponse;
-import org.ektorp.http.HttpStatus;
-import org.ektorp.http.ResponseCallback;
-import org.ektorp.http.RestTemplate;
-import org.ektorp.http.StdResponseHandler;
-import org.ektorp.http.URI;
+import org.ektorp.http.*;
 import org.ektorp.impl.changes.ContinuousChangesFeed;
 import org.ektorp.impl.changes.StdDocumentChange;
 import org.ektorp.util.Assert;
@@ -64,17 +58,17 @@ public class StdCouchDbConnector implements CouchDbConnector {
     private static final Logger LOG = LoggerFactory
             .getLogger(StdCouchDbConnector.class);
     private static final ResponseCallback<Void> VOID_RESPONSE_HANDLER = new StdResponseHandler<Void>();
-    private final ObjectMapper objectMapper;
+    protected final ObjectMapper objectMapper;
     private JsonSerializer jsonSerializer;
 
-    private final URI dbURI;
+    protected final URI dbURI;
     private final String dbName;
 
-    private final RestTemplate restTemplate;
+    protected final RestTemplate restTemplate;
 
     private final CouchDbInstance dbInstance;
 
-    private final RevisionResponseHandler revisionHandler;
+	protected final RevisionResponseHandler revisionHandler;
     private final DocIdResponseHandler docIdResponseHandler;
 
     private final ThreadLocalBulkBufferHolder bulkBufferManager = new ThreadLocalBulkBufferHolder();
@@ -132,7 +126,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         restTemplate.put(URIWithDocId(id), jsonSerializer.toJson(node));
     }
 
-    private String URIWithDocId(String id) {
+    protected String URIWithDocId(String id) {
         return dbURI.append(id).toString();
     }
 
@@ -495,7 +489,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
                         .toString(), revisionHandler).getRevision();
     }
 
-    private void assertDocIdHasValue(String docId) {
+    protected void assertDocIdHasValue(String docId) {
         Assert.hasText(docId, "document id cannot be empty");
     }
 
@@ -654,7 +648,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         this.jsonSerializer = js;
     }
 
-    private List<DocumentOperationResult> executeBulk(Collection<?> objects,
+    public List<DocumentOperationResult> executeBulk(Collection<?> objects,
 			boolean allOrNothing) {
 		BulkOperation op = jsonSerializer.createBulkOperation(objects,
 				allOrNothing);

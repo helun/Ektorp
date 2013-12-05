@@ -33,7 +33,7 @@ public class StdHttpResponse implements HttpResponse {
 		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest, rsp.getFirstHeader("ETag"));
 	}
 	
-	private StdHttpResponse(HttpEntity e, StatusLine status, HttpUriRequest httpRequest, Header eTagHeader) {
+	public StdHttpResponse(HttpEntity e, StatusLine status, HttpUriRequest httpRequest, Header eTagHeader) {
 		this.httpRequest = httpRequest;
 		this.entity = e != null ? e : NULL_ENTITY;
 		this.status = status;
