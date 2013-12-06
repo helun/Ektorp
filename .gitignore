@@ -18,3 +18,7 @@ local.properties
 
 /org.ektorp.spring/target/
 /target
+
+# IntelliJ
+.idea
+*.iml

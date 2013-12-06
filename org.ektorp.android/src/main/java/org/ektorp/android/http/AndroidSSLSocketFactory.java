@@ -31,27 +31,6 @@
 
 package org.ektorp.android.http;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
 import org.apache.http.conn.scheme.HostNameResolver;
 import org.apache.http.conn.scheme.LayeredSocketFactory;
 import org.apache.http.conn.scheme.SocketFactory;
@@ -61,6 +40,14 @@ import org.apache.http.conn.ssl.StrictHostnameVerifier;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+
+import javax.net.ssl.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.*;
 
 /**
  * Layered socket factory for TLS/SSL connections, based on JSSE.
@@ -199,7 +186,7 @@ public class AndroidSSLSocketFactory implements LayeredSocketFactory, SocketFact
             trustmanagers = createTrustManagers(truststore);
         }
         this.sslcontext = SSLContext.getInstance(algorithm);
-        this.sslcontext.init(keymanagers, new TrustManager[]{TRUST_EVEYONE_MANAGER}, random);
+        this.sslcontext.init(keymanagers, trustmanagers, random);
         this.socketfactory = this.sslcontext.getSocketFactory();
         this.nameResolver = nameResolver;
     }
