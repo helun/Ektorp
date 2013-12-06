@@ -1,6 +1,7 @@
 package org.ektorp.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.http.HttpEntity;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.PurgeResult;
@@ -22,13 +23,20 @@ public class StreamedCouchDbConnector extends StdCouchDbConnector {
         super(databaseName, dbInstance);
     }
 
+    public StreamedCouchDbConnector(String databaseName, CouchDbInstance dbi, ObjectMapperFactory om) {
+        super(databaseName, dbi, om);
+    }
+
+    protected HttpEntity createHttpEntity(Object o) {
+        return new JacksonableEntity(o, objectMapper);
+    }
+
     @Override
     public void create(final Object o) {
         Assert.notNull(o, "Document may not be null");
         Assert.isTrue(Documents.isNew(o), "Object must be new");
 
-        JacksonableEntity entity = new JacksonableEntity(o);
-        entity.setObjectMapper(objectMapper);
+        HttpEntity entity = createHttpEntity(o);
 
         String id = Documents.getId(o);
         DocumentOperationResult result;
@@ -41,14 +49,12 @@ public class StreamedCouchDbConnector extends StdCouchDbConnector {
         Documents.setRevision(o, result.getRevision());
     }
 
-
     @Override
     public void create(String id, Object node) {
         assertDocIdHasValue(id);
         Assert.notNull(node, "node may not be null");
 
-        JacksonableEntity entity = new JacksonableEntity(node);
-        entity.setObjectMapper(objectMapper);
+        HttpEntity entity = createHttpEntity(node);
 
         restTemplate.put(URIWithDocId(id), entity);
     }
@@ -61,11 +67,10 @@ public class StreamedCouchDbConnector extends StdCouchDbConnector {
         // TODO : override the method using kind of the same pattern as the JacksonableEntity to generate the Bulk request JSON document
         return super.executeBulk(objects, allOrNothing);
     }
-    
+
     @Override
     public PurgeResult purge(Map<String, List<String>> revisionsToPurge) {
-        JacksonableEntity entity = new JacksonableEntity(revisionsToPurge);
-        entity.setObjectMapper(objectMapper);
+        HttpEntity entity = createHttpEntity(revisionsToPurge);
 
         return restTemplate.post(dbURI.append("_purge").toString(), entity,
                 new StdResponseHandler<PurgeResult>() {
@@ -82,8 +87,7 @@ public class StreamedCouchDbConnector extends StdCouchDbConnector {
         final String id = Documents.getId(o);
         assertDocIdHasValue(id);
 
-        JacksonableEntity entity = new JacksonableEntity(o);
-        entity.setObjectMapper(objectMapper);
+        HttpEntity entity = createHttpEntity(o);
 
         restTemplate.put(dbURI.append(id).toString(), entity,
                 new StdResponseHandler<Void>() {

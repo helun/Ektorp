@@ -1,21 +1,10 @@
 package org.ektorp.impl;
 
-import static java.lang.String.format;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-
+import org.apache.commons.io.IOUtils;
 import org.ektorp.*;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
@@ -27,32 +16,43 @@ import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.mockito.internal.verification.VerificationModeFactory;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+
+import static java.lang.String.format;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class StdCouchDbConnectorTest {
 
-    private static final String OK_RESPONSE_WITH_ID_AND_REV = "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}";
-	private static final String TEST_DB_PATH = "/test_db/";
+    protected static final String OK_RESPONSE_WITH_ID_AND_REV = "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}";
+    protected static final String TEST_DB_PATH = "/test_db/";
     CouchDbConnector dbCon;
     StdHttpClient httpClient;
     TestDoc td = new TestDoc();
 
     @Before
     public void setUp() throws Exception {
-        httpClient = mock(StdHttpClient.class);
-        StdCouchDbInstance dbInstance = new StdCouchDbInstance(httpClient, new StdObjectMapperFactory(){
-        	@Override
-        	public ObjectMapper createObjectMapper(CouchDbConnector connector) {
-        		ObjectMapper mapper = super.createObjectMapper(connector);
-        		mapper.registerModule(new JodaModule());
-        		return mapper;
-        	}
+        httpClient = mock(StdHttpClient.class, new ThrowsException(new UnsupportedOperationException()));
+        StdCouchDbInstance dbInstance = new StdCouchDbInstance(httpClient, new StdObjectMapperFactory() {
+            @Override
+            public ObjectMapper createObjectMapper(CouchDbConnector connector) {
+                ObjectMapper mapper = super.createObjectMapper(connector);
+                mapper.registerModule(new JodaModule());
+                return mapper;
+            }
         });
-		dbCon = dbInstance.createConnector("test_db/",false);
+        dbCon = dbInstance.createConnector("test_db/", false);
 
         td.name = "nisse";
         td.age = 12;
@@ -62,8 +62,7 @@ public class StdCouchDbConnectorTest {
     public void testCreate() {
         td.setId("some_id");
         setupNegativeContains(td.getId());
-        when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
@@ -77,8 +76,7 @@ public class StdCouchDbConnectorTest {
         String escapedId = "http%3A%2F%2Fsome%2Fopenid%3Fgoog";
         td.setId("http://some/openid?goog");
         setupNegativeContains(escapedId);
-        when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/" + escapedId), ac.capture());
@@ -87,8 +85,7 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void testCreateFromJsonNode() throws Exception {
-        when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
         JsonNode root = new ObjectMapper().readValue(getClass().getResourceAsStream("create_from_json_node.json"),
                 JsonNode.class);
         dbCon.create("some_id", root);
@@ -101,8 +98,7 @@ public class StdCouchDbConnectorTest {
         td.setId("some_id");
         td.name = "Örjan Åäö";
         setupNegativeContains(td.getId());
-        when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
@@ -111,8 +107,7 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void create_should_post_if_id_is_missing() {
-        when(httpClient.post(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).post(anyString(), anyString());
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).post(eq(TEST_DB_PATH), ac.capture());
@@ -123,8 +118,7 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void testDelete() {
-        when(httpClient.delete(anyString())).thenReturn(
-                HttpResponseStub.valueOf(200, "{\"ok\":true,\"rev\":\"123D123\"}"));
+        doReturn(HttpResponseStub.valueOf(200, "{\"ok\":true,\"rev\":\"123D123\"}")).when(httpClient).delete(anyString());
         dbCon.delete("some_id", "123D123");
         verify(httpClient).delete("/test_db/some_id?rev=123D123");
     }
@@ -134,8 +128,7 @@ public class StdCouchDbConnectorTest {
         td.setId("some_id");
         td.setRevision("123D123");
         setupGetDocResponse();
-        when(httpClient.delete(anyString())).thenReturn(
-                HttpResponseStub.valueOf(200, "{\"ok\":true,\"rev\":\"123D123\"}"));
+        doReturn(HttpResponseStub.valueOf(200, "{\"ok\":true,\"rev\":\"123D123\"}")).when(httpClient).delete(anyString());
         dbCon.delete(td);
         verify(httpClient).delete("/test_db/some_id?rev=123D123");
     }
@@ -162,22 +155,20 @@ public class StdCouchDbConnectorTest {
     }
 
     private void setupGetDocResponse() {
-        when(httpClient.get(anyString())).thenReturn(
-                HttpResponseStub.valueOf(200,
-                        "{\"name\":\"nisse\",\"age\":12,\"_id\":\"some_id\",\"_rev\":\"123D123\"}"));
+        doReturn(HttpResponseStub.valueOf(200,
+                "{\"name\":\"nisse\",\"age\":12,\"_id\":\"some_id\",\"_rev\":\"123D123\"}")).when(httpClient).get(anyString());
     }
 
     private void setupGetDocResponse(String... ids) {
         for (String id : ids) {
-            when(httpClient.get(TEST_DB_PATH + id)).thenReturn(
-                    HttpResponseStub.valueOf(200, "{\"name\":\"nisse\",\"age\":12,\"_id\":\" " + id
-                            + "\",\"_rev\":\"123D123\"}"));
+            doReturn(HttpResponseStub.valueOf(200, "{\"name\":\"nisse\",\"age\":12,\"_id\":\" " + id
+                    + "\",\"_rev\":\"123D123\"}")).when(httpClient).get(TEST_DB_PATH + id);
         }
     }
 
     @Test(expected = DocumentNotFoundException.class)
     public void throw_exception_when_doc_is_missing() {
-        when(httpClient.get(anyString())).thenReturn(HttpResponseStub.valueOf(404, ""));
+        doReturn(HttpResponseStub.valueOf(404, "")).when(httpClient).get(anyString());
         dbCon.get(TestDoc.class, "some_id");
     }
 
@@ -185,8 +176,7 @@ public class StdCouchDbConnectorTest {
     public void update() {
         td.setId("some_id");
         td.setRevision("123D123");
-        when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
         dbCon.update(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
@@ -199,8 +189,7 @@ public class StdCouchDbConnectorTest {
     public void throw_exception_when_in_conflict() {
         td.setId("some_id");
         td.setRevision("123D123");
-        when(httpClient.put(anyString(), anyString())).thenReturn(
-                ResponseOnFileStub.newInstance(409, "update_conflict.json"));
+        doReturn(ResponseOnFileStub.newInstance(409, "update_conflict.json")).when(httpClient).put(anyString(), anyString());
         dbCon.update(td);
     }
 
@@ -208,29 +197,26 @@ public class StdCouchDbConnectorTest {
     public void throw_exception_when_create_attachment_in_conflict() {
         td.setId("some_id");
         td.setRevision("123D123");
-        when(httpClient.put(anyString(), any(InputStream.class), anyString(), anyInt())).thenReturn(
-                ResponseOnFileStub.newInstance(409, "update_conflict.json"));
+        doReturn(ResponseOnFileStub.newInstance(409, "update_conflict.json")).when(httpClient).put(anyString(), any(InputStream.class), anyString(), anyInt());
         dbCon.createAttachment("id", "rev", new AttachmentInputStream("attach_id", IOUtils.toInputStream("data"),
                 "whatever"));
     }
 
     @Test
     public void should_create_db_if_missing() {
-        when(httpClient.head("/test_db/")).thenReturn(
-                HttpResponseStub.valueOf(404, "{\"error\":\"not_found\",\"reason\":\"no_db_file\"}"));
-
+        doReturn(HttpResponseStub.valueOf(404, "{\"error\":\"not_found\",\"reason\":\"no_db_file\"}")).when(httpClient).head("/test_db/");
+        doReturn(null).when(httpClient).put("/test_db/");
         dbCon.createDatabaseIfNotExists();
         verify(httpClient).put("/test_db/");
     }
 
     @Test
     public void should_not_create_db_if_already_exists() {
-        when(httpClient.head("/test_db/"))
-                .thenReturn(
-                        HttpResponseStub
-                                .valueOf(
-                                        200,
-                                        "{\"test_db\":\"global\",\"doc_count\":1,\"doc_del_count\":0,\"update_seq\":3,\"purge_seq\":0,\"compact_running\":false,\"disk_size\":100,\"instance_start_time\":\"130\",\"disk_format_version\":5,\"committed_update_seq\":3}"));
+        doReturn(HttpResponseStub
+                .valueOf(
+                        200,
+                        "{\"test_db\":\"global\",\"doc_count\":1,\"doc_del_count\":0,\"update_seq\":3,\"purge_seq\":0,\"compact_running\":false,\"disk_size\":100,\"instance_start_time\":\"130\",\"disk_format_version\":5,\"committed_update_seq\":3}"))
+                .when(httpClient).head("/test_db/");
 
         dbCon.createDatabaseIfNotExists();
         verify(httpClient, VerificationModeFactory.times(0)).put(anyString());
@@ -238,11 +224,12 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void return_all_docIds_in_db() {
-        when(httpClient.get("/test_db/_all_docs")).thenReturn(HttpResponseStub.valueOf(200,
+        doReturn(HttpResponseStub.valueOf(200,
                 "{\"total_rows\": 3, \"offset\": 0, \"rows\": [" +
                         "{\"id\": \"doc1\", \"key\": \"doc1\", \"value\": {\"rev\": \"4324BB\"}}," +
                         "{\"id\": \"doc2\", \"key\": \"doc2\", \"value\": {\"rev\":\"2441HF\"}}," +
-                        "{\"id\": \"doc3\", \"key\": \"doc3\", \"value\": {\"rev\":\"74EC24\"}}]}"));
+                        "{\"id\": \"doc3\", \"key\": \"doc3\", \"value\": {\"rev\":\"74EC24\"}}]}"))
+                .when(httpClient).get("/test_db/_all_docs");
         List<String> all = dbCon.getAllDocIds();
         assertEquals(3, all.size());
         assertEquals("doc1", all.get(0));
@@ -252,32 +239,30 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void return_all_revisions() {
-        when(httpClient.get("/test_db/some_doc_id?revs_info=true"))
-                .thenReturn(ResponseOnFileStub.newInstance(200, "revisions.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "revisions.json")).when(httpClient).get("/test_db/some_doc_id?revs_info=true");
         List<Revision> l = dbCon.getRevisions("some_doc_id");
         assertNotNull(l);
         assertEquals(8, l.size());
         assertEquals(new Revision("8-8395fd3a7a2dd04022cc1330a4d20e66", "available"), l.get(0));
     }
-    
+
     @Test
-	public void return_current_revision() {
-		final String revision = UUID.randomUUID().toString();
-		when(httpClient.head("/test_db/some_doc_id")).thenReturn(
-				new HttpResponseStub(200, "") {
-					@Override
-					public String getETag() {
-						return revision;
-					}
-				});
-		String currentRevision = dbCon.getCurrentRevision("some_doc_id");
-		assertEquals(revision, currentRevision);
-	}
+    public void return_current_revision() {
+        final String revision = UUID.randomUUID().toString();
+        doReturn(
+                new HttpResponseStub(200, "") {
+                    @Override
+                    public String getETag() {
+                        return revision;
+                    }
+                }).when(httpClient).head("/test_db/some_doc_id");
+        String currentRevision = dbCon.getCurrentRevision("some_doc_id");
+        assertEquals(revision, currentRevision);
+    }
 
     @Test
     public void return_null_revisions_when_doc_is_missing() {
-        when(httpClient.get("/test_db/some_doc_id?revs_info=true"))
-                .thenReturn(HttpResponseStub.valueOf(404, ""));
+        doReturn(HttpResponseStub.valueOf(404, "")).when(httpClient).get("/test_db/some_doc_id?revs_info=true");
         List<Revision> l = dbCon.getRevisions("some_doc_id");
         assertNotNull(l);
         assertTrue(l.isEmpty());
@@ -286,7 +271,7 @@ public class StdCouchDbConnectorTest {
     @Test
     public void return_attachment_with_open_data_stream() throws Exception {
         ResponseOnFileStub rsp = ResponseOnFileStub.newInstance(200, "attachment.txt", "text", 12);
-        when(httpClient.get("/test_db/some_doc_id/some_attachment")).thenReturn(rsp);
+        doReturn(rsp).when(httpClient).get("/test_db/some_doc_id/some_attachment");
         AttachmentInputStream a = dbCon.getAttachment("some_doc_id", "some_attachment");
         assertNotNull(a);
         assertFalse(rsp.isConnectionReleased());
@@ -299,7 +284,7 @@ public class StdCouchDbConnectorTest {
     public void read_document_as_stream() throws Exception {
         // content type is really json but it doesn't matter here.
         ResponseOnFileStub rsp = ResponseOnFileStub.newInstance(200, "attachment.txt");
-        when(httpClient.get("/test_db/some_doc_id")).thenReturn(rsp);
+        doReturn(rsp).when(httpClient).get("/test_db/some_doc_id");
         InputStream data = dbCon.getAsStream("some_doc_id");
         assertNotNull(data);
         assertFalse(rsp.isConnectionReleased());
@@ -308,8 +293,7 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void should_stream_attachmed_content() {
-        when(httpClient.put(anyString(), any(InputStream.class), anyString(), anyInt())).thenReturn(
-                ResponseOnFileStub.newInstance(200, "create_attachment_rsp.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "create_attachment_rsp.json")).when(httpClient).put(anyString(), any(InputStream.class), anyString(), anyInt());
 
         dbCon.createAttachment("docid", new AttachmentInputStream("attachment_id", IOUtils.toInputStream("content"),
                 "text/html", 12l));
@@ -327,7 +311,7 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .key("key_value");
 
-        when(httpClient.getUncached(query.buildQuery())).thenReturn(ResponseOnFileStub.newInstance(200, "view_result.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result.json")).when(httpClient).getUncached(query.buildQuery());
 
         ViewResult result = dbCon.queryView(query);
 
@@ -344,8 +328,7 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .key("key_value");
 
-        when(httpClient.getUncached(query.buildQuery())).thenReturn(
-                ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json")).when(httpClient).getUncached(query.buildQuery());
 
         List<TestDoc> result = dbCon.queryView(query, TestDoc.class);
 
@@ -366,8 +349,7 @@ public class StdCouchDbConnectorTest {
                 .key("key_value")
                 .cacheOk(true);
 
-        when(httpClient.get(query.buildQuery())).thenReturn(
-                ResponseOnFileStub.newInstance(200, "view_result_with_included_docs.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_included_docs.json")).when(httpClient).get(query.buildQuery());
 
         List<TestDoc> result = dbCon.queryView(query, TestDoc.class);
 
@@ -388,8 +370,7 @@ public class StdCouchDbConnectorTest {
                 .keys(Arrays.asList("doc_id0", "doc_id1", "doc_id2", "doc_id3", "doc_id4", "doc_id5", "doc_id6"));
         query.setIgnoreNotFound(true);
 
-        when(httpClient.postUncached(anyString(), anyString())).thenReturn(
-                ResponseOnFileStub.newInstance(200, "view_result_with_ignored_docs.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_ignored_docs.json")).when(httpClient).postUncached(anyString(), anyString());
 
         List<TestDoc> result = dbCon.queryView(query, TestDoc.class);
 
@@ -414,8 +395,7 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .keys(keys);
 
-        when(httpClient.postUncached(anyString(), anyString())).thenReturn(
-                ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json")).when(httpClient).postUncached(anyString(), anyString());
         dbCon.queryView(query, TestDoc.class);
         verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
     }
@@ -433,8 +413,7 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .keys(keys);
 
-        when(httpClient.postUncached(anyString(), anyString())).thenReturn(
-                ResponseOnFileStub.newInstance(200, "view_result.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result.json")).when(httpClient).postUncached(anyString(), anyString());
         dbCon.queryView(query);
         verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
     }
@@ -452,8 +431,7 @@ public class StdCouchDbConnectorTest {
                 .viewName("test_view")
                 .keys(keys);
 
-        when(httpClient.postUncached(anyString(), anyString())).thenReturn(
-                ResponseOnFileStub.newInstance(200, "view_result.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result.json")).when(httpClient).postUncached(anyString(), anyString());
         dbCon.queryForStream(query).close();
         verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
     }
@@ -461,8 +439,7 @@ public class StdCouchDbConnectorTest {
     @Test
     public void dates_should_be_serialized_in_ISO_8601_format() {
         setupNegativeContains("some_id");
-        when(httpClient.put(anyString(), anyString())).thenReturn(
-                HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
 
         DateTime dt = new DateTime(2010, 4, 25, 20, 11, 24, 555, DateTimeZone.forID("+00:00"));
         Date d = dt.toDate();
@@ -479,7 +456,7 @@ public class StdCouchDbConnectorTest {
         String json = ac.getValue();
         assertEqualJson("dates.json", json);
 
-        when(httpClient.get("/test_db/some_id")).thenReturn(HttpResponseStub.valueOf(201, json));
+        doReturn(HttpResponseStub.valueOf(201, json)).when(httpClient).get("/test_db/some_id");
 
         DateDoc deserialized = dbCon.get(DateDoc.class, dd.getId());
         assertEquals(dt, deserialized.getDateTime());
@@ -494,11 +471,11 @@ public class StdCouchDbConnectorTest {
     }
 
     private void setupPositiveContains(String id) {
-        when(httpClient.head("/test_db/" + id)).thenReturn(HttpResponseStub.valueOf(200, ""));
+        doReturn(HttpResponseStub.valueOf(200, "")).when(httpClient).head("/test_db/" + id);
     }
 
-    private void setupNegativeContains(String id) {
-        when(httpClient.head("/test_db/" + id)).thenReturn(HttpResponseStub.valueOf(404, ""));
+    protected void setupNegativeContains(String id) {
+        doReturn(HttpResponseStub.valueOf(404, "")).when(httpClient).head("/test_db/" + id);
     }
 
     @Test
@@ -509,7 +486,7 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void testGetDbInfo() {
-        when(httpClient.get(TEST_DB_PATH)).thenReturn(ResponseOnFileStub.newInstance(200, "db_info.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "db_info.json")).when(httpClient).get(TEST_DB_PATH);
         DbInfo info = dbCon.getDbInfo();
         assertNotNull(info);
         assertEquals("dj", info.getDbName());
@@ -555,15 +532,15 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void testGetRevsLimit() {
-        when(httpClient.get("/test_db/_revs_limit")).thenReturn(HttpResponseStub.valueOf(201, "\"1500\""));
+        doReturn(HttpResponseStub.valueOf(201, "\"1500\"")).when(httpClient).get("/test_db/_revs_limit");
         assertEquals(1500, dbCon.getRevisionLimit());
     }
 
     @Test
     public void testSetRevsLimit() {
         HttpResponse rsp = mock(HttpResponse.class);
-        when(rsp.isSuccessful()).thenReturn(Boolean.TRUE);
-        when(httpClient.put(anyString(), anyString())).thenReturn(rsp);
+        doReturn(Boolean.TRUE).when(rsp).isSuccessful();
+        doReturn(rsp).when(httpClient).put(anyString(), anyString());
         dbCon.setRevisionLimit(500);
         verify(httpClient).put("/test_db/_revs_limit", "500");
         verify(rsp).releaseConnection();
@@ -579,8 +556,8 @@ public class StdCouchDbConnectorTest {
 
     private HttpResponse setupResponseOnPost() {
         HttpResponse rsp = mock(HttpResponse.class);
-        when(rsp.isSuccessful()).thenReturn(Boolean.TRUE);
-        when(httpClient.post(anyString(), anyString())).thenReturn(rsp);
+        doReturn(Boolean.TRUE).when(rsp).isSuccessful();
+        doReturn(rsp).when(httpClient).post(anyString(), anyString());
         return rsp;
     }
 
@@ -602,16 +579,14 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void testGetDesignDocInfo() {
-        when(httpClient.get("/test_db/_design/exampleDesignDoc/_info")).thenReturn(
-                ResponseOnFileStub.newInstance(200, "../design_doc_info.json"));
+        doReturn(ResponseOnFileStub.newInstance(200, "../design_doc_info.json")).when(httpClient).get("/test_db/_design/exampleDesignDoc/_info");
         DesignDocInfo info = dbCon.getDesignDocInfo("exampleDesignDoc");
         assertNotNull(info);
     }
 
     @Test
     public void testCallUpdateHandler() {
-        when(httpClient.put("/test_db/_design/designDocID/_update/functionName/docID?key=value", "")).thenReturn(
-                HttpResponseStub.valueOf(201, "response string"));
+        doReturn(HttpResponseStub.valueOf(201, "response string")).when(httpClient).put("/test_db/_design/designDocID/_update/functionName/docID?key=value", "");
         Map<String, String> params = Collections.singletonMap("key", "value");
         assertEquals("response string", dbCon.callUpdateHandler("_design/designDocID", "functionName", "docID", params));
     }
@@ -619,11 +594,10 @@ public class StdCouchDbConnectorTest {
     @Test
     public void testCallUpdateHanderWithObject() {
 
-        when(
-                httpClient.put("/test_db/_design/designDocID/_update/functionName/docID",
-                        "{\"value\":\"value\",\"param\":\"param\"}"))
-                .thenReturn(HttpResponseStub.valueOf(201,
-                        "{\"name\":\"nisse\",\"age\":12,\"_id\":\"some_id\",\"_rev\":\"123D123\"}"));
+        doReturn(HttpResponseStub.valueOf(201,
+                "{\"name\":\"nisse\",\"age\":12,\"_id\":\"some_id\",\"_rev\":\"123D123\"}")).when(
+                httpClient).put("/test_db/_design/designDocID/_update/functionName/docID",
+                "{\"value\":\"value\",\"param\":\"param\"}");
 
         UpdateHandlerRequest req = new UpdateHandlerRequest();
         req.designDocId("_design/designDocID")
@@ -642,8 +616,7 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void testEnsureFullCommit() {
-        when(httpClient.post("/test_db/_ensure_full_commit", "")).thenReturn(
-                HttpResponseStub.valueOf(200, "{\"ok\" : true, \"instance_start_time\" : \"1288186189373361\"}"));
+        doReturn(HttpResponseStub.valueOf(200, "{\"ok\" : true, \"instance_start_time\" : \"1288186189373361\"}")).when(httpClient).post("/test_db/_ensure_full_commit", "");
         dbCon.ensureFullCommit();
         verify(httpClient).post("/test_db/_ensure_full_commit", "");
     }
@@ -651,7 +624,7 @@ public class StdCouchDbConnectorTest {
     @Test
     public void testPurge() {
         String rsp = "{\"purged\" : { \"Billy\" : [ \"17-b3eb5ac6fbaef4428d712e66483dcb79\"]},\"purge_seq\" : 11}";
-        when(httpClient.post(eq("/test_db/_purge"), anyString())).thenReturn(HttpResponseStub.valueOf(200, rsp));
+        doReturn(HttpResponseStub.valueOf(200, rsp)).when(httpClient).post(eq("/test_db/_purge"), anyString());
         Map<String, List<String>> revisionsToPurge = new HashMap<String, List<String>>();
         revisionsToPurge.put("Billy", Collections.singletonList("17-b3eb5ac6fbaef4428d712e66483dcb79"));
         PurgeResult r = dbCon.purge(revisionsToPurge);
@@ -659,95 +632,107 @@ public class StdCouchDbConnectorTest {
         assertTrue(r.getPurged().containsKey("Billy"));
     }
 
-	@Test
-	public void updateMultipart_should_perform_put_operation_with_path_set_to_db_followed_by_id() {
-		String id = UUID.randomUUID().toString();
-		dbCon.updateMultipart(id, null, "abc", 0, null);
+    @Test
+    public void updateMultipart_should_perform_put_operation_with_path_set_to_db_followed_by_id() {
+        String id = UUID.randomUUID().toString();
 
-		String expectedPath = "/test_db/" + id;
-		verify(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
-	}
+        String expectedPath = "/test_db/" + id;
+        doReturn(null).when(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
 
-	@Test
-	public void updateMultipart_should_perform_put_operation_with_path_using_any_given_options() {
-		String id = UUID.randomUUID().toString();
-		String paramName = "some_param";
-		String paramValue = "false";
-		Options options = new Options().param(paramName, paramValue);
-		dbCon.updateMultipart(id, null, "abc", 0, options);
+        dbCon.updateMultipart(id, null, "abc", 0, null);
 
-		String expectedPath = "/test_db/" + id + "?some_param=false";
-		verify(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
-	}
+        verify(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
+    }
 
-	@Test
-	public void updateMultipart_should_perform_put_operation_with_the_given_InputStream() {
-		InputStream stream = mock(InputStream.class);
-		dbCon.updateMultipart("a", stream, "abc", 0, null);
+    @Test
+    public void updateMultipart_should_perform_put_operation_with_path_using_any_given_options() {
+        String id = UUID.randomUUID().toString();
+        String paramName = "some_param";
+        String paramValue = "false";
+        Options options = new Options().param(paramName, paramValue);
 
-		verify(httpClient).put(anyString(), eq(stream), anyString(), anyLong());
-	}
+        String expectedPath = "/test_db/" + id + "?some_param=false";
+        doReturn(null).when(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
+        dbCon.updateMultipart(id, null, "abc", 0, options);
 
-	@Test
-	public void updateMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_boundary() {
-		String boundary = UUID.randomUUID().toString();
-		dbCon.updateMultipart("a", null, boundary, 0, null);
+        verify(httpClient).put(eq(expectedPath), any(InputStream.class), anyString(), anyLong());
+    }
 
-		String expectedContentType = "multipart/related; boundary=\"" + boundary + "\"";
-		verify(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
-	}
+    @Test
+    public void updateMultipart_should_perform_put_operation_with_the_given_InputStream() {
+        InputStream stream = mock(InputStream.class);
 
-	@Test(expected = IllegalArgumentException.class)
-	public void updateMultipart_should_throw_if_boundary_is_null() {
-		dbCon.updateMultipart("a", null, null, 0, null);
-	}
+        doReturn(null).when(httpClient).put(anyString(), eq(stream), anyString(), anyLong());
+        dbCon.updateMultipart("a", stream, "abc", 0, null);
 
-	@Test
-	public void updateMultipart_should_perform_put_operation_with_content_type_set_to_length() {
-		long length = 1000l;
-		dbCon.updateMultipart("a", null, "abc", length, null);
+        verify(httpClient).put(anyString(), eq(stream), anyString(), anyLong());
+    }
 
-		verify(httpClient).put(anyString(), any(InputStream.class), anyString(), eq(length));
-	}
+    @Test
+    public void updateMultipart_should_perform_put_operation_with_content_type_set_to_multipart_related_with_boundary() {
+        String boundary = UUID.randomUUID().toString();
+        String expectedContentType = "multipart/related; boundary=\"" + boundary + "\"";
+        doReturn(null).when(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
+        dbCon.updateMultipart("a", null, boundary, 0, null);
+        verify(httpClient).put(anyString(), any(InputStream.class), eq(expectedContentType), anyLong());
+    }
 
-	@Test
-	public void update_with_stream_should_perform_put_operation_with_content_type_set_to_application_json() {
-		String documentId = UUID.randomUUID().toString();
-		InputStream inputStream = mock(InputStream.class);
-		long documentLength = 999l;
-		String paramName = "some_param";
-		String paramValue = "false";
-		Options options = new Options().param(paramName, paramValue);
+    @Test(expected = IllegalArgumentException.class)
+    public void updateMultipart_should_throw_if_boundary_is_null() {
+        dbCon.updateMultipart("a", null, null, 0, null);
+    }
 
-		dbCon.update(documentId, inputStream, documentLength, options);
+    @Test
+    public void updateMultipart_should_perform_put_operation_with_content_type_set_to_length() {
+        long length = 1000l;
+        doReturn(null).when(httpClient).put(anyString(), any(InputStream.class), anyString(), eq(length));
 
-		String expectedPath = "/test_db/" + documentId + "?some_param=false";
-		String expectedContentType = "application/json";
-		verify(httpClient).put(expectedPath, inputStream, expectedContentType, documentLength);
-	}
+        dbCon.updateMultipart("a", null, "abc", length, null);
 
-	@Test
-	public void testCopy() {
-		String src = "sourceId";
-		String target = "targetId";
-		when(httpClient.copy(anyString(), anyString())).thenReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
-		dbCon.copy(src, target);
-		String expectedPath = "/test_db/" + src;
-		verify(httpClient).copy(expectedPath, target);
-	}
-	
-	@Test
-	public void testCopyRev() {
-		String src = "sourceId";
-		String target = "targetId";
-		String rev = "revision";
-		when(httpClient.copy(anyString(), anyString())).thenReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV));
-		dbCon.copy(src, target, rev);
-		String expectedPath = "/test_db/" + src;
-		String expectedTarget = target + "?rev=" + rev;
-		verify(httpClient).copy(expectedPath, expectedTarget);
-	}
-	
+        verify(httpClient).put(anyString(), any(InputStream.class), anyString(), eq(length));
+    }
+
+    @Test
+    public void update_with_stream_should_perform_put_operation_with_content_type_set_to_application_json() {
+        String documentId = UUID.randomUUID().toString();
+        InputStream inputStream = mock(InputStream.class);
+        long documentLength = 999l;
+        String paramName = "some_param";
+        String paramValue = "false";
+        Options options = new Options().param(paramName, paramValue);
+
+        String expectedPath = "/test_db/" + documentId + "?some_param=false";
+        String expectedContentType = "application/json";
+
+        doReturn(null).when(httpClient).put(expectedPath, inputStream, expectedContentType, documentLength);
+        dbCon.update(documentId, inputStream, documentLength, options);
+
+
+        verify(httpClient).put(expectedPath, inputStream, expectedContentType, documentLength);
+    }
+
+    @Test
+    public void testCopy() {
+        String src = "sourceId";
+        String target = "targetId";
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).copy(anyString(), anyString());
+        dbCon.copy(src, target);
+        String expectedPath = "/test_db/" + src;
+        verify(httpClient).copy(expectedPath, target);
+    }
+
+    @Test
+    public void testCopyRev() {
+        String src = "sourceId";
+        String target = "targetId";
+        String rev = "revision";
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).copy(anyString(), anyString());
+        dbCon.copy(src, target, rev);
+        String expectedPath = "/test_db/" + src;
+        String expectedTarget = target + "?rev=" + rev;
+        verify(httpClient).copy(expectedPath, expectedTarget);
+    }
+
     @SuppressWarnings("serial")
     static class DateDoc extends CouchDbDocument {
 
@@ -772,7 +757,7 @@ public class StdCouchDbConnectorTest {
     }
 
     @SuppressWarnings("serial")
-    static class TestDoc extends CouchDbDocument {
+    public static class TestDoc extends CouchDbDocument {
         private String name;
         private int age;
 
@@ -794,7 +779,7 @@ public class StdCouchDbConnectorTest {
 
     }
 
-    @JsonPropertyOrder({"value","param"})
+    @JsonPropertyOrder({"value", "param"})
     static class TestRequest {
         private String param;
         private String value;
@@ -821,12 +806,12 @@ public class StdCouchDbConnectorTest {
         }
     }
 
-    private void assertEqualJson(String expectedFileName, String actual) {
+    protected void assertEqualJson(String expectedFileName, String actual) {
         String facit = getString(expectedFileName);
         assertTrue(format("expected: %s was: %s", facit, actual), JSONComparator.areEqual(facit, actual));
     }
 
-    private String getString(String resourceName) {
+    protected String getString(String resourceName) {
         try {
             return IOUtils.toString(getClass().getResourceAsStream(resourceName), "UTF-8");
         } catch (IOException e) {
