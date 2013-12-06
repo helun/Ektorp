@@ -255,7 +255,7 @@ public class AndroidHttpClient implements HttpClient {
                 try {
                     if (this.sslSocketFactory == null ) {
                         AndroidSSLSocketFactory androidSSLSocketFactory = new AndroidSSLSocketFactory((KeyStore)null);
-                        androidSSLSocketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+                        androidSSLSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
                         return new Scheme("https", androidSSLSocketFactory, port);
                     } else {
                         return new Scheme("https", this.sslSocketFactory, port);
