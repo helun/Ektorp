@@ -9,6 +9,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -71,10 +72,12 @@ public class StdHttpClient implements HttpClient {
 		return backend;
 	}
 
+	@Override
 	public HttpResponse delete(String uri) {
 		return executeRequest(new HttpDelete(uri));
 	}
 
+	@Override
 	public HttpResponse get(String uri) {
 		return executeRequest(new HttpGet(uri));
 	}
@@ -84,44 +87,61 @@ public class StdHttpClient implements HttpClient {
 		return executeRequest(new HttpGet(uri), headers);
 	}
 
+	@Override
 	public HttpResponse getUncached(String uri) {
 		return executeRequest(new HttpGet(uri), true);
 	}
 
+	@Override
 	public HttpResponse postUncached(String uri, String content) {
 		return executePutPost(new HttpPost(uri), content, true);
 	}
 
+	@Override
 	public HttpResponse post(String uri, String content) {
 		return executePutPost(new HttpPost(uri), content, false);
 	}
 
+	@Override
 	public HttpResponse post(String uri, InputStream content) {
 		InputStreamEntity e = new InputStreamEntity(content, -1);
 		e.setContentType("application/json");
+		return post(uri, e);
+	}
+
+	@Override
+	public HttpResponse post(String uri, HttpEntity httpEntity) {
 		HttpPost post = new HttpPost(uri);
-		post.setEntity(e);
+		post.setEntity(httpEntity);
 		return executeRequest(post, true);
 	}
 
+	@Override
 	public HttpResponse put(String uri, String content) {
 		return executePutPost(new HttpPut(uri), content, false);
 	}
 
+	@Override
 	public HttpResponse put(String uri) {
 		return executeRequest(new HttpPut(uri));
 	}
 
+	@Override
 	public HttpResponse put(String uri, InputStream data, String contentType,
 			long contentLength) {
 		InputStreamEntity e = new InputStreamEntity(data, contentLength);
 		e.setContentType(contentType);
+		return put(uri, e);
+	}
 
+	@Override
+	public HttpResponse put(String uri, HttpEntity httpEntity) {
 		HttpPut hp = new HttpPut(uri);
-		hp.setEntity(e);
+		hp.setEntity(httpEntity);
 		return executeRequest(hp);
 	}
 
+	@Override
 	public HttpResponse head(String uri) {
 		return executeRequest(new HttpHead(uri));
 	}
@@ -158,10 +178,14 @@ public class StdHttpClient implements HttpClient {
 			}
 			LOG.trace("{} {} {} {}", new Object[] { request.getMethod(), request.getURI(),
 					rsp.getStatusLine().getStatusCode(), rsp.getStatusLine().getReasonPhrase() });
-			return StdHttpResponse.of(rsp, request);
+			return createStdHttpResponse(rsp, request);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}		
+	}
+
+	protected HttpResponse createStdHttpResponse(org.apache.http.HttpResponse rsp, HttpUriRequest httpRequest) {
+		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest, rsp.getFirstHeader("ETag"));
 	}
 
 	protected HttpResponse executeRequest(HttpRequestBase request) {

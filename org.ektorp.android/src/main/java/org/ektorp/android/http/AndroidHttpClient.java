@@ -1,5 +1,6 @@
 package org.ektorp.android.http;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -80,9 +81,14 @@ public class AndroidHttpClient implements HttpClient {
 	public HttpResponse post(String uri, InputStream content) {
 		InputStreamEntity e = new InputStreamEntity(content, -1);
 		e.setContentType("application/json");
+		return post(uri, e);
+	}
+
+	@Override
+	public HttpResponse post(String uri, HttpEntity httpEntity) {
 		HttpPost post = new HttpPost(uri);
-		post.setEntity(e);
-		return executeRequest(post);
+		post.setEntity(httpEntity);
+		return executeRequest(post, true);
 	}
 
 	@Override
@@ -105,12 +111,16 @@ public class AndroidHttpClient implements HttpClient {
 			long contentLength) {
 		InputStreamEntity e = new InputStreamEntity(data, contentLength);
 		e.setContentType(contentType);
+		return put(uri, e);
+	}
 
+	@Override
+	public HttpResponse put(String uri, HttpEntity httpEntity) {
 		HttpPut hp = new HttpPut(uri);
-		hp.setEntity(e);
+		hp.setEntity(httpEntity);
 		return executeRequest(hp);
 	}
-	
+
 	@Override
 	public HttpResponse copy(String sourceUri, String destination) {
 		return executeRequest(new HttpCopyRequest(sourceUri, destination), true);
