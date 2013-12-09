@@ -42,6 +42,10 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		this.objectMapperFactory = of;
 	}
 
+	public ObjectMapperFactory getObjectMapperFactory() {
+		return objectMapperFactory;
+	}
+
 	public void createDatabase(String path) {
 		createDatabase(DbPath.fromString(path));
 	}

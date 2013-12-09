@@ -2,6 +2,7 @@ package org.ektorp.http;
 
 import java.io.InputStream;
 
+import org.apache.http.HttpEntity;
 import org.ektorp.util.Exceptions;
 /**
  * 
@@ -42,12 +43,20 @@ public class RestTemplate {
 		return handleResponse(callback, client.put(path, content));
 	}
 
+	public <T> T put(String path, HttpEntity httpEntity, ResponseCallback<T> callback) {
+		return handleResponse(callback, client.put(path, httpEntity));
+	}
+
 	public <T> T copy(String path, String destinationUri, ResponseCallback<T> callback) {
 		return handleResponse(callback, client.copy(path, destinationUri));
 	}
 	
 	public void put(String path, String content) {
 		handleVoidResponse(client.put(path, content));
+	}
+
+	public void put(String path, HttpEntity httpEntity) {
+		handleVoidResponse(client.put(path, httpEntity));
 	}
 
 	public void put(String path, InputStream data, String contentType,
@@ -62,6 +71,10 @@ public class RestTemplate {
 
 	public <T> T post(String path, String content, ResponseCallback<T> callback) {
 		return handleResponse(callback, client.post(path, content));
+	}
+
+	public <T> T post(String path, HttpEntity httpEntity, ResponseCallback<T> callback) {
+		return handleResponse(callback, client.post(path, httpEntity));
 	}
 
 	public <T> T post(String path, InputStream content, ResponseCallback<T> callback) {
