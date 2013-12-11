@@ -1,22 +1,10 @@
 package org.ektorp.android.http;
 
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyStore;
-import java.util.Map;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRoutePNames;
@@ -32,14 +20,16 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
-import org.ektorp.http.HttpClient;
-import org.ektorp.http.HttpCopyRequest;
-import org.ektorp.http.HttpResponse;
-import org.ektorp.http.IdleConnectionMonitor;
-import org.ektorp.http.PreemptiveAuthRequestInterceptor;
+import org.ektorp.http.*;
 import org.ektorp.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.KeyStore;
+import java.util.Map;
 
 public class AndroidHttpClient implements HttpClient {
 
@@ -273,9 +263,13 @@ public class AndroidHttpClient implements HttpClient {
 		private Scheme configureScheme() {
 			if (enableSSL) {
                 try {
-					AndroidSSLSocketFactory androidSSLSocketFactory = new AndroidSSLSocketFactory((KeyStore)null);
-					androidSSLSocketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-					return new Scheme("https", androidSSLSocketFactory, port);
+                    if (this.sslSocketFactory == null ) {
+                        AndroidSSLSocketFactory androidSSLSocketFactory = new AndroidSSLSocketFactory((KeyStore)null);
+                        androidSSLSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+                        return new Scheme("https", androidSSLSocketFactory, port);
+                    } else {
+                        return new Scheme("https", this.sslSocketFactory, port);
+                    }
 				} catch (Exception e) {
 					throw Exceptions.propagate(e);
 				}
@@ -377,7 +371,7 @@ public class AndroidHttpClient implements HttpClient {
 		 * Set to true in order to enable SSL sockets. Note that the CouchDB
 		 * host must be accessible through a https:// path Default is false.
 		 *
-		 * @param s
+		 * @param b
 		 * @return
 		 */
 		public Builder enableSSL(boolean b) {
