@@ -33,6 +33,10 @@ public class StdDocumentChange implements DocumentChange {
 		return node.get(SEQ_FIELD_NAME).intValue();
 	}
 
+	public String getStringSequence() {
+		return node.get(SEQ_FIELD_NAME).textValue();
+	}
+
 	public String getId() {
 		return node.get(ID_FIELD_NAME).textValue();
 	}

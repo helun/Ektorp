@@ -15,6 +15,10 @@ public interface DocumentChange {
 	 */
 	int getSequence();
 	/**
+	 * @return the database string format sequence number in which this change took place (e.g. Cloudant).
+	 */
+	String getStringSequence();
+	/**
 	 *
 	 * @return the id of the changed document.
 	 */
