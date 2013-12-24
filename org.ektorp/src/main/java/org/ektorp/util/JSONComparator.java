@@ -3,6 +3,7 @@ package org.ektorp.util;
 import static java.lang.String.*;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import org.apache.commons.io.*;
@@ -11,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JSONComparator {
 
-	private final static String UTF_8 = "UTF-8";
+    private final static Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
 
 	private static Map<Class<?>, ValueComparator> valueComparators = new ClassHierarchyMap<ValueComparator>();
 	static {
@@ -24,10 +25,15 @@ public class JSONComparator {
 
 	@SuppressWarnings("unchecked")
 	public static boolean areEqual(String jsonA, String jsonB) {
+        return areEqual(jsonA.getBytes(CHARSET_UTF_8), jsonB.getBytes(CHARSET_UTF_8));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static boolean areEqual(byte[] jsonA, byte[] jsonB) {
 		ObjectMapper om = new ObjectMapper();
 		try {
-			Map<String, ?> mapA = om.readValue(IOUtils.toInputStream(jsonA, UTF_8), Map.class);
-			Map<String, ?> mapB = om.readValue(IOUtils.toInputStream(jsonB, UTF_8), Map.class);
+			Map<String, ?> mapA = om.readValue(jsonA, Map.class);
+			Map<String, ?> mapB = om.readValue(jsonB, Map.class);
 			return areEquals(mapA, mapB);
 		} catch (IOException e) {
 			throw Exceptions.propagate(e);
