@@ -84,7 +84,7 @@ public class StreamedCouchDbConnectorTest extends StdCouchDbConnectorTest {
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
         assertEquals("some_id", td.getId());
         assertEquals("123D123", td.getRevision());
-        assertEqualJson("update.json", new String(output.toByteArray()));
+        assertEqualJson("update.json", output.toByteArray());
     }
 
     @Test
@@ -99,7 +99,7 @@ public class StreamedCouchDbConnectorTest extends StdCouchDbConnectorTest {
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
         assertEquals("some_id", td.getId());
         assertEquals("123D123", td.getRevision());
-        assertEqualJson("create.json", new String(output.toByteArray()));
+        assertEqualJson("create.json", output.toByteArray());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class StreamedCouchDbConnectorTest extends StdCouchDbConnectorTest {
         dbCon.create("some_id", root);
         ArgumentCaptor<HttpEntity> ac = ArgumentCaptor.forClass(HttpEntity.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
-        assertEqualJson("create_from_json_node.json", new String(output.toByteArray()));
+        assertEqualJson("create_from_json_node.json", output.toByteArray());
     }
 
     @Test
@@ -137,7 +137,7 @@ public class StreamedCouchDbConnectorTest extends StdCouchDbConnectorTest {
         dbCon.create(td);
         ArgumentCaptor<HttpEntity> ac = ArgumentCaptor.forClass(HttpEntity.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
-        assertEqualJson("charset.json", new String(output.toByteArray()));
+        assertEqualJson("charset.json", output.toByteArray());
     }
 
     @Test
@@ -149,7 +149,7 @@ public class StreamedCouchDbConnectorTest extends StdCouchDbConnectorTest {
         verify(httpClient).post(eq(TEST_DB_PATH), ac.capture());
         assertEquals("some_id", td.getId());
         assertEquals("123D123", td.getRevision());
-        assertEqualJson("create_with_no_id.json", new String(output.toByteArray()));
+        assertEqualJson("create_with_no_id.json", output.toByteArray());
     }
 
     @Test
@@ -171,10 +171,10 @@ public class StreamedCouchDbConnectorTest extends StdCouchDbConnectorTest {
 
         ArgumentCaptor<JacksonableEntity> ac = ArgumentCaptor.forClass(JacksonableEntity.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
-        String json = new String(output.toByteArray());
+        byte[] json = output.toByteArray();
         assertEqualJson("dates.json", json);
 
-        doReturn(HttpResponseStub.valueOf(201, json)).when(httpClient).get("/test_db/some_id");
+        doReturn(HttpResponseStub.valueOf(201, new String(json))).when(httpClient).get("/test_db/some_id");
 
         DateDoc deserialized = dbCon.get(DateDoc.class, dd.getId());
         assertEquals(dt, deserialized.getDateTime());

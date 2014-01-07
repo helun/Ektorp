@@ -811,11 +811,33 @@ public class StdCouchDbConnectorTest {
         assertTrue(format("expected: %s was: %s", facit, actual), JSONComparator.areEqual(facit, actual));
     }
 
+    protected void assertEqualJson(String expectedFileName, byte[] actual) {
+        byte[] facit = getBytes(expectedFileName);
+        assertTrue(format("expected: %s was: %s", facit, actual), JSONComparator.areEqual(facit, actual));
+    }
+
+
     protected String getString(String resourceName) {
+        InputStream inputStream = null;
         try {
-            return IOUtils.toString(getClass().getResourceAsStream(resourceName), "UTF-8");
+            inputStream = getClass().getResourceAsStream(resourceName);
+            return IOUtils.toString(inputStream, "UTF-8");
         } catch (IOException e) {
             throw Exceptions.propagate(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    protected byte[] getBytes(String resourceName) {
+        InputStream inputStream = null;
+        try {
+            inputStream = getClass().getResourceAsStream(resourceName);
+            return IOUtils.toByteArray(inputStream);
+        } catch (IOException e) {
+            throw Exceptions.propagate(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
     }
 
