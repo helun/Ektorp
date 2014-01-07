@@ -18,18 +18,20 @@ Simple API
 ----------
 It is very easy to get started with Ektorp:
 
-	HttpClient httpClient = new StdHttpClient.Builder()
-                                    .url("http://localhost:5984")
-                                    .build();
+```java
+HttpClient httpClient = new StdHttpClient.Builder()
+        .url("http://localhost:5984")
+        .build();
 
-	CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
-	CouchDbConnector db = new StdCouchDbConnector("mydatabase", dbInstance);
+CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
+CouchDbConnector db = new StdCouchDbConnector("mydatabase", dbInstance);
 
-	db.createDatabaseIfNotExists();
+db.createDatabaseIfNotExists();
 
-	Sofa sofa = db.get(Sofa.class, "ektorp");
-	sofa.setColor("blue");
-	db.update(sofa);
+Sofa sofa = db.get(Sofa.class, "ektorp");
+sofa.setColor("blue");
+db.update(sofa);
+```
 
 Out-of-the-Box CRUD
 -------------------
@@ -37,24 +39,28 @@ Ektorp features a generic repository support class. It provides all Create, Read
 
 Here's how a SofaRepository implemented with the generic repository looks like
 
-	public class SofaRepository extends CouchDbRepositorySupport<Sofa> {
+```java
+public class SofaRepository extends CouchDbRepositorySupport<Sofa> {
 
-		public SofaRepository(CouchDbConnector db) {
-			super(Sofa.class, db);
-		}
-		
-	}
+    public SofaRepository(CouchDbConnector db) {
+        super(Sofa.class, db);
+    }
+
+}
+```
 
 This repository will have the following methods "out of the box":
 
-	SofaRepository repo = new SofaRepository(db);
-			
-	repo.add(Sofa s);
-	repo.contains("doc_id");
-	Sofa sofa = repo.get("doc_id");
-	repo.update(Sofa s);
-	repo.remove(Sofa s);
-	List<Sofa> repo.getAll();
+```java
+SofaRepository repo = new SofaRepository(db);
+
+repo.add(Sofa s);
+repo.contains("doc_id");
+Sofa sofa = repo.get("doc_id");
+repo.update(Sofa s);
+repo.remove(Sofa s);
+List<Sofa> repo.getAll();
+```
 
 Convenient Management of View Definitions
 ---------------------------------------
@@ -65,29 +71,30 @@ Embedded View Definitions
 -------------------------
 It is possible to embed view definitions in your repository classes through a @View annotation:
 
-	@View( name="complicated_view", file = "complicated_view.json")
-	public class BlogPostRepository extends CouchDbRepositorySupport<BlogPost> {
+```java
+@View( name="complicated_view", file = "complicated_view.json")
+public class BlogPostRepository extends CouchDbRepositorySupport<BlogPost> {
 
-        @Autowired
-        public BlogPostRepository(@Qualifier("blogPostDatabase") CouchDbConnector db) {
-                super(BlogPost.class, db);
-                initStandardDesignDocument();
-        }
+    @Autowired
+    public BlogPostRepository(@Qualifier("blogPostDatabase") CouchDbConnector db) {
+        super(BlogPost.class, db);
+        initStandardDesignDocument();
+    }
 
-        @Override
-        @View( name="all", map = "function(doc) { if (doc.title) { emit(doc.dateCreated, doc._id) } }")
-        public List<BlogPost> getAll() {
-                ViewQuery q = createQuery("all").descending(true);
-                return db.queryView(q, BlogPost.class);
-        }
-        
-        @GenerateView
-        public List<BlogPost> findByTag(String tag) {
-                return queryView("by_tag", tag);
-        }
+    @Override
+    @View( name="all", map = "function(doc) { if (doc.title) { emit(doc.dateCreated, doc._id) } }")
+    public List<BlogPost> getAll() {
+        ViewQuery q = createQuery("all").descending(true);
+        return db.queryView(q, BlogPost.class);
+    }
 
-	}
+    @GenerateView
+    public List<BlogPost> findByTag(String tag) {
+        return queryView("by_tag", tag);
+    }
 
+}
+```
 
 Automatic view generation for finder methods
 --------------------------------------------
@@ -104,41 +111,42 @@ All persistent objects managed by Ektorp need to define properties for id and re
 
 Here's an trivial example class:
 
+```java
+import org.codehaus.jackson.annotate.*;
 
-	import org.codehaus.jackson.annotate.*;
+@JsonWriteNullProperties(false)
+@JsonIgnoreProperties({"id", "revision"})
+public class Sofa {
 
-	@JsonWriteNullProperties(false)
-	@JsonIgnoreProperties({"id", "revision"})
-	public class Sofa {
+    @JsonProperty("_id")
+    private String id;
 
-		@JsonProperty("_id")
-		private String id;
+    @JsonProperty("_rev")
+    private String revision;
 
-		@JsonProperty("_rev")
-		private String revision;
+    private String color;
 
-		private String color;
-	
-		public void setId(String s) {
-			id = s;
-		}
+    public void setId(String s) {
+        id = s;
+    }
 
-		public String getId() {
-			return id;
-		}
+    public String getId() {
+        return id;
+    }
 
-		public String getRevision() {
-			return revision;
-		}
-	
-		public void setColor(String s) {
-			color = s;
-		}
-	
-		public String getColor() {
-			return color;
-		}
-	}
+    public String getRevision() {
+        return revision;
+    }
+
+    public void setColor(String s) {
+        color = s;
+    }
+
+    public String getColor() {
+        return color;
+    }
+}
+```
 
 Querying Views
 --------------
@@ -148,39 +156,45 @@ Query for Objects
 -----------------
 If the view's result value field is a document, Ektorp can load the result as a List of Objects
 
-	ViewQuery query = new ViewQuery()
-                     .designDocId("_design/Sofa")
-                     .viewName("by_color")
-                     .key("red");
-		
-	List<Sofa> redSofas = db.queryView(query, Sofa.class);
+```java
+ViewQuery query = new ViewQuery()
+        .designDocId("_design/Sofa")
+        .viewName("by_color")
+        .key("red");
+
+List<Sofa> redSofas = db.queryView(query, Sofa.class);
+```
 
 Scalar queries
 --------------
 It is possible to query for scalar values. Currently just String and int values are supported.
 
-	ViewQuery query = new ViewQuery()
-          .designDocId("_design/somedoc")
-          .viewName("some_view_name");
-		
-	ViewResult result = db.queryView(query);
-	for (ViewResult.Row row : result.getRows()) {
-    	String stringValue = row.getValue();
-    	int intValue = row.getValueAsInt();
-	}
+```java
+ViewQuery query = new ViewQuery()
+        .designDocId("_design/somedoc")
+        .viewName("some_view_name");
+
+ViewResult result = db.queryView(query);
+for (ViewResult.Row row : result.getRows()) {
+    String stringValue = row.getValue();
+    int intValue = row.getValueAsInt();
+}
+```
 
 It is of course possible to parse a string value as JSON.
 View Result as Raw JSON Stream
 ------------------------------
 The most flexible method is query for stream. The result is returned as a stream.
 
-	ViewQuery query = new ViewQuery()
-          .designDocId("_design/somedoc")
-          .viewName("view_with_huge_result");
+```java
+ViewQuery query = new ViewQuery()
+        .designDocId("_design/somedoc")
+        .viewName("view_with_huge_result");
 
-	InputStream data = db.queryForStream(query);
-	...
-	data.close();
+InputStream data = db.queryForStream(query);
+// ...
+data.close();
+```
 
 Try it Out
 ------------
@@ -188,11 +202,13 @@ Try it Out
 
 If you are using Maven:
 
-    <dependency>
-        <groupId>org.ektorp</groupId>
-        <artifactId>org.ektorp</artifactId>
-        <version>1.3.0</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>org.ektorp</groupId>
+    <artifactId>org.ektorp</artifactId>
+    <version>1.3.0</version>
+</dependency>
+```
 
 Getting Help
 ------------
