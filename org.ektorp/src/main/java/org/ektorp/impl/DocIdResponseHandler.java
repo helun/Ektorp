@@ -1,8 +1,5 @@
 package org.ektorp.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -10,6 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.DbAccessException;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdResponseHandler;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 /**
  *
  * @author henrik lundgren
@@ -23,37 +24,63 @@ public class DocIdResponseHandler extends StdResponseHandler<List<String>> {
 		jsonFactory = om.getFactory();
 	}
 
-	@Override
-	public List<String> success(HttpResponse hr) throws Exception {
-		JsonParser jp = jsonFactory.createParser(hr.getContent());
-		if (jp.nextToken() != JsonToken.START_OBJECT) {
-			throw new DbAccessException("Expected data to start with an Object");
-		}
-		boolean inRow = false;
-		List<String> result = null;
+    /**
+     * The token is required to be on the START_ARRAY value for rows.
+     * @param jp
+     * @param result
+     * @return The results found in the rows object
+     */
+    private List<String> parseRows(JsonParser jp, List<String> result) throws IOException {
+        while(jp.nextToken() == JsonToken.START_OBJECT) {
+            while(jp.nextToken() == JsonToken.FIELD_NAME)
+            {
+                String fieldName = jp.getCurrentName();
+                jp.nextToken();
+                if ("id".equals(fieldName)) {
+                    result.add(jp.getText());
+                } else {
+                    jp.skipChildren();
+                }
+            }
+        }
+        return result;
+    }
 
-		while (jp.nextToken() != null) {
-			switch (jp.getCurrentToken()) {
-				case START_ARRAY:
-					inRow = true;
-					break;
-				case END_ARRAY:
-					inRow = false;
-					break;
-				case FIELD_NAME:
-					String n = jp.getCurrentName();
-					if (inRow) {
-						if ("id".equals(n)) {
-							jp.nextToken();
-							result.add(jp.getText());
-						}
-					} else if ("total_rows".equals(n)) {
-						jp.nextToken();
-						result = new ArrayList<String>(jp.getIntValue());
-					}
-					break;
-			}
-		}
-		return result;
-	}
+    @Override
+    public List<String> success(HttpResponse hr) throws Exception {
+        JsonParser jp = jsonFactory.createParser(hr.getContent());
+        if (jp.nextToken() != JsonToken.START_OBJECT) {
+            throw new DbAccessException("Expected data to start with an Object");
+        }
+
+        List<String> result = null;
+
+        while (jp.nextToken() != null) {
+            if (jp.getCurrentToken() == JsonToken.FIELD_NAME) {
+                String fieldName = jp.getCurrentName();
+                if ("total_rows".equals(fieldName)) {
+                    if (result != null) {
+                        throw new DbAccessException("Two total_rows were provided.");
+                    }
+
+                    jp.nextToken();
+                    result = new ArrayList<String>(jp.getIntValue());
+                } else if ("rows".equals(fieldName)) {
+                    if (result == null) {
+                        throw new DbAccessException("total_rows is required to be included in value before rows");
+                    }
+
+                    if (jp.nextToken() != JsonToken.START_ARRAY) {
+                        throw new DbAccessException("rows's value must be an array");
+                    }
+
+                    result = parseRows(jp, result);
+                } else {
+                    jp.skipChildren();
+                }
+            }
+        }
+
+        return result;
+    }
 }
