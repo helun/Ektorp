@@ -235,6 +235,15 @@ public class StdCouchDbConnectorTest {
         assertEquals("doc1", all.get(0));
         assertEquals("doc2", all.get(1));
         assertEquals("doc3", all.get(2));
+
+        doReturn(HttpResponseStub.valueOf(200,"{\"offset\":0,\"total_rows\":2, \"rows\":["+
+            "{\"id\":\"07b5e058-1125-4cc9-b908-04af5e0f0a45\",\"value\":{\"_conflicts\":[],\"rev\":\"1-e18520bb-c91e-46f6-bbf8-ed13ab907b9e\"},\"key\":\"07b5e058-1125-4cc9-b908-04af5e0f0a45\"},"+
+            "{\"id\":\"52977cfe-c809-4276-b1a4-bc1f3f6303e4\",\"value\":{\"_conflicts\":[],\"rev\":\"1-6af4da06-2554-4a74-8677-05d8b308d922\"},\"key\":\"52977cfe-c809-4276-b1a4-bc1f3f6303e4\"}]}"))
+                .when(httpClient).get("/test_db/_all_docs");
+        all = dbCon.getAllDocIds();
+        assertEquals(2, all.size());
+        assertEquals("07b5e058-1125-4cc9-b908-04af5e0f0a45", all.get(0));
+        assertEquals("52977cfe-c809-4276-b1a4-bc1f3f6303e4", all.get(1));
     }
 
     @Test
