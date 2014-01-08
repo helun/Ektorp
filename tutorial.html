@@ -1,0 +1,334 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Relaxed Java Persistence with Ektorp and CouchDB</title><link rel="stylesheet" type="text/css" href="docbook.css"><meta name="generator" content="DocBook XSL-NS Stylesheets V1.76.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book" title="Relaxed Java Persistence with Ektorp and CouchDB"><div class="titlepage"><div><div><h1 class="title"><a name="d0e1"></a>Relaxed Java Persistence with Ektorp and CouchDB</h1></div><div><div class="author"><h3 class="author"><span class="firstname">Henrik</span> <span class="surname">Lundgren</span></h3><div class="affiliation"><span class="orgname"><br></span></div></div></div><div><p class="pubdate">2011-11-07</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#d0e15">1. Introduction</a></span></dt><dd><dl><dt><span class="section"><a href="#d0e20">Functionality</a></span></dt><dt><span class="section"><a href="#d0e35">Prerequisite Software</a></span></dt><dt><span class="section"><a href="#d0e54">Launching</a></span></dt></dl></dd><dt><span class="chapter"><a href="#d0e67">2. The Structure of the Application</a></span></dt><dd><dl><dt><span class="section"><a href="#d0e71">Object Model</a></span></dt><dt><span class="section"><a href="#d0e94">Modeling for Concurrency</a></span></dt><dt><span class="section"><a href="#d0e105">Repositories</a></span></dt><dd><dl><dt><span class="section"><a href="#d0e121">The BlogPostRepository</a></span></dt><dt><span class="section"><a href="#d0e181">The CommentRepository</a></span></dt><dt><span class="section"><a href="#d0e189">The Controller</a></span></dt><dt><span class="section"><a href="#d0e198">The Spring Application Context</a></span></dt><dt><span class="section"><a href="#d0e230">In the Database</a></span></dt><dt><span class="section"><a href="#d0e240">Conclusion</a></span></dt><dt><span class="section"><a href="#d0e245">Further Reading</a></span></dt></dl></dd></dl></dd></dl></div><div class="chapter" title="Chapter&nbsp;1.&nbsp;Introduction"><div class="titlepage"><div><div><h2 class="title"><a name="d0e15"></a>Chapter&nbsp;1.&nbsp;Introduction</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#d0e20">Functionality</a></span></dt><dt><span class="section"><a href="#d0e35">Prerequisite Software</a></span></dt><dt><span class="section"><a href="#d0e54">Launching</a></span></dt></dl></div><p>This document gives a brief overview on how to develop a basic blog
+    application using CouchDB and Ektorp for persistence and Spring MVC 3 for
+    the web layer.</p><div class="section" title="Functionality"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e20"></a>Functionality</h2></div></div></div><p>The Relaxed Blog sample web application is pretty basic, it has
+      the following features:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Create blog posts</p></li><li class="listitem"><p>View a list of all blog posts</p></li><li class="listitem"><p>Create a comment for a blog post</p></li></ul></div></div><div class="section" title="Prerequisite Software"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e35"></a>Prerequisite Software</h2></div></div></div><p>You need to have the following software installed on your system
+      in order to run the sample application.</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><a class="link" href="https://github.com/downloads/helun/Ektorp/org.ektorp.sample-1.8-project.zip" target="_top">org.ektorp.sample-1.8-project.zip</a></p></li><li class="listitem"><p>CouchDB installed and running.</p></li><li class="listitem"><p>Java SDK 1.6</p></li><li class="listitem"><p>Maven 2 or 3</p></li></ul></div></div><div class="section" title="Launching"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e54"></a>Launching</h2></div></div></div><p>Download the Relaxed Blog sample project and unpack the project
+      somewhere nice.</p><p>Make sure you have CouchDB running locally. If you want to specify
+      couchdb connection parameters it can be done in the file
+      /src/main/resources/couchdb.properties in the sample project.</p><p>From the project's root, start the application by the following
+      command:</p><pre class="programlisting">mvn jetty:run</pre><p>Point your browser at http://localhost:8080/blog/posts/ and you
+      should find the first page of the Relaxed Blog application.</p></div></div><div class="chapter" title="Chapter&nbsp;2.&nbsp;The Structure of the Application"><div class="titlepage"><div><div><h2 class="title"><a name="d0e67"></a>Chapter&nbsp;2.&nbsp;The Structure of the Application</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#d0e71">Object Model</a></span></dt><dt><span class="section"><a href="#d0e94">Modeling for Concurrency</a></span></dt><dt><span class="section"><a href="#d0e105">Repositories</a></span></dt><dd><dl><dt><span class="section"><a href="#d0e121">The BlogPostRepository</a></span></dt><dt><span class="section"><a href="#d0e181">The CommentRepository</a></span></dt><dt><span class="section"><a href="#d0e189">The Controller</a></span></dt><dt><span class="section"><a href="#d0e198">The Spring Application Context</a></span></dt><dt><span class="section"><a href="#d0e230">In the Database</a></span></dt><dt><span class="section"><a href="#d0e240">Conclusion</a></span></dt><dt><span class="section"><a href="#d0e245">Further Reading</a></span></dt></dl></dd></dl></div><p></p><div class="section" title="Object Model"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e71"></a>Object Model</h2></div></div></div><p>This application has two "domain" classes:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><span class="emphasis"><em>org.ektorp.sample.BlogPost</em></span></p></li><li class="listitem"><p><span class="emphasis"><em>org.ektorp.sample.Comment</em></span></p></li></ul></div><p>For convenience, they both extend
+      <span class="emphasis"><em>org.ektorp.support.CouchDbDocument</em></span> (this is however
+      not an requirement).</p><p>Both classes are classic Java Beans with good old getters and
+      setters:</p><pre class="programlisting"><strong class="hl-keyword">package</strong> org.ektorp.sample;
+
+<strong class="hl-keyword">import</strong> java.util.*;
+
+<strong class="hl-keyword">import</strong> org.ektorp.support.*;
+<strong class="hl-keyword">import</strong> org.joda.time.*;
+
+<strong class="hl-keyword">public</strong> <strong class="hl-keyword">class</strong> BlogPost <strong class="hl-keyword">extends</strong> CouchDbDocument {
+
+        <strong class="hl-keyword">private</strong> <strong class="hl-keyword">static</strong> <strong class="hl-keyword">final</strong> <strong class="hl-keyword">long</strong> serialVersionUID = <span class="hl-number">1L</span>;
+        <strong class="hl-tag" style="color: blue">/**
+         * @TypeDiscriminator is used to mark properties that makes this class's documents unique in the database. 
+         */</strong>
+        <em><span class="hl-annotation" style="color: gray">@TypeDiscriminator</span></em>
+        <strong class="hl-keyword">private</strong> String title;
+
+        <strong class="hl-keyword">private</strong> String body;
+
+        <strong class="hl-keyword">private</strong> List&lt;String&gt; tags;
+
+        <strong class="hl-keyword">private</strong> DateTime dateCreated;
+
+        <strong class="hl-tag" style="color: blue">/**
+         * @DocumentReferences is used to refer to other documents in the database, in this case comments.
+         */</strong>
+        <em><span class="hl-annotation" style="color: gray">@DocumentReferences(fetch = FetchType.LAZY, descendingSortOrder = true, orderBy = "dateCreated", backReference = "blogPostId")</span></em>
+        <strong class="hl-keyword">private</strong> Set&lt;Comment&gt; comments;
+
+        <strong class="hl-keyword">public</strong> DateTime getDateCreated() {
+                <strong class="hl-keyword">return</strong> dateCreated;
+        }
+        
+        <strong class="hl-keyword">public</strong> <strong class="hl-keyword">void</strong> setDateCreated(DateTime dateCreated) {
+                <strong class="hl-keyword">this</strong>.dateCreated = dateCreated;
+        }
+        
+        <strong class="hl-keyword">public</strong> String getTitle() {
+                <strong class="hl-keyword">return</strong> title;
+        }
+        
+        <strong class="hl-keyword">public</strong> <strong class="hl-keyword">void</strong> setTitle(String title) {
+                <strong class="hl-keyword">this</strong>.title = title;
+        }
+        
+        <strong class="hl-keyword">public</strong> String getBody() {
+                <strong class="hl-keyword">return</strong> body;
+        }
+        
+        <strong class="hl-keyword">public</strong> <strong class="hl-keyword">void</strong> setBody(String body) {
+                <strong class="hl-keyword">this</strong>.body = body;
+        }
+        
+        <strong class="hl-keyword">public</strong> List&lt;String&gt; getTags() {
+                <strong class="hl-keyword">return</strong> tags;
+        }
+        
+        <strong class="hl-keyword">public</strong> <strong class="hl-keyword">void</strong> setTags(List&lt;String&gt; tags) {
+                <strong class="hl-keyword">this</strong>.tags = tags;
+        }
+}
+
+<strong class="hl-keyword">package</strong> org.ektorp.sample;
+
+<strong class="hl-keyword">import</strong> org.ektorp.support.*;
+<strong class="hl-keyword">import</strong> org.joda.time.*;
+
+<strong class="hl-keyword">public</strong> <strong class="hl-keyword">class</strong> Comment <strong class="hl-keyword">extends</strong> CouchDbDocument {
+
+        <strong class="hl-keyword">private</strong> <strong class="hl-keyword">static</strong> <strong class="hl-keyword">final</strong> <strong class="hl-keyword">long</strong> serialVersionUID = <span class="hl-number">1L</span>;
+
+        <strong class="hl-keyword">private</strong> String blogPostId;
+        <strong class="hl-keyword">private</strong> String comment;
+        <strong class="hl-keyword">private</strong> DateTime dateCreated;
+        <strong class="hl-keyword">private</strong> String email;
+        
+        <strong class="hl-keyword">public</strong> String getBlogPostId() {
+                <strong class="hl-keyword">return</strong> blogPostId;
+        }
+        
+        <strong class="hl-keyword">public</strong> <strong class="hl-keyword">void</strong> setBlogPostId(String blogPostId) {
+                <strong class="hl-keyword">this</strong>.blogPostId = blogPostId;
+        }
+        
+        <strong class="hl-keyword">public</strong> String getComment() {
+                <strong class="hl-keyword">return</strong> comment;
+        }
+        
+        <strong class="hl-keyword">public</strong> <strong class="hl-keyword">void</strong> setComment(String comment) {
+                <strong class="hl-keyword">this</strong>.comment = comment;
+        }
+        
+        <strong class="hl-keyword">public</strong> DateTime getDateCreated() {
+                <strong class="hl-keyword">return</strong> dateCreated;
+        }
+        
+        <strong class="hl-keyword">public</strong> <strong class="hl-keyword">void</strong> setDateCreated(DateTime dateCreated) {
+                <strong class="hl-keyword">this</strong>.dateCreated = dateCreated;
+        }
+        
+        <strong class="hl-keyword">public</strong> String getEmail() {
+                <strong class="hl-keyword">return</strong> email;
+        }
+        
+        <strong class="hl-keyword">public</strong> <strong class="hl-keyword">void</strong> setEmail(String username) {
+                <strong class="hl-keyword">this</strong>.email = username;
+        }
+        
+}</pre></div><div class="section" title="Modeling for Concurrency"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e94"></a>Modeling for Concurrency</h2></div></div></div><p>The straight forward solution to modeling blog post comments is to
+      model the comments as a list embedded in the blog post document.
+      Although this is almost always preferable, this model would in this case
+      cause update congestion in the blog post document if many users post
+      comments concurrently.</p><p>We choose instead to model comments as separate documents next to
+      blog post documents. The relationship between BlogPost and Comment is
+      maintained through the blogPostId field in the Comment class. The
+      comments field in BlogPost is annotated with @DocumentReferences which
+      enables Ektorp to load related comments to a blog post transparently and
+      lazily.</p><p>Keeping each comment in its own document is a more efficient
+      solution from a concurrency point of view is to as no update conflicts
+      will occur.</p><p>What is the most appropriate model differs from case to case. In
+      general when the parent object and its children has a more uniform
+      update cycle, it is best to embed the list contents in the parent
+      document / object.</p></div><div class="section" title="Repositories"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e105"></a>Repositories</h2></div></div></div><p>All interactions with the database are encapsulated within
+      repositories. A repository is typically responsible for a particlar
+      domain class.</p><p>his application has two repositories, one for each domain
+      class:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><span class="emphasis"><em>org.ektorp.sample.BlogPostRepository</em></span></p></li><li class="listitem"><p><span class="emphasis"><em>org.ektorp.sample.CommentRepository</em></span></p></li></ul></div><div class="section" title="The BlogPostRepository"><div class="titlepage"><div><div><h3 class="title"><a name="d0e121"></a>The BlogPostRepository</h3></div></div></div><p>This repository obviously handles blog posts.</p><pre class="programlisting"><strong class="hl-keyword">package</strong> org.ektorp.sample;
+
+<strong class="hl-keyword">import</strong> java.util.*;
+
+<strong class="hl-keyword">import</strong> org.ektorp.*;
+<strong class="hl-keyword">import</strong> org.ektorp.support.*;
+<strong class="hl-keyword">import</strong> org.springframework.beans.factory.annotation.*;
+<strong class="hl-keyword">import</strong> org.springframework.stereotype.*;
+
+<em><span class="hl-annotation" style="color: gray">@Component</span></em>
+<strong class="hl-keyword">public</strong> <strong class="hl-keyword">class</strong> BlogPostRepository <strong class="hl-keyword">extends</strong> CouchDbRepositorySupport&lt;BlogPost&gt; {
+
+        <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+        <strong class="hl-keyword">public</strong> BlogPostRepository(<em><span class="hl-annotation" style="color: gray">@Qualifier("blogPostDatabase")</span></em> CouchDbConnector db) {
+                <strong class="hl-keyword">super</strong>(BlogPost.<strong class="hl-keyword">class</strong>, db);
+                initStandardDesignDocument();
+        }
+
+        <em><span class="hl-annotation" style="color: gray">@GenerateView</span></em> <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+        <strong class="hl-keyword">public</strong> List&lt;BlogPost&gt; getAll() {
+                ViewQuery q = createQuery(<strong class="hl-string"><em style="color:red">"all"</em></strong>).descending(true);
+                <strong class="hl-keyword">return</strong> db.queryView(q, BlogPost.<strong class="hl-keyword">class</strong>);
+        }
+        
+        <em><span class="hl-annotation" style="color: gray">@GenerateView</span></em>
+        <strong class="hl-keyword">public</strong> List&lt;BlogPost&gt; findByTag(String tag) {
+                <strong class="hl-keyword">return</strong> queryView(<strong class="hl-string"><em style="color:red">"by_tag"</em></strong>, tag);
+        }
+
+}</pre><p>View definitions can be embedded within repositories through the
+        @View annotation.</p><div class="section" title="Listing all Blog Posts"><div class="titlepage"><div><div><h4 class="title"><a name="d0e130"></a>Listing all Blog Posts</h4></div></div></div><p>The support class
+          <span class="emphasis"><em>CouchDbRepositorySupport</em></span> provides a getAll()
+          method out of the box. It calls the <span class="emphasis"><em>all</em></span> view
+          that has to be defined in the database and returns all documents
+          handled by this repository. In this case the
+          <span class="emphasis"><em>all</em></span> view can be automatically generated by
+          Ektorp as the BlogPost class has defined a field with a
+          @TypeDiscriminator annotation that gives Ektorp enough information
+          so that the <span class="emphasis"><em>all</em></span> view can be generated.</p><p>As we want the latest blog post to appear first, we have to
+          override the default getAll() method and specify descending sort
+          order.</p><p>The "all" view is defined in the @View annotation declared in
+          the repository class above. In order for the view to be sorted by
+          date, dateCreated is emitted as key.</p><p>If you are new to CouchDB and Views you can read more <a class="link" href="http://guide.couchdb.org/editions/1/en/views.html" target="_top">here</a>.</p></div><div class="section" title="The @GenerateView annotation"><div class="titlepage"><div><div><h4 class="title"><a name="d0e156"></a>The @GenerateView annotation</h4></div></div></div><p>The findByTag method is not used in the sample application,
+          but it is shown here as an example on how the @GenerateView
+          annotation us used.</p><p>Finder methods annotated with @GenerateView will have their
+          view definitions automatically created.</p></div><div class="section" title="The Constructor"><div class="titlepage"><div><div><h4 class="title"><a name="d0e163"></a>The Constructor</h4></div></div></div><p>The CouchDbConnector is autowired in the constructor by Spring
+          framework. As new connectors might be added to the applications
+          later, a specific connector is specified through the
+          @Qualifier("blogPostDatabase") annotation.</p><p>The constructor in the super class has to be called in order
+          to specifiy this repository's handled type (BlogPost.class) and to
+          provide the CouchDbConnector reference to the underlying support
+          code.</p><p>The constructor then calls the
+          <span class="emphasis"><em>initStandardDesignDocument()</em></span> method in order
+          for the <span class="emphasis"><em>@View</em></span> and
+          <span class="emphasis"><em>@GenerateView</em></span> definitions to be generated and
+          inserted into the database. Existing view definitions are not
+          overwritten so if you change your definitions, you will have to
+          delete the existing view (or design document) in the
+          database.</p></div></div><div class="section" title="The CommentRepository"><div class="titlepage"><div><div><h3 class="title"><a name="d0e181"></a>The CommentRepository</h3></div></div></div><p>There isn't much to say about the CommentRepository besides that
+        the view used in findByBlogPostId uses the @GenerateView annotation in
+        order to generate the view that describes the Comment's relationship
+        with the BlogPost.</p><pre class="programlisting"><strong class="hl-keyword">package</strong> org.ektorp.sample;
+
+<strong class="hl-keyword">import</strong> java.util.*;
+
+<strong class="hl-keyword">import</strong> org.ektorp.*;
+<strong class="hl-keyword">import</strong> org.ektorp.support.*;
+<strong class="hl-keyword">import</strong> org.springframework.beans.factory.annotation.*;
+<strong class="hl-keyword">import</strong> org.springframework.stereotype.*;
+
+<em><span class="hl-annotation" style="color: gray">@Component</span></em>
+<em><span class="hl-annotation" style="color: gray">@View( name="all", map = "function(doc) { if (doc.blogPostId) { emit(null, doc) } }")</span></em>
+<strong class="hl-keyword">public</strong> <strong class="hl-keyword">class</strong> CommentRepository <strong class="hl-keyword">extends</strong> CouchDbRepositorySupport&lt;Comment&gt; {
+
+        <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+        <strong class="hl-keyword">public</strong> CommentRepository(<em><span class="hl-annotation" style="color: gray">@Qualifier("blogPostDatabase")</span></em> CouchDbConnector db) {
+                <strong class="hl-keyword">super</strong>(Comment.<strong class="hl-keyword">class</strong>, db);
+                initStandardDesignDocument();
+        }
+        
+        <em><span class="hl-annotation" style="color: gray">@GenerateView</span></em>
+        <strong class="hl-keyword">public</strong> List&lt;Comment&gt; findByBlogPostId(String blogPostId) {
+                <strong class="hl-keyword">return</strong> queryView(<strong class="hl-string"><em style="color:red">"by_blogPostId"</em></strong>, blogPostId);
+        }
+
+}
+</pre></div><div class="section" title="The Controller"><div class="titlepage"><div><div><h3 class="title"><a name="d0e189"></a>The Controller</h3></div></div></div><p>The BlogController handles all use cases in this application. As
+        this is a very simple application there is no service layer and the
+        controller uses the repositories directly.</p><p>Authorization and such is left as an exercise for you, the
+        reader.</p><pre class="programlisting"><strong class="hl-keyword">package</strong> org.ektorp.sample;
+
+<strong class="hl-keyword">import</strong> org.joda.time.*;
+<strong class="hl-keyword">import</strong> org.springframework.beans.factory.annotation.*;
+<strong class="hl-keyword">import</strong> org.springframework.stereotype.*;
+<strong class="hl-keyword">import</strong> org.springframework.ui.*;
+<strong class="hl-keyword">import</strong> org.springframework.web.bind.annotation.*;
+<strong class="hl-keyword">import</strong> org.springframework.web.servlet.*;
+
+<em><span class="hl-annotation" style="color: gray">@Controller</span></em>
+<strong class="hl-keyword">public</strong> <strong class="hl-keyword">class</strong> BlogController {
+
+        <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+        BlogPostRepository blogPostRepo;
+        <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+        CommentRepository commentRepo;
+        
+        <em><span class="hl-annotation" style="color: gray">@RequestMapping( value = "/posts/", method = RequestMethod.GET)</span></em>
+        <strong class="hl-keyword">public</strong> String viewAll(Model m) {
+                m.addAttribute(blogPostRepo.getAll());
+                <strong class="hl-keyword">return</strong> <strong class="hl-string"><em style="color:red">"/posts/index"</em></strong>;
+        }
+        
+        <em><span class="hl-annotation" style="color: gray">@RequestMapping( value = "/posts/new", method = RequestMethod.GET)</span></em>
+        <strong class="hl-keyword">public</strong> ModelAndView newPost() {
+                <strong class="hl-keyword">return</strong> <strong class="hl-keyword">new</strong> ModelAndView(<strong class="hl-string"><em style="color:red">"/posts/edit"</em></strong>, <strong class="hl-string"><em style="color:red">"command"</em></strong>, <strong class="hl-keyword">new</strong> BlogPost());
+        }
+        
+        <em><span class="hl-annotation" style="color: gray">@RequestMapping( value = "/posts/", method = RequestMethod.POST)</span></em>
+        <strong class="hl-keyword">public</strong> String submitPost(<em><span class="hl-annotation" style="color: gray">@ModelAttribute("command")</span></em> BlogPost post) {
+                <strong class="hl-keyword">if</strong> (post.isNew()) {
+                        post.setId(createId(post.getTitle()));
+                        post.setDateCreated(<strong class="hl-keyword">new</strong> DateTime());
+                }
+                blogPostRepo.update(post);
+                <strong class="hl-keyword">return</strong> <strong class="hl-string"><em style="color:red">"redirect:/blog/posts/"</em></strong>;
+        }
+        
+        <strong class="hl-keyword">private</strong> String createId(String title) {
+                <strong class="hl-keyword">return</strong> title.replaceAll(<strong class="hl-string"><em style="color:red">"\\s"</em></strong>, <strong class="hl-string"><em style="color:red">"-"</em></strong>);
+        }
+
+        <em><span class="hl-annotation" style="color: gray">@RequestMapping("/posts/{postId}")</span></em>
+        <strong class="hl-keyword">public</strong> ModelAndView viewPost(<em><span class="hl-annotation" style="color: gray">@PathVariable("postId")</span></em> String postId) {
+                ModelAndView model = <strong class="hl-keyword">new</strong> ModelAndView(<strong class="hl-string"><em style="color:red">"/posts/view"</em></strong>);
+                model.addObject(blogPostRepo.get(postId));
+                model.addObject(commentRepo.findByBlogPostId(postId));
+                <strong class="hl-keyword">return</strong> model;
+        }
+        
+        <em><span class="hl-annotation" style="color: gray">@RequestMapping( value = "/posts/{postId}/edit", method = RequestMethod.GET)</span></em>
+        <strong class="hl-keyword">public</strong> BlogPost editPost(<em><span class="hl-annotation" style="color: gray">@PathVariable("postId")</span></em> String postId) {
+                <strong class="hl-keyword">return</strong> blogPostRepo.get(postId);
+        }
+        
+        <em><span class="hl-annotation" style="color: gray">@RequestMapping( value = "/posts/{postId}/comment", method = RequestMethod.POST)</span></em>
+        <strong class="hl-keyword">public</strong> String addComment(<em><span class="hl-annotation" style="color: gray">@PathVariable("postId")</span></em> String postId, <em><span class="hl-annotation" style="color: gray">@ModelAttribute("command")</span></em> Comment comment) {
+                comment.setBlogPostId(postId);
+                comment.setDateCreated(<strong class="hl-keyword">new</strong> DateTime());
+                commentRepo.add(comment);
+                <strong class="hl-keyword">return</strong> <strong class="hl-string"><em style="color:red">"redirect:/blog/posts/"</em></strong> + comment.getBlogPostId();
+        }
+}</pre></div><div class="section" title="The Spring Application Context"><div class="titlepage"><div><div><h3 class="title"><a name="d0e198"></a>The Spring Application Context</h3></div></div></div><p>Almost all components in this application are configured through
+        annotations. The few things that need to be configured in xml are the
+        <span class="emphasis"><em>StdCouchDbConnector</em></span> and its supporting classes
+        <span class="emphasis"><em>StdCouchDbInstance</em></span> and
+        <span class="emphasis"><em>HttpClient</em></span>.</p><p>The HttpClient is created with the help of
+        <span class="emphasis"><em>org.ektorp.spring.HttpClientFactoryBean</em></span> that read
+        configuration parameters from <span class="emphasis"><em>couchdb.properties</em></span>
+        defined below.</p><p>Note that in a bigger application, you would want
+        <span class="emphasis"><em>StdCouchDbInstance</em></span> to be a standalone bean so
+        that it can be referenced by multiple
+        <span class="emphasis"><em>CouchDbConnectors</em></span>.</p><pre class="programlisting"><span class="hl-directive" style="color: maroon">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<strong class="hl-tag" style="color: #000096">&lt;beans</strong> <span class="hl-attribute" style="color: #F5844C">xmlns</span>=<span class="hl-value" style="color: #993300">"http://www.springframework.org/schema/beans"</span>
+<span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">xmlns:xsi</span>=<span class="hl-value" style="color: #993300">"http://www.w3.org/2001/XMLSchema-instance"</span>
+<span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">xmlns:context</span>=<span class="hl-value" style="color: #993300">"http://www.springframework.org/schema/context"</span>
+<span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">xmlns:util</span>=<span class="hl-value" style="color: #993300">"http://www.springframework.org/schema/util"</span>
+<span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">&nbsp;</span> <span class="hl-attribute" style="color: #F5844C">xsi:schemaLocation</span>=<span class="hl-value" style="color: #993300">"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"</span><strong class="hl-tag" style="color: #000096">&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; 
+&nbsp; &nbsp; &nbsp; &nbsp; <em class="hl-comment" style="color: silver">&lt;!-- Scans within the base package of the application for @Components to configure as beans --&gt;</em>
+&nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;context:component-scan</strong> <span class="hl-attribute" style="color: #F5844C">base-package</span>=<span class="hl-value" style="color: #993300">"org.ektorp.sample"</span><strong class="hl-tag" style="color: #000096"> /&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; 
+&nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;util:properties</strong> <span class="hl-attribute" style="color: #F5844C">id</span>=<span class="hl-value" style="color: #993300">"couchdbProperties"</span> <span class="hl-attribute" style="color: #F5844C">location</span>=<span class="hl-value" style="color: #993300">"classpath:/couchdb.properties"</span><strong class="hl-tag" style="color: #000096">/&gt;</strong>
+
+&nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;bean</strong> <span class="hl-attribute" style="color: #F5844C">id</span>=<span class="hl-value" style="color: #993300">"blogPostDatabase"</span> <span class="hl-attribute" style="color: #F5844C">class</span>=<span class="hl-value" style="color: #993300">"org.ektorp.impl.StdCouchDbConnector"</span><strong class="hl-tag" style="color: #000096">&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;constructor-arg</strong> <span class="hl-attribute" style="color: #F5844C">value</span>=<span class="hl-value" style="color: #993300">"blogPosts"</span><strong class="hl-tag" style="color: #000096"> /&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;constructor-arg&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;bean</strong> <span class="hl-attribute" style="color: #F5844C">id</span>=<span class="hl-value" style="color: #993300">"couchDbInstance"</span> <span class="hl-attribute" style="color: #F5844C">class</span>=<span class="hl-value" style="color: #993300">"org.ektorp.impl.StdCouchDbInstance"</span><strong class="hl-tag" style="color: #000096">&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;constructor-arg&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;bean</strong> <span class="hl-attribute" style="color: #F5844C">class</span>=<span class="hl-value" style="color: #993300">"org.ektorp.spring.HttpClientFactoryBean"</span><strong class="hl-tag" style="color: #000096"> /&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;/constructor-arg&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;/bean&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;/constructor-arg&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; <strong class="hl-tag" style="color: #000096">&lt;/bean&gt;</strong>
+&nbsp; &nbsp; &nbsp; &nbsp; 
+<strong class="hl-tag" style="color: #000096">&lt;/beans&gt;</strong></pre></div><div class="section" title="In the Database"><div class="titlepage"><div><div><h3 class="title"><a name="d0e230"></a>In the Database</h3></div></div></div><p>If you successfully started the application, your CouchDb
+        instance will contain a new database called blogposts. The new
+        database should contain one design documents:
+        <span class="emphasis"><em>_design/BlogPost</em></span> the contains the auto generated
+        views .</p><p>If you made any posts or comments you should find them here as
+        well.</p></div><div class="section" title="Conclusion"><div class="titlepage"><div><div><h3 class="title"><a name="d0e240"></a>Conclusion</h3></div></div></div><p>Now we have covered what a simple application with Ektorp as
+        persistence layer looks like and I hope you will find Ektorp useful
+        for you.</p></div><div class="section" title="Further Reading"><div class="titlepage"><div><div><h3 class="title"><a name="d0e245"></a>Further Reading</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><a class="link" href="http://blog.couch.io/post/595079631/document-modelling-rules-of-thumb" target="_top">Document
+            Modelling Rules of Thumb</a></p></li><li class="listitem"><p><a class="link" href="http://ektorp.org/reference_documentation.html" target="_top">Ektorp
+            Reference Documentation</a></p></li></ul></div></div></div></div></div></body></html>

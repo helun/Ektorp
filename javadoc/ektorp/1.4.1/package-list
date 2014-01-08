@@ -1,0 +1,11 @@
+org.ektorp
+org.ektorp.changes
+org.ektorp.dataload
+org.ektorp.docref
+org.ektorp.http
+org.ektorp.impl
+org.ektorp.impl.changes
+org.ektorp.impl.docref
+org.ektorp.impl.jackson
+org.ektorp.support
+org.ektorp.util
