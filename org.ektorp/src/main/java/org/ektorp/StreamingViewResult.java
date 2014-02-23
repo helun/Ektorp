@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import com.fasterxml.jackson.databind.*;
 import org.ektorp.ViewResult.Row;
@@ -90,13 +91,23 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 
 	private class StreamingViewResultIterator implements Iterator<Row>{
 		private Row row;
+		private boolean closed = false;
 		public boolean hasNext() {
+			if (closed) {
+				// The BufferedReader is closed. There can't be any more rows.
+				return false;
+			}
+			if (row != null) {
+				// We still already have an 'uncollected' row from last time.
+				return true;
+			}
 			try {
 			    JsonNode node;
 			    do {
     				String doc = reader.readLine();
     				if (doc == null || doc.equals("]}")) {
     					reader.close();
+					closed = true;
     					return false;
     				}
     				if (doc.endsWith(",")) {
@@ -116,7 +127,12 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 
 
 		public Row next() {
-			return row;
+			if (!hasNext()) {
+				throw new NoSuchElementException("Attempt to iterate beyond the result set");
+			}
+			Row toReturn = row;
+			row = null;
+			return toReturn;
 		}
 		public void remove() {
 			throw new UnsupportedOperationException();
