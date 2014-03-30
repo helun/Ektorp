@@ -5,6 +5,7 @@ import static java.lang.String.*;
 import java.io.*;
 import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,7 +27,6 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	private final RestTemplate restTemplate;
 	private final ObjectMapper objectMapper;
 	private final ObjectMapperFactory objectMapperFactory;
-	private JsonSerializer jsonSerializer;
 
 	public StdCouchDbInstance(HttpClient client) {
 		this(client, new StdObjectMapperFactory());
@@ -38,7 +38,6 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		this.client = client;
 		this.restTemplate = new RestTemplate(client);
 		this.objectMapper = of.createObjectMapper();
-		this.jsonSerializer = new StreamingJsonSerializer(objectMapper);
 		this.objectMapperFactory = of;
 	}
 
@@ -161,7 +160,13 @@ public class StdCouchDbInstance implements CouchDbInstance {
       Assert.notNull(section, "Section may not be null");
       Assert.notNull(key, "Key may not be null");
       String url = "/_config/" + section + "/" + key;
-      return restTemplate.put(url, jsonSerializer.toJson(value),
+      String content;
+      try {
+            content = objectMapper.writeValueAsString(value);
+      } catch (JsonProcessingException e) {
+            throw Exceptions.propagate(e);
+      }
+      return restTemplate.put(url, content,
          new StdResponseHandler<String>() {
             @Override
             public String success(HttpResponse hr) throws Exception {
