@@ -8,7 +8,7 @@ import org.ektorp.http.URI;
 import java.io.InputStream;
 import java.util.List;
 
-public class DefaultBulkStreamExecutor implements BulkStreamExecutor {
+public class InputStreamWrapperBulkExecutor implements BulkExecutor<InputStream> {
 
     protected URI dbURI;
 
@@ -20,7 +20,7 @@ public class DefaultBulkStreamExecutor implements BulkStreamExecutor {
 
     protected String bulkDocsUri;
 
-    public DefaultBulkStreamExecutor(URI dbURI, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public InputStreamWrapperBulkExecutor(URI dbURI, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.dbURI = dbURI;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;

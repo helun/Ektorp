@@ -5,6 +5,6 @@ import org.ektorp.DocumentOperationResult;
 import java.util.Collection;
 import java.util.List;
 
-public interface BulkExecutor {
-    List<DocumentOperationResult> executeBulk(Collection<?> objects, boolean allOrNothing);
+public interface BulkExecutor<T> {
+    List<DocumentOperationResult> executeBulk(T bulk, boolean allOrNothing);
 }

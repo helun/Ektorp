@@ -53,9 +53,9 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     private LocalBulkBuffer localBulkBuffer;
 
-    private BulkExecutor bulkExecutor;
+    private BulkExecutor<Collection<?>> collectionBulkExecutor;
 
-    private BulkStreamExecutor bulkStreamExecutor;
+    private BulkExecutor<InputStream> inputStreamBulkExecutor;
 
     private final static Options EMPTY_OPTIONS = new Options();
 
@@ -80,7 +80,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         this.revisionHandler = new RevisionResponseHandler(objectMapper);
         this.docIdResponseHandler = new DocIdResponseHandler(objectMapper);
 
-        bulkExecutor = new BulkOperationExecutor(dbURI, restTemplate, objectMapper) {
+        collectionBulkExecutor = new BulkOperationCollectionBulkExecutor(dbURI, restTemplate, objectMapper) {
             @Override
             protected JsonSerializer getJsonSerializer() {
                 return jsonSerializer;
@@ -89,23 +89,23 @@ public class StdCouchDbConnector implements CouchDbConnector {
         localBulkBuffer = new DefaultLocalBulkBuffer() {
             @Override
             protected BulkExecutor getBulkExecutor() {
-                return bulkExecutor;
+                return collectionBulkExecutor;
             }
         };
 
-        bulkStreamExecutor = new DefaultBulkStreamExecutor(dbURI, restTemplate, objectMapper);
+        inputStreamBulkExecutor = new InputStreamWrapperBulkExecutor(dbURI, restTemplate, objectMapper);
     }
 
     public void setLocalBulkBuffer(LocalBulkBuffer localBulkBuffer) {
         this.localBulkBuffer = localBulkBuffer;
     }
 
-    public void setBulkExecutor(BulkExecutor bulkExecutor) {
-        this.bulkExecutor = bulkExecutor;
+    public void setCollectionBulkExecutor(BulkExecutor<Collection<?>> collectionBulkExecutor) {
+        this.collectionBulkExecutor = collectionBulkExecutor;
     }
 
-    public void setBulkStreamExecutor(BulkStreamExecutor bulkStreamExecutor) {
-        this.bulkStreamExecutor = bulkStreamExecutor;
+    public void setInputStreamBulkExecutor(BulkExecutor<InputStream> inputStreamBulkExecutor) {
+        this.inputStreamBulkExecutor = inputStreamBulkExecutor;
     }
 
     @Override
@@ -604,7 +604,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     public List<DocumentOperationResult> executeBulk(InputStream inputStream, boolean allOrNothing) {
-        return bulkStreamExecutor.executeBulk(inputStream, allOrNothing);
+        return inputStreamBulkExecutor.executeBulk(inputStream, allOrNothing);
     }
 
     @Override
@@ -647,7 +647,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     public List<DocumentOperationResult> executeBulk(Collection<?> objects,
 			boolean allOrNothing) {
-		return bulkExecutor.executeBulk(objects, allOrNothing);
+		return collectionBulkExecutor.executeBulk(objects, allOrNothing);
 	}
 
     @Override

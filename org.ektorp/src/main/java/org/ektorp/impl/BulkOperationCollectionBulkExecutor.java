@@ -8,7 +8,7 @@ import org.ektorp.http.URI;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class BulkOperationExecutor implements BulkExecutor {
+public abstract class BulkOperationCollectionBulkExecutor implements BulkExecutor<Collection<?>> {
 
     protected URI dbURI;
 
@@ -16,11 +16,11 @@ public abstract class BulkOperationExecutor implements BulkExecutor {
 
     protected ObjectMapper objectMapper;
 
-    public BulkOperationExecutor() {
+    public BulkOperationCollectionBulkExecutor() {
 
     }
 
-    public BulkOperationExecutor(URI dbURI, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public BulkOperationCollectionBulkExecutor(URI dbURI, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.dbURI = dbURI;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;

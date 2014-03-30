@@ -27,7 +27,7 @@ public class StreamedCouchDbConnector extends StdCouchDbConnector {
     }
 
     {
-        setBulkExecutor(new BulkEntityExecutor(dbURI, restTemplate, objectMapper));
+        setCollectionBulkExecutor(new EntityCollectionBulkExecutor(dbURI, restTemplate, objectMapper));
     }
 
     protected HttpEntity createHttpEntity(Object o) {

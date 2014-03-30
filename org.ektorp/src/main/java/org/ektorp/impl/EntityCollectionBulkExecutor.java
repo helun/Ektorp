@@ -11,9 +11,9 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * This is designed to replace the BulkOperationExecutor
+ * This is designed to replace the BulkOperationCollectionBulkExecutor
  */
-public class BulkEntityExecutor implements BulkExecutor {
+public class EntityCollectionBulkExecutor implements BulkExecutor<Collection<?>> {
 
     protected URI dbURI;
 
@@ -21,11 +21,11 @@ public class BulkEntityExecutor implements BulkExecutor {
 
     protected ObjectMapper objectMapper;
 
-    public BulkEntityExecutor() {
+    public EntityCollectionBulkExecutor() {
 
     }
 
-    public BulkEntityExecutor(URI dbURI, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public EntityCollectionBulkExecutor(URI dbURI, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.dbURI = dbURI;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
