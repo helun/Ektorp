@@ -51,7 +51,9 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	protected final RevisionResponseHandler revisionHandler;
     private final DocIdResponseHandler docIdResponseHandler;
 
-    private LocalBulkBuffer localBulkBuffer = new DefaultLocalBulkBuffer(this);
+    private LocalBulkBuffer localBulkBuffer;
+
+    private BulkExecutor bulkExecutor;
 
     private final static Options EMPTY_OPTIONS = new Options();
 
@@ -75,6 +77,27 @@ public class StdCouchDbConnector implements CouchDbConnector {
         this.restTemplate = new RestTemplate(dbi.getConnection());
         this.revisionHandler = new RevisionResponseHandler(objectMapper);
         this.docIdResponseHandler = new DocIdResponseHandler(objectMapper);
+
+        bulkExecutor = new BulkOperationExecutor(dbURI, restTemplate, objectMapper) {
+            @Override
+            protected JsonSerializer getJsonSerializer() {
+                return jsonSerializer;
+            }
+        };
+        localBulkBuffer = new DefaultLocalBulkBuffer() {
+            @Override
+            protected BulkExecutor getBulkExecutor() {
+                return bulkExecutor;
+            }
+        };
+    }
+
+    public void setLocalBulkBuffer(LocalBulkBuffer localBulkBuffer) {
+        this.localBulkBuffer = localBulkBuffer;
+    }
+
+    public void setBulkExecutor(BulkExecutor bulkExecutor) {
+        this.bulkExecutor = bulkExecutor;
     }
 
     @Override
@@ -488,7 +511,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
                         return objectMapper.readValue(hr.getContent(),
                                 DbInfo.class);
                     }
-                });
+                }
+        );
     }
 
     @Override
@@ -562,8 +586,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     @Override
-    public List<DocumentOperationResult> executeAllOrNothing(
-            InputStream inputStream) {
+    public List<DocumentOperationResult> executeAllOrNothing(InputStream inputStream) {
         return executeBulk(inputStream, true);
     }
 
@@ -572,8 +595,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
         return executeBulk(inputStream, false);
     }
 
-    private List<DocumentOperationResult> executeBulk(InputStream inputStream,
-            boolean allOrNothing) {
+    // TODO : should we move this method to BulkExecutor too ??
+    private List<DocumentOperationResult> executeBulk(InputStream inputStream, boolean allOrNothing) {
         BulkDocumentWriter writer = new BulkDocumentWriter(objectMapper);
 
         return restTemplate.post(
@@ -584,8 +607,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     @Override
-    public List<DocumentOperationResult> executeAllOrNothing(
-            Collection<?> objects) {
+    public List<DocumentOperationResult> executeAllOrNothing(Collection<?> objects) {
         return executeBulk(objects, true);
     }
 
@@ -624,18 +646,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     public List<DocumentOperationResult> executeBulk(Collection<?> objects,
 			boolean allOrNothing) {
-		BulkOperation op = jsonSerializer.createBulkOperation(objects,
-				allOrNothing);
-		try {
-			List<DocumentOperationResult> result = restTemplate.post(
-					dbURI.append("_bulk_docs").toString(),
-					op.getData(),
-					new BulkOperationResponseHandler(objects, objectMapper));
-			op.awaitCompletion();
-			return result;
-		} finally {
-			op.close();
-		}
+		return bulkExecutor.executeBulk(objects, allOrNothing);
 	}
 
     @Override
