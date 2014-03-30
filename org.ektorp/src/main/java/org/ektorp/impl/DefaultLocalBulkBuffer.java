@@ -45,7 +45,7 @@ public abstract class DefaultLocalBulkBuffer implements LocalBulkBuffer {
         }
     }
 
-    protected abstract BulkExecutor getBulkExecutor();
+    protected abstract BulkExecutor<Collection<?>> getBulkExecutor();
 
     public boolean isAllOrNothing() {
         return allOrNothing;
