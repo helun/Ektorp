@@ -55,6 +55,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     private BulkExecutor bulkExecutor;
 
+    private BulkStreamExecutor bulkStreamExecutor;
+
     private final static Options EMPTY_OPTIONS = new Options();
 
     public StdCouchDbConnector(String databaseName, CouchDbInstance dbInstance) {
@@ -90,6 +92,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
                 return bulkExecutor;
             }
         };
+
+        bulkStreamExecutor = new DefaultBulkStreamExecutor(dbURI, restTemplate, objectMapper);
     }
 
     public void setLocalBulkBuffer(LocalBulkBuffer localBulkBuffer) {
@@ -98,6 +102,10 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     public void setBulkExecutor(BulkExecutor bulkExecutor) {
         this.bulkExecutor = bulkExecutor;
+    }
+
+    public void setBulkStreamExecutor(BulkStreamExecutor bulkStreamExecutor) {
+        this.bulkStreamExecutor = bulkStreamExecutor;
     }
 
     @Override
@@ -595,15 +603,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
         return executeBulk(inputStream, false);
     }
 
-    // TODO : should we move this method to BulkExecutor too ??
-    private List<DocumentOperationResult> executeBulk(InputStream inputStream, boolean allOrNothing) {
-        BulkDocumentWriter writer = new BulkDocumentWriter(objectMapper);
-
-        return restTemplate.post(
-            dbURI.append("_bulk_docs").toString(),
-            writer.createInputStreamWrapper(allOrNothing, inputStream),
-            new BulkOperationResponseHandler(objectMapper));
-
+    public List<DocumentOperationResult> executeBulk(InputStream inputStream, boolean allOrNothing) {
+        return bulkStreamExecutor.executeBulk(inputStream, allOrNothing);
     }
 
     @Override
