@@ -63,9 +63,13 @@ public class StreamedCouchDbConnector extends StdCouchDbConnector {
     public List<DocumentOperationResult> executeBulk(Collection<?> objects,
                                                      boolean allOrNothing) {
 
-        // FIXME : the super method uses an ExecutorService to transform the Objects Collections to a JSON document using a PipedInputStream + a PipedOutputStream
-        // TODO : override the method using kind of the same pattern as the JacksonableEntity to generate the Bulk request JSON document
-        return super.executeBulk(objects, allOrNothing);
+        // the super method uses an ExecutorService to transform the Objects Collections to a JSON document using a PipedInputStream + a PipedOutputStream
+        // overrides the method using kind of the same pattern as the JacksonableEntity to generate the Bulk request JSON document
+        BulkDocumentBean<?> bulkDocumentBean = new BulkDocumentBean(objects, allOrNothing);
+        return restTemplate.post(
+                dbURI.append("_bulk_docs").toString(),
+                createHttpEntity(bulkDocumentBean),
+                new BulkOperationResponseHandler(objects, objectMapper));
     }
 
     @Override

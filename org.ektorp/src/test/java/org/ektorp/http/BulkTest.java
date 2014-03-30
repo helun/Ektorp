@@ -1,12 +1,22 @@
 package org.ektorp.http;
 
-import java.util.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.RandomStringUtils;
 import org.ektorp.*;
-import org.ektorp.impl.*;
-import org.junit.*;
+import org.ektorp.impl.StdCouchDbConnector;
+import org.ektorp.impl.StdCouchDbInstance;
+import org.ektorp.impl.StdObjectMapperFactory;
+import org.ektorp.impl.StreamedCouchDbConnector;
+import org.ektorp.support.CouchDbDocument;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /* throws:
 Exception in thread "main" org.ektorp.DbAccessException: java.net.SocketException: Connection reset
@@ -39,36 +49,161 @@ Caused by: java.net.SocketException: Connection reset
 @Ignore
 public class BulkTest {
 
-        public static void main(String[] args) throws Exception {
+    private final static Logger LOG = LoggerFactory.getLogger(StdCouchDbInstance.class);
 
-                HttpClient httpClient = new StdHttpClient.Builder().host("localhost").port(5984).cleanupIdleConnections(true).build();
-                CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
-                CouchDbConnector db = dbInstance.createConnector("mutka_local", true);
-                ObjectMapper mapper = new ObjectMapper();
+    private HttpClient httpClient;
 
-                // create document "myid"
-                try {
-                        db.create("myid", mapper.readTree("{\"i\":0}"));
-                } catch (UpdateConflictException ex) {
-                        // already exists - ignore
-                }
-                long start = System.currentTimeMillis();
-                for (int i = 1; i < 1000; i++) {
-                        System.out.println("Round "+i);
+    private StdCouchDbConnector stdCouchDbConnector;
 
-                        JsonNode doc = db.get(JsonNode.class, "myid");
+    private StreamedCouchDbConnector streamedCouchDbConnector;
 
-                        Collection<JsonNode> docList = Collections.singleton(doc);
-                        List<DocumentOperationResult> bulkResult = db.executeBulk(docList);
-                        if (!bulkResult.isEmpty())
-                                throw new Exception("Got DocumentOperationResult "+bulkResult.get(0));
+    private CouchDbInstance dbInstance;
 
-                        Collection<String> idList = Collections.singleton("myid");
-                        ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(idList);
-                        db.queryView(q);
-                }
-                long rt = System.currentTimeMillis() - start;
-                System.out.println("Running time: " + rt + " ms");
+    private ObjectMapper mapper;
+
+    @Before
+    public void setUp() {
+        httpClient = new StdHttpClient.Builder().host("localhost").port(5984).cleanupIdleConnections(true).build();
+        dbInstance = new StdCouchDbInstance(httpClient);
+
+        String databasePath = this.getClass().getSimpleName() + "-DataBase";
+
+        if (dbInstance.checkIfDbExists(databasePath)) {
+            dbInstance.deleteDatabase(databasePath);
         }
+        dbInstance.createDatabase(databasePath);
+
+        stdCouchDbConnector = new StdCouchDbConnector(databasePath, dbInstance, new StdObjectMapperFactory());
+        streamedCouchDbConnector = new StreamedCouchDbConnector(databasePath, dbInstance, new StdObjectMapperFactory());
+
+        mapper = new ObjectMapper();
+    }
+
+    @After
+    public void tearDown() {
+        httpClient.shutdown();
+    }
+
+    @Test
+    public void shouldUpdateInBulkWithOneElementWithStdCouchDbConnector() throws Exception {
+        doUpdateInBulkWithOneElement(stdCouchDbConnector);
+    }
+
+    @Test
+    public void shouldUpdateInBulkWithOneElementWithStreamedCouchDbConnector() throws Exception {
+        doUpdateInBulkWithOneElement(streamedCouchDbConnector);
+    }
+
+    @Test
+    public void shouldUpdateInBulkWithManyElementsWithStdCouchDbConnector() throws Exception {
+        doUpdateInBulkWithManyElements(stdCouchDbConnector);
+    }
+
+    @Test
+    public void shouldUpdateInBulkWithManyElementsWithStreamedCouchDbConnector() throws Exception {
+        doUpdateInBulkWithManyElements(streamedCouchDbConnector);
+    }
+
+    public void doUpdateInBulkWithOneElement(CouchDbConnector db) throws Exception {
+        final int iterationsCount = 1000;
+
+        // create document "myid"
+        try {
+            db.create("myid", mapper.readTree("{\"i\":0}"));
+        } catch (UpdateConflictException ex) {
+            LOG.info("already exists - ignore : " + "myid");
+        }
+
+        long start = System.currentTimeMillis();
+        for (int i = 1; i < iterationsCount; i++) {
+            LOG.info("Round " + i + " of " + iterationsCount);
+
+            JsonNode doc = db.get(JsonNode.class, "myid");
+
+            Collection<JsonNode> docList = Collections.singleton(doc);
+            List<DocumentOperationResult> bulkResult = db.executeBulk(docList);
+            if (!bulkResult.isEmpty()) {
+                throw new Exception("Got DocumentOperationResult " + bulkResult);
+            }
+            Collection<String> idList = Collections.singleton("myid");
+            ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(idList);
+            db.queryView(q);
+        }
+        long rt = System.currentTimeMillis() - start;
+        LOG.info("Running time: " + rt + " ms");
+    }
+
+
+    public void doUpdateInBulkWithManyElements(CouchDbConnector db) throws Exception {
+        final int iterationsCount = 20;
+        final int elementsCount = 1000;
+
+        final List<String> allDocIds = new ArrayList<String>();
+        for (int i = 0; i < elementsCount; i++) {
+            String currentId = "TestDocumentBean-" + i;
+            TestDocumentBean bean = new TestDocumentBean(RandomStringUtils.randomAlphanumeric(32), RandomStringUtils.randomAlphanumeric(16), new Date(), 0);
+            try {
+                db.create(currentId, bean);
+            } catch (UpdateConflictException ex) {
+                LOG.info("already exists - ignore : " + currentId);
+            }
+            allDocIds.add(currentId);
+        }
+
+        ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(allDocIds);
+
+        long start = System.currentTimeMillis();
+        long bulkOpsTotalDuration = 0;
+        for (int i = 1; i <= iterationsCount; i++) {
+            LOG.info("Round " + i + " of " + iterationsCount);
+
+            List<TestDocumentBean> docList = db.queryView(q, TestDocumentBean.class);
+            for (TestDocumentBean b : docList) {
+                // check version is as expected
+                if (b.version != i - 1) {
+                    throw new IllegalStateException("Bean state is not as expected : " + b);
+                }
+                b.version = i;
+            }
+
+            long bulkOpStart = System.currentTimeMillis();
+            List<DocumentOperationResult> bulkResult = db.executeBulk(docList);
+            bulkOpsTotalDuration += (System.currentTimeMillis() - bulkOpStart);
+            if (!bulkResult.isEmpty()) {
+                throw new Exception("Got DocumentOperationResult " + bulkResult);
+            }
+        }
+
+        List<TestDocumentBean> docList = db.queryView(q, TestDocumentBean.class);
+        for (TestDocumentBean b : docList) {
+            // check version is as expected
+            if (b.version != iterationsCount) {
+                throw new IllegalStateException("Bean state is not as expected : " + b);
+            }
+        }
+
+        long rt = System.currentTimeMillis() - start;
+        LOG.info("Running time: " + rt + " ms, bulkOpsTotalDuration = " + bulkOpsTotalDuration + " ms");
+    }
+
+
+    public static class TestDocumentBean extends CouchDbDocument {
+        public String lastName;
+        public String firstName;
+        public Date dateOfBirth;
+        public int version;
+
+        public TestDocumentBean() {
+
+        }
+
+        public TestDocumentBean(String lastName, String firstName, Date dateOfBirth, int version) {
+            this.lastName = lastName;
+            this.firstName = firstName;
+            this.dateOfBirth = dateOfBirth;
+            this.version = version;
+        }
+    }
+
 }
 
