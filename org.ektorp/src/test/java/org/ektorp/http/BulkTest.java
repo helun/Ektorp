@@ -2,6 +2,8 @@ package org.ektorp.http;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang.RandomStringUtils;
 import org.ektorp.*;
 import org.ektorp.impl.StdCouchDbConnector;
@@ -16,6 +18,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.io.StringReader;
 import java.util.*;
 
 /* throws:
@@ -85,6 +89,16 @@ public class BulkTest {
     }
 
     @Test
+    public void shouldDoUpdateInBulkWithOneSmallInputStreamWithStdCouchDbConnector() throws Exception {
+        doUpdateInBulkWithOneSmallInputStream(stdCouchDbConnector);
+    }
+
+    @Test
+    public void shouldDoUpdateInBulkWithOneSmallInputStreamWithStreamedCouchDbConnector() throws Exception {
+        doUpdateInBulkWithOneSmallInputStream(streamedCouchDbConnector);
+    }
+
+    @Test
     public void shouldUpdateInBulkWithOneElementWithStdCouchDbConnector() throws Exception {
         doUpdateInBulkWithOneElement(stdCouchDbConnector);
     }
@@ -115,7 +129,7 @@ public class BulkTest {
         }
 
         long start = System.currentTimeMillis();
-        for (int i = 1; i < iterationsCount; i++) {
+        for (int i = 1; i <= iterationsCount; i++) {
             LOG.info("Round " + i + " of " + iterationsCount);
 
             JsonNode doc = db.get(JsonNode.class, "myid");
@@ -125,9 +139,6 @@ public class BulkTest {
             if (!bulkResult.isEmpty()) {
                 throw new Exception("Got DocumentOperationResult " + bulkResult);
             }
-            Collection<String> idList = Collections.singleton("myid");
-            ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(idList);
-            db.queryView(q);
         }
         long rt = System.currentTimeMillis() - start;
         LOG.info("Running time: " + rt + " ms");
@@ -182,6 +193,41 @@ public class BulkTest {
             }
         }
 
+        long rt = System.currentTimeMillis() - start;
+        LOG.info("Running time: " + rt + " ms, bulkOpsTotalDuration = " + bulkOpsTotalDuration + " ms");
+    }
+
+    public void doUpdateInBulkWithOneSmallInputStream(CouchDbConnector db) throws Exception {
+        final int iterationsCount = 1000;
+
+        // create document "myid"
+        try {
+            db.create("myid", mapper.readTree("{\"i\":0}"));
+        } catch (UpdateConflictException ex) {
+            LOG.info("already exists - ignore : " + "myid");
+        }
+
+        long start = System.currentTimeMillis();
+        long bulkOpsTotalDuration = 0;
+        for (int i = 1; i <= iterationsCount; i++) {
+            LOG.info("Round " + i + " of " + iterationsCount);
+
+            ObjectNode doc = db.get(ObjectNode.class, "myid");
+            int iFieldValue = doc.get("i").asInt();
+            if (iFieldValue != i-1) {
+                throw new IllegalStateException("Bean state is not as expected : " + doc);
+            }
+            doc.put("i", i);
+
+            InputStream bulkDocumentAsInputStream = new ReaderInputStream(new StringReader("[" + mapper.writeValueAsString(doc) + "]"));
+
+            long bulkOpStart = System.currentTimeMillis();
+            List<DocumentOperationResult> bulkResult = db.executeBulk(bulkDocumentAsInputStream);
+            bulkOpsTotalDuration += (System.currentTimeMillis() - bulkOpStart);
+            if (!bulkResult.isEmpty()) {
+                throw new Exception("Got DocumentOperationResult " + bulkResult);
+            }
+        }
         long rt = System.currentTimeMillis() - start;
         LOG.info("Running time: " + rt + " ms, bulkOpsTotalDuration = " + bulkOpsTotalDuration + " ms");
     }
