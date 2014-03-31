@@ -46,7 +46,6 @@ public class JacksonableEntity extends AbstractHttpEntity {
             }
         }
         setContentType("application/json");
-        setContentEncoding("UTF-8");
     }
 
     public JacksonableEntity(final Object ser, final ObjectMapper objectMapper) {

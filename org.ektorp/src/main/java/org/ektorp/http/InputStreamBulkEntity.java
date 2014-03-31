@@ -23,7 +23,6 @@ public class InputStreamBulkEntity extends AbstractHttpEntity {
         this.inputStream = inputStream;
         this.allOrNothing = allOrNothing;
         setContentType("application/json");
-        setContentEncoding("UTF-8");
     }
 
     @Override
