@@ -65,17 +65,61 @@ public class BulkTest {
 
     private ObjectMapper mapper;
 
+    private boolean createDatabaseIfNeeded = true;
+
+    private boolean deleteDatabaseIfNeeded = false;
+
     @Before
     public void setUp() {
-        httpClient = new StdHttpClient.Builder().host("localhost").port(5984).cleanupIdleConnections(true).build();
+        StdHttpClient.Builder builder = new StdHttpClient.Builder();
+
+        // read the configuration from the System properties (if you want to target another host like Cloudant)
+
+        final String serverHost = System.getProperty("serverHost");
+        final String serverPort = System.getProperty("serverPort");
+        final String serverUsername = System.getProperty("serverUsername");
+        final String serverPassword = System.getProperty("serverPassword");
+        final String proxyHost = System.getProperty("proxyHost");
+        final String proxyPort = System.getProperty("proxyPort");
+
+        builder = builder.cleanupIdleConnections(true).caching(false).enableSSL(false);
+        if (serverHost != null) {
+            builder = builder.host(serverHost);
+            builder = builder.socketTimeout(10000).connectionTimeout(5000);
+        }
+        if (serverPort != null) {
+            builder = builder.port(Integer.parseInt(serverPort));
+        }
+        if (serverUsername != null) {
+            builder = builder.username(serverUsername);
+        }
+        if (serverPassword != null) {
+            builder = builder.password(serverPassword);
+        }
+        if (proxyHost != null && proxyPort != null) {
+            builder = builder.proxy(proxyHost).proxyPort(Integer.parseInt(proxyPort));
+        }
+
+
+        httpClient = builder.build();
         dbInstance = new StdCouchDbInstance(httpClient);
 
         String databasePath = this.getClass().getSimpleName() + "-DataBase";
 
-        if (dbInstance.checkIfDbExists(databasePath)) {
-            dbInstance.deleteDatabase(databasePath);
+        if (deleteDatabaseIfNeeded) {
+            if (dbInstance.checkIfDbExists(databasePath)) {
+                dbInstance.deleteDatabase(databasePath);
+            }
         }
-        dbInstance.createDatabase(databasePath);
+        if (createDatabaseIfNeeded) {
+            if (!dbInstance.checkIfDbExists(databasePath)) {
+                dbInstance.createDatabase(databasePath);
+            }
+        } else {
+            if (!dbInstance.checkIfDbExists(databasePath)) {
+                throw new IllegalStateException("Database does not exists");
+            }
+        }
 
         stdCouchDbConnector = new StdCouchDbConnector(databasePath, dbInstance, new StdObjectMapperFactory());
         streamedCouchDbConnector = new StreamedCouchDbConnector(databasePath, dbInstance, new StdObjectMapperFactory());
@@ -85,7 +129,9 @@ public class BulkTest {
 
     @After
     public void tearDown() {
-        httpClient.shutdown();
+        if (httpClient != null) {
+            httpClient.shutdown();
+        }
     }
 
     @Test
@@ -119,7 +165,7 @@ public class BulkTest {
     }
 
     public void doUpdateInBulkWithOneElement(CouchDbConnector db) throws Exception {
-        final int iterationsCount = 1000;
+        final int iterationsCount = 100;
 
         // create document "myid"
         try {
@@ -145,23 +191,47 @@ public class BulkTest {
     }
 
 
-    public void doUpdateInBulkWithManyElements(CouchDbConnector db) throws Exception {
+    public void doUpdateInBulkWithManyElements(CouchDbConnector db) {
         final int iterationsCount = 20;
-        final int elementsCount = 1000;
+        final int elementsCount = 200;
 
         final List<String> allDocIds = new ArrayList<String>();
+
         for (int i = 0; i < elementsCount; i++) {
             String currentId = "TestDocumentBean-" + i;
-            TestDocumentBean bean = new TestDocumentBean(RandomStringUtils.randomAlphanumeric(32), RandomStringUtils.randomAlphanumeric(16), new Date(), 0);
-            try {
-                db.create(currentId, bean);
-            } catch (UpdateConflictException ex) {
-                LOG.info("already exists - ignore : " + currentId);
-            }
             allDocIds.add(currentId);
         }
 
-        ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(allDocIds);
+        final Map<String, String> currentRevisionById = new HashMap<String, String>();
+        if (!deleteDatabaseIfNeeded) {
+            for (String id : allDocIds) {
+                try {
+                    String currentRevisionId;
+                    currentRevisionId = db.getCurrentRevision(id);
+                    currentRevisionById.put(id, currentRevisionId);
+                } catch (DocumentNotFoundException e) {
+                    // should never occur
+                    LOG.info("DocumentNotFoundException when searching for revision of document " + id, e);
+                }
+            }
+            LOG.info("currentRevisionById = " + currentRevisionById);
+        }
+
+        for (int i = 0; i < elementsCount; i++) {
+            String currentId = "TestDocumentBean-" + i;
+            TestDocumentBean bean = new TestDocumentBean(RandomStringUtils.randomAlphanumeric(32), RandomStringUtils.randomAlphanumeric(16), new Date(), 0);
+            String currentRevision = currentRevisionById.get(currentId);
+            if (currentRevision != null) {
+                bean.setId(currentId);
+                bean.setRevision(currentRevision);
+                db.update(bean);
+            } else {
+                db.create(currentId, bean);
+            }
+        }
+
+
+        final ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(allDocIds);
 
         long start = System.currentTimeMillis();
         long bulkOpsTotalDuration = 0;
@@ -181,7 +251,7 @@ public class BulkTest {
             List<DocumentOperationResult> bulkResult = db.executeBulk(docList);
             bulkOpsTotalDuration += (System.currentTimeMillis() - bulkOpStart);
             if (!bulkResult.isEmpty()) {
-                throw new Exception("Got DocumentOperationResult " + bulkResult);
+                throw new RuntimeException("Got DocumentOperationResult " + bulkResult);
             }
         }
 
@@ -198,13 +268,23 @@ public class BulkTest {
     }
 
     public void doUpdateInBulkWithOneSmallInputStream(CouchDbConnector db) throws Exception {
-        final int iterationsCount = 1000;
+        final int iterationsCount = 100;
 
-        // create document "myid"
+        // create or update the document, with initial "i" value of 0
+        final String id = "myid";
+        ObjectNode originalJsonObject = (ObjectNode) mapper.readTree("{\"i\":0}");
+        String currentRevisionId;
         try {
-            db.create("myid", mapper.readTree("{\"i\":0}"));
-        } catch (UpdateConflictException ex) {
-            LOG.info("already exists - ignore : " + "myid");
+            currentRevisionId = db.getCurrentRevision(id);
+        } catch (DocumentNotFoundException e) {
+            currentRevisionId = null;
+        }
+        if (currentRevisionId == null) {
+            db.create("myid", originalJsonObject);
+        } else {
+            originalJsonObject.put("_id", id);
+            originalJsonObject.put("_rev", currentRevisionId);
+            db.update(originalJsonObject);
         }
 
         long start = System.currentTimeMillis();
@@ -214,7 +294,7 @@ public class BulkTest {
 
             ObjectNode doc = db.get(ObjectNode.class, "myid");
             int iFieldValue = doc.get("i").asInt();
-            if (iFieldValue != i-1) {
+            if (iFieldValue != i - 1) {
                 throw new IllegalStateException("Bean state is not as expected : " + doc);
             }
             doc.put("i", i);
