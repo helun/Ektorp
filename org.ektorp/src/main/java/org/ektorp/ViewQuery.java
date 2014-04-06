@@ -7,14 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.ektorp.http.URI;
 import org.ektorp.impl.StdObjectMapperFactory;
 import org.ektorp.util.Assert;
 import org.ektorp.util.Exceptions;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  *
@@ -36,6 +37,13 @@ public class ViewQuery {
 	private String viewName;
     private Object key;
     private Keys keys;
+	/**
+	 * If {@code true}, use {code POST} HTTP method for {@code keys}, otherwise {@code GET}. 
+	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
+	 * @see #keys(Collection)
+	 * @see #keysUsingPost(Collection)
+	 */
+	private boolean keysUsingPost = false;
 	private Object startKey;
 	private String startDocId;
 	private Object endKey;
@@ -262,11 +270,27 @@ public class ViewQuery {
 		return this;
 	}
     /**
-     * For multiple-key queries (as of CouchDB 0.9). Keys will be JSON-encoded.
+     * For multiple-key queries (as of CouchDB 0.9) using {@code GET} HTTP method. Keys will be JSON-encoded.
      * @param keyList a list of Object, will be JSON encoded according to each element's type.
      * @return the view query for chained calls
+     * @see #keysUsingPost(Collection)
+     * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
      */
     public ViewQuery keys(Collection<?> keyList) {
+    	keysUsingPost = false;
+        reset();
+        keys = Keys.of(keyList);
+        return this;
+    }
+    /**
+     * For multiple-key queries (as of CouchDB 0.9) using {@code POST} HTTP method. Keys will be JSON-encoded.
+     * @param keyList a list of Object, will be JSON encoded according to each element's type.
+     * @return the view query for chained calls
+     * @see #keys(Collection)
+     * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
+     */
+    public ViewQuery keysUsingPost(Collection<?> keyList) {
+    	keysUsingPost = true;
         reset();
         keys = Keys.of(keyList);
         return this;
@@ -558,7 +582,22 @@ public class ViewQuery {
     public boolean hasMultipleKeys() {
     	return keys != null;
     }
+    
+	/**
+	 * If {@code true}, use {code POST} HTTP method for {@code keys}, otherwise {@code GET}. 
+	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
+	 * @see #keys(Collection)
+	 * @see #keysUsingPost(Collection)
+	 */
+    public boolean isKeysUsingPost() {
+		return keysUsingPost;
+	}
 
+    /**
+     * Get {@link #keys} as JSON object.
+     * @return
+     * @see #getKeysAsJsonArray()
+     */
     public String getKeysAsJson() {
     	if (keys == null) {
     		return "{\"keys\":[]}";
@@ -566,6 +605,17 @@ public class ViewQuery {
         return keys.toJson(mapper);
     }
 
+    /**
+     * Get {@link #keys} as JSON array.
+     * @return
+     * @see #getKeysAsJson()
+     */
+    public String getKeysAsJsonArray() {
+    	if (keys == null) {
+    		return "[]";
+    	}
+        return keys.toJsonArray(mapper);
+    }
 
     public Object getStartKey() {
 		return startKey;
@@ -575,6 +625,11 @@ public class ViewQuery {
 		return endKey;
 	}
 
+	/**
+	 * If {@link #isKeysUsingPost()} is {@code true}, {@code #keys} will be omitted from the query string.
+	 * If {@link #isKeysUsingPost()} is {@code false}, {@code #keys} will be included in the query string.
+	 * @return
+	 */
 	public String buildQuery() {
 		if (cachedQuery != null) {
 			return cachedQuery;
@@ -584,6 +639,10 @@ public class ViewQuery {
 
 		if (isNotEmpty(key)) {
 			query.param("key", jsonEncode(key));
+		}
+		
+		if (hasMultipleKeys() && !isKeysUsingPost()) {
+			query.param("keys", getKeysAsJsonArray());
 		}
 
 		if (isNotEmpty(startKey)) {
@@ -650,6 +709,7 @@ public class ViewQuery {
 		return cachedQuery;
 	}
 
+	@Override
 	public ViewQuery clone() {
 		ViewQuery copy = new ViewQuery();
 		copy.mapper = mapper;
@@ -886,6 +946,7 @@ public class ViewQuery {
 			this.keys = Arrays.asList(keys);
 		}
 		
+		@Override
 		public Keys clone() {
 			return new Keys(keys);
 		}
@@ -906,6 +967,19 @@ public class ViewQuery {
 				throw Exceptions.propagate(e);
 			}
 		}
+
+		public String toJsonArray(ObjectMapper mapper) {
+			ArrayNode keysNode = mapper.createArrayNode();
+			for (Object key : keys) {
+				keysNode.addPOJO(key);
+			}
+			try {
+				return mapper.writeValueAsString(keysNode);
+			} catch (Exception e) {
+				throw Exceptions.propagate(e);
+			}
+		}
+
 	}
 
 
