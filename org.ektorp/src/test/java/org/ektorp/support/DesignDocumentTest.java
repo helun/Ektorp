@@ -1,17 +1,22 @@
 package org.ektorp.support;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.*;
+import java.io.IOException;
 
-import org.apache.commons.io.*;
+import org.apache.commons.io.IOUtils;
+import org.ektorp.util.JSONComparator;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ektorp.util.*;
-import org.junit.*;
 
 public class DesignDocumentTest {
 
@@ -117,6 +122,15 @@ public class DesignDocumentTest {
 		assertSerialization(om);
 	}
 	
+	@Test
+	public void should_tostring_as_json() throws IOException {
+		ObjectMapper om = new ObjectMapper();
+		String json = dd.toString();
+		String expected = IOUtils.toString(getClass().getResourceAsStream(
+				"design_doc.json"));
+		assertTrue(JSONComparator.areEqual(json, expected));
+	}
+
 	@Test
 	public void view_functions_with_line_breaks_should_serialze_just_fine() throws Exception {
 		dd.addView("by_lastname", new DesignDocument.View("function(doc)\n{ if (doc.Type == 'TestDoc') {\nemit(doc.LastName, doc)\n}\n}"));

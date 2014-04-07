@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Representation of a CouchDb design document.
@@ -26,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DesignDocument extends OpenCouchDbDocument {
 
     private static final long serialVersionUID = 727813829995624926L;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public final static String ID_PREFIX = "_design/";
     private final static String DEFAULT_LANGUAGE = "javascript";
@@ -238,20 +241,24 @@ public class DesignDocument extends OpenCouchDbDocument {
 
     @Override
 	public String toString() {
-		final int maxLen = 10;
-		return "DesignDocument ["
-				+ (views != null ? "views="
-						+ toString(views.entrySet(), maxLen) + ", " : "")
-				+ (lists != null ? "lists="
-						+ toString(lists.entrySet(), maxLen) + ", " : "")
-				+ (shows != null ? "shows="
-						+ toString(shows.entrySet(), maxLen) + ", " : "")
-				+ (updateHandlers != null ? "updateHandlers="
-						+ toString(updateHandlers.entrySet(), maxLen) + ", "
-						: "")
-				+ (language != null ? "language=" + language + ", " : "")
-				+ (filters != null ? "filters="
-						+ toString(filters.entrySet(), maxLen) : "") + "]";
+    	try {
+			return mapper.writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			final int maxLen = 10;
+			return "DesignDocument ["
+					+ (views != null ? "views="
+							+ toString(views.entrySet(), maxLen) + ", " : "")
+					+ (lists != null ? "lists="
+							+ toString(lists.entrySet(), maxLen) + ", " : "")
+					+ (shows != null ? "shows="
+							+ toString(shows.entrySet(), maxLen) + ", " : "")
+					+ (updateHandlers != null ? "updateHandlers="
+							+ toString(updateHandlers.entrySet(), maxLen) + ", "
+							: "")
+					+ (language != null ? "language=" + language + ", " : "")
+					+ (filters != null ? "filters="
+							+ toString(filters.entrySet(), maxLen) : "") + "]";
+		}
 	}
 
 	private String toString(Collection<?> collection, int maxLen) {
@@ -386,13 +393,17 @@ public class DesignDocument extends OpenCouchDbDocument {
 
 		@Override
 		public String toString() {
-			final int maxLen = 10;
-			return "View ["
-					+ (map != null ? "map=" + map + ", " : "")
-					+ (reduce != null ? "reduce=" + reduce + ", " : "")
-					+ (anonymous != null ? "anonymous="
-							+ toString(anonymous.entrySet(), maxLen) : "")
-					+ "]";
+	    	try {
+				return mapper.writeValueAsString(this);
+			} catch (JsonProcessingException e) {
+				final int maxLen = 10;
+				return "View ["
+						+ (map != null ? "map=" + map + ", " : "")
+						+ (reduce != null ? "reduce=" + reduce + ", " : "")
+						+ (anonymous != null ? "anonymous="
+								+ toString(anonymous.entrySet(), maxLen) : "")
+						+ "]";
+			}
 		}
 
 		private String toString(Collection<?> collection, int maxLen) {
