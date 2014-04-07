@@ -1,9 +1,10 @@
 package org.ektorp.support;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-
 
 import org.ektorp.util.Assert;
 
@@ -235,7 +236,39 @@ public class DesignDocument extends OpenCouchDbDocument {
         return Boolean.getBoolean(AUTO_UPDATE_VIEW_ON_CHANGE) || Boolean.getBoolean(UPDATE_ON_DIFF);
     }
 
-    /**
+    @Override
+	public String toString() {
+		final int maxLen = 10;
+		return "DesignDocument ["
+				+ (views != null ? "views="
+						+ toString(views.entrySet(), maxLen) + ", " : "")
+				+ (lists != null ? "lists="
+						+ toString(lists.entrySet(), maxLen) + ", " : "")
+				+ (shows != null ? "shows="
+						+ toString(shows.entrySet(), maxLen) + ", " : "")
+				+ (updateHandlers != null ? "updateHandlers="
+						+ toString(updateHandlers.entrySet(), maxLen) + ", "
+						: "")
+				+ (language != null ? "language=" + language + ", " : "")
+				+ (filters != null ? "filters="
+						+ toString(filters.entrySet(), maxLen) : "") + "]";
+	}
+
+	private String toString(Collection<?> collection, int maxLen) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		int i = 0;
+		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext()
+				&& i < maxLen; i++) {
+			if (i > 0)
+				builder.append(", ");
+			builder.append(iterator.next());
+		}
+		builder.append("]");
+		return builder.toString();
+	}
+
+	/**
      * Definition of a view in a design document.
      *
      * @author henrik lundgren
@@ -351,6 +384,31 @@ public class DesignDocument extends OpenCouchDbDocument {
             return true;
         }
 
+		@Override
+		public String toString() {
+			final int maxLen = 10;
+			return "View ["
+					+ (map != null ? "map=" + map + ", " : "")
+					+ (reduce != null ? "reduce=" + reduce + ", " : "")
+					+ (anonymous != null ? "anonymous="
+							+ toString(anonymous.entrySet(), maxLen) : "")
+					+ "]";
+		}
+
+		private String toString(Collection<?> collection, int maxLen) {
+			StringBuilder builder = new StringBuilder();
+			builder.append("[");
+			int i = 0;
+			for (Iterator<?> iterator = collection.iterator(); iterator
+					.hasNext() && i < maxLen; i++) {
+				if (i > 0)
+					builder.append(", ");
+				builder.append(iterator.next());
+			}
+			builder.append("]");
+			return builder.toString();
+		}
+        
     }
 
 }

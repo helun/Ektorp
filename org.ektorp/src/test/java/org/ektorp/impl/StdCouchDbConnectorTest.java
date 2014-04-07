@@ -1,11 +1,49 @@
 package org.ektorp.impl;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
+import static java.lang.String.format;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.commons.io.IOUtils;
-import org.ektorp.*;
+import org.ektorp.AttachmentInputStream;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.CouchDbInstance;
+import org.ektorp.DbInfo;
+import org.ektorp.DesignDocInfo;
+import org.ektorp.DocumentNotFoundException;
+import org.ektorp.Options;
+import org.ektorp.PurgeResult;
+import org.ektorp.ReplicationCommand;
+import org.ektorp.ReplicationStatus;
+import org.ektorp.Revision;
+import org.ektorp.UpdateConflictException;
+import org.ektorp.UpdateHandlerRequest;
+import org.ektorp.ViewQuery;
+import org.ektorp.ViewResult;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.support.CouchDbDocument;
@@ -19,19 +57,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.mockito.internal.verification.VerificationModeFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
-
-import static java.lang.String.format;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 public class StdCouchDbConnectorTest {
 
@@ -370,13 +399,35 @@ public class StdCouchDbConnectorTest {
     }
 
     @Test
-    public void queries_with_ignore_not_found() {
+    public void queries_with_ignore_not_found_using_get() {
         ViewQuery query = new ViewQuery()
                 .dbPath(TEST_DB_PATH)
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
                 .includeDocs(true)
                 .keys(Arrays.asList("doc_id0", "doc_id1", "doc_id2", "doc_id3", "doc_id4", "doc_id5", "doc_id6"));
+        query.setIgnoreNotFound(true);
+
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_ignored_docs.json")).when(httpClient).getUncached(anyString());
+
+        List<TestDoc> result = dbCon.queryView(query, TestDoc.class);
+
+        assertEquals(3, result.size());
+        assertEquals(TestDoc.class, result.get(0).getClass());
+        assertEquals("doc_id1", result.get(0).getId());
+        assertEquals("doc_id3", result.get(1).getId());
+        assertEquals("doc_id6", result.get(2).getId());
+        verify(httpClient).getUncached(query.buildQuery());
+    }
+
+    @Test
+    public void queries_with_ignore_not_found_using_post() {
+        ViewQuery query = new ViewQuery()
+                .dbPath(TEST_DB_PATH)
+                .designDocId("_design/testdoc")
+                .viewName("test_view")
+                .includeDocs(true)
+                .keysUsingPost(Arrays.asList("doc_id0", "doc_id1", "doc_id2", "doc_id3", "doc_id4", "doc_id5", "doc_id6"));
         query.setIgnoreNotFound(true);
 
         doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_ignored_docs.json")).when(httpClient).postUncached(anyString(), anyString());
@@ -392,7 +443,7 @@ public class StdCouchDbConnectorTest {
     }
 
     @Test
-    public void multiple_query_keys_should_be_posted() {
+    public void multiple_query_keys_should_use_get() {
         List<Object> keys = new ArrayList<Object>();
         keys.add("key1");
         keys.add("key2");
@@ -403,6 +454,24 @@ public class StdCouchDbConnectorTest {
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
                 .keys(keys);
+
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json")).when(httpClient).getUncached(anyString());
+        dbCon.queryView(query, TestDoc.class);
+        verify(httpClient).getUncached(query.buildQuery());
+    }
+
+    @Test
+    public void multiple_query_keys_should_be_posted_if_using_post() {
+        List<Object> keys = new ArrayList<Object>();
+        keys.add("key1");
+        keys.add("key2");
+        keys.add("key3");
+
+        ViewQuery query = new ViewQuery()
+                .dbPath(TEST_DB_PATH)
+                .designDocId("_design/testdoc")
+                .viewName("test_view")
+                .keysUsingPost(keys);
 
         doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json")).when(httpClient).postUncached(anyString(), anyString());
         dbCon.queryView(query, TestDoc.class);
@@ -410,7 +479,7 @@ public class StdCouchDbConnectorTest {
     }
 
     @Test
-    public void multiple_query_keys_should_be_posted_2() {
+    public void multiple_query_keys_should_use_get_2() {
         List<Object> keys = new ArrayList<Object>();
         keys.add("key1");
         keys.add("key2");
@@ -421,6 +490,24 @@ public class StdCouchDbConnectorTest {
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
                 .keys(keys);
+
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result.json")).when(httpClient).getUncached(anyString());
+        dbCon.queryView(query);
+        verify(httpClient).getUncached(query.buildQuery());
+    }
+
+    @Test
+    public void multiple_query_keys_should_be_posted_if_using_post_2() {
+        List<Object> keys = new ArrayList<Object>();
+        keys.add("key1");
+        keys.add("key2");
+        keys.add("key3");
+
+        ViewQuery query = new ViewQuery()
+                .dbPath(TEST_DB_PATH)
+                .designDocId("_design/testdoc")
+                .viewName("test_view")
+                .keysUsingPost(keys);
 
         doReturn(ResponseOnFileStub.newInstance(200, "view_result.json")).when(httpClient).postUncached(anyString(), anyString());
         dbCon.queryView(query);
