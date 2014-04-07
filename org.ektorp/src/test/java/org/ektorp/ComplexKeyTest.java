@@ -1,14 +1,15 @@
 package org.ektorp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
-import java.util.*;
+import java.util.Date;
+
+import org.ektorp.impl.StdObjectMapperFactory;
+import org.ektorp.util.RegexMatcher;
+import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ektorp.impl.*;
-import org.ektorp.util.*;
-import org.junit.*;
-
 
 public class ComplexKeyTest {
 	
@@ -21,6 +22,12 @@ public class ComplexKeyTest {
 	public void testToJson() throws Exception {
 		String json = mapper.writeValueAsString(ComplexKey.of(ComplexKey.emptyArray(), Integer.valueOf(2), "fooz", ComplexKey.emptyObject()));
 		assertEquals("[[],2,\"fooz\",{}]", json);
+	}
+	
+	@Test
+	public void testToString() throws Exception {
+		String str = ComplexKey.of(ComplexKey.emptyArray(), Integer.valueOf(2), "fooz", ComplexKey.emptyObject()).toString();
+		assertEquals("[[],2,\"fooz\",{}]", str);
 	}
 	
 	@Test

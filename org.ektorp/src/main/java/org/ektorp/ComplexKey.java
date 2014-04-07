@@ -1,9 +1,12 @@
 package org.ektorp;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 /**
  * Class for creating complex keys for view queries.
@@ -56,4 +59,19 @@ public class ComplexKey {
 		}
 		return key;
 	}
+	
+	@Override
+	public String toString() {
+		try {
+			return mapper.writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			final int maxLen = 10;
+			return "ComplexKey ["
+					+ (components != null ? "components="
+							+ components.subList(0,
+									Math.min(components.size(), maxLen)) : "")
+					+ "]";
+		}
+	}
+	
 }
