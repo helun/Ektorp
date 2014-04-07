@@ -46,7 +46,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<!-- required by apache httpclient -->
+			<!-- commons-logging API required by apache httpclient -->
 			<artifactId>jcl-over-slf4j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
