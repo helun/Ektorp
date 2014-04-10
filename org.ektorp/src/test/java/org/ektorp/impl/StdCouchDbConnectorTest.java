@@ -427,7 +427,8 @@ public class StdCouchDbConnectorTest {
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
                 .includeDocs(true)
-                .keysUsingPost(Arrays.asList("doc_id0", "doc_id1", "doc_id2", "doc_id3", "doc_id4", "doc_id5", "doc_id6"));
+                .keys(Arrays.asList("doc_id0", "doc_id1", "doc_id2", "doc_id3", "doc_id4", "doc_id5", "doc_id6"))
+                .usePostForMultipleKeys(true);
         query.setIgnoreNotFound(true);
 
         doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_ignored_docs.json")).when(httpClient).postUncached(anyString(), anyString());
@@ -461,6 +462,25 @@ public class StdCouchDbConnectorTest {
     }
 
     @Test
+    public void multiple_query_keys_should_be_posted_if_large() {
+        List<Object> keys = new ArrayList<Object>();
+        for (int i = 1; i <= 1000; i++) {
+        	keys.add("key" + i);
+        }
+
+        ViewQuery query = new ViewQuery()
+                .dbPath(TEST_DB_PATH)
+                .designDocId("_design/testdoc")
+                .viewName("test_view")
+                .keys(keys)
+                .usePostForMultipleKeys(false);
+
+        doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json")).when(httpClient).postUncached(anyString(), anyString());
+        dbCon.queryView(query, TestDoc.class);
+        verify(httpClient).postUncached(query.buildQuery(), query.getKeysAsJson());
+    }
+
+    @Test
     public void multiple_query_keys_should_be_posted_if_using_post() {
         List<Object> keys = new ArrayList<Object>();
         keys.add("key1");
@@ -471,7 +491,8 @@ public class StdCouchDbConnectorTest {
                 .dbPath(TEST_DB_PATH)
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
-                .keysUsingPost(keys);
+                .keys(keys)
+                .usePostForMultipleKeys(true);
 
         doReturn(ResponseOnFileStub.newInstance(200, "view_result_with_embedded_docs.json")).when(httpClient).postUncached(anyString(), anyString());
         dbCon.queryView(query, TestDoc.class);
@@ -507,7 +528,8 @@ public class StdCouchDbConnectorTest {
                 .dbPath(TEST_DB_PATH)
                 .designDocId("_design/testdoc")
                 .viewName("test_view")
-                .keysUsingPost(keys);
+                .keys(keys)
+                .usePostForMultipleKeys(true);
 
         doReturn(ResponseOnFileStub.newInstance(200, "view_result.json")).when(httpClient).postUncached(anyString(), anyString());
         dbCon.queryView(query);

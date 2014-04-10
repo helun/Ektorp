@@ -38,12 +38,13 @@ public class ViewQuery {
     private Object key;
     private Keys keys;
 	/**
-	 * If {@code true}, use {code POST} HTTP method for {@code keys}, otherwise {@code GET}. 
+	 * If {@code false}, use {@code GET} when URI fits in a HTTP request, otherwise use {@code POST}.
+	 * If {@code true}, force use {@code POST} HTTP method for {@code keys}. 
 	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
 	 * @see #keys(Collection)
-	 * @see #keysUsingPost(Collection)
+	 * @see #usePostForMultipleKeys(boolean)
 	 */
-	private boolean keysUsingPost = false;
+	private boolean usePostForMultipleKeys = false;
 	private Object startKey;
 	private String startDocId;
 	private Object endKey;
@@ -273,26 +274,23 @@ public class ViewQuery {
      * For multiple-key queries (as of CouchDB 0.9) using {@code GET} HTTP method. Keys will be JSON-encoded.
      * @param keyList a list of Object, will be JSON encoded according to each element's type.
      * @return the view query for chained calls
-     * @see #keysUsingPost(Collection)
+     * @see #usePostForMultipleKeys(Collection)
      * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
      */
     public ViewQuery keys(Collection<?> keyList) {
-    	keysUsingPost = false;
         reset();
         keys = Keys.of(keyList);
         return this;
     }
     /**
-     * For multiple-key queries (as of CouchDB 0.9) using {@code POST} HTTP method. Keys will be JSON-encoded.
-     * @param keyList a list of Object, will be JSON encoded according to each element's type.
-     * @return the view query for chained calls
-     * @see #keys(Collection)
-     * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
+     * Specify behavior when multiple {@link #keys(Collection)} is used:
+	 * <p>If {@code false}, use {@code GET} when URI fits in a HTTP request, otherwise use {@code POST} (which CouchDB 0.9+).
+	 * <p>If {@code true}, force use {@code POST} HTTP method for {@link #keys(Collection)} (requires CouchDB 0.9+). 
+	 * @see #keys(Collection)
+	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
      */
-    public ViewQuery keysUsingPost(Collection<?> keyList) {
-    	keysUsingPost = true;
-        reset();
-        keys = Keys.of(keyList);
+    public ViewQuery usePostForMultipleKeys(boolean usePostForMultipleKeys) {
+    	this.usePostForMultipleKeys = usePostForMultipleKeys;
         return this;
     }
 
@@ -584,13 +582,14 @@ public class ViewQuery {
     }
     
 	/**
-	 * If {@code true}, use {code POST} HTTP method for {@code keys}, otherwise {@code GET}. 
+	 * If {@code true}, force use {code POST} HTTP method for {@link #keys(Collection)},
+	 * otherwise auto ({@code GET} or {@code POST} depending on HTTP request size). 
 	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
 	 * @see #keys(Collection)
-	 * @see #keysUsingPost(Collection)
+	 * @see #usePostForMultipleKeys(Collection)
 	 */
-    public boolean isKeysUsingPost() {
-		return keysUsingPost;
+    public boolean isUsingPostForMultipleKeys() {
+		return usePostForMultipleKeys;
 	}
 
     /**
@@ -626,11 +625,12 @@ public class ViewQuery {
 	}
 
 	/**
-	 * If {@link #isKeysUsingPost()} is {@code true}, {@code #keys} will be omitted from the query string.
-	 * If {@link #isKeysUsingPost()} is {@code false}, {@code #keys} will be included in the query string.
+	 * Builds the HTTP query.
+	 * @param keysAsJsonArray If not {@code null} (typically from {@link #getKeysAsJsonArray()}),
+	 * 		it will be included as {@code keys} HTTP query parameter.
 	 * @return
 	 */
-	public String buildQuery() {
+	public String buildQuery(String keysAsJsonArray) {
 		if (cachedQuery != null) {
 			return cachedQuery;
 		}
@@ -641,8 +641,8 @@ public class ViewQuery {
 			query.param("key", jsonEncode(key));
 		}
 		
-		if (hasMultipleKeys() && !isKeysUsingPost()) {
-			query.param("keys", getKeysAsJsonArray());
+		if (keysAsJsonArray != null) {
+			query.param("keys", keysAsJsonArray);
 		}
 
 		if (isNotEmpty(startKey)) {
@@ -709,6 +709,14 @@ public class ViewQuery {
 		return cachedQuery;
 	}
 
+	/**
+	 * Builds the HTTP query without including {@link #keys(Collection)}).
+	 * @return
+	 */
+	public String buildQuery() {
+		return buildQuery(null);
+	}
+	
 	@Override
 	public ViewQuery clone() {
 		ViewQuery copy = new ViewQuery();
