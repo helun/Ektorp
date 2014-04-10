@@ -240,6 +240,8 @@ public class DesignDocument extends OpenCouchDbDocument {
 	@Override
 	public String toString() {
 		return "DesignDocument ["
+				+ "id=" + getId() + ", "
+				+ "_rev=" + getRevision() + ", "
 				+ (views != null ? "views=" + views + ", " : "")
 				+ (lists != null ? "lists=" + lists + ", " : "")
 				+ (shows != null ? "shows=" + shows + ", " : "")

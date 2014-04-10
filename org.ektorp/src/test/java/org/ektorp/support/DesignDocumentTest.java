@@ -11,6 +11,8 @@ import org.apache.commons.io.IOUtils;
 import org.ektorp.util.JSONComparator;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -20,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DesignDocumentTest {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(DesignDocumentTest.class);
 	DesignDocument dd = new DesignDocument("_design/TestDoc");
 
 	@Before
@@ -122,13 +126,17 @@ public class DesignDocumentTest {
 		assertSerialization(om);
 	}
 	
+	/**
+	 * @see {@code design_doc.json}
+	 * @throws IOException
+	 */
 	@Test
-	public void should_tostring_as_json() throws IOException {
-		ObjectMapper om = new ObjectMapper();
+	public void tostring_should_provide_info() throws IOException {
 		String json = dd.toString();
-		String expected = IOUtils.toString(getClass().getResourceAsStream(
-				"design_doc.json"));
-		assertTrue(JSONComparator.areEqual(json, expected));
+		log.debug("DesignDocument.toString: {}", json);
+		assertTrue(json.contains("_design/TestDoc"));
+		assertTrue(json.contains("12345"));
+		assertTrue(json.contains("function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }"));
 	}
 
 	@Test
