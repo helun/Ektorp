@@ -1,9 +1,7 @@
 package org.ektorp.support;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.ektorp.util.Assert;
@@ -13,8 +11,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Representation of a CouchDb design document.
@@ -28,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DesignDocument extends OpenCouchDbDocument {
 
     private static final long serialVersionUID = 727813829995624926L;
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     public final static String ID_PREFIX = "_design/";
     private final static String DEFAULT_LANGUAGE = "javascript";
@@ -238,41 +233,19 @@ public class DesignDocument extends OpenCouchDbDocument {
     private boolean updateOnDiff() {
         return Boolean.getBoolean(AUTO_UPDATE_VIEW_ON_CHANGE) || Boolean.getBoolean(UPDATE_ON_DIFF);
     }
-
-    @Override
+    
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
 	public String toString() {
-    	try {
-			return mapper.writeValueAsString(this);
-		} catch (JsonProcessingException e) {
-			final int maxLen = 10;
-			return "DesignDocument ["
-					+ (views != null ? "views="
-							+ toString(views.entrySet(), maxLen) + ", " : "")
-					+ (lists != null ? "lists="
-							+ toString(lists.entrySet(), maxLen) + ", " : "")
-					+ (shows != null ? "shows="
-							+ toString(shows.entrySet(), maxLen) + ", " : "")
-					+ (updateHandlers != null ? "updateHandlers="
-							+ toString(updateHandlers.entrySet(), maxLen) + ", "
-							: "")
-					+ (language != null ? "language=" + language + ", " : "")
-					+ (filters != null ? "filters="
-							+ toString(filters.entrySet(), maxLen) : "") + "]";
-		}
-	}
-
-	private String toString(Collection<?> collection, int maxLen) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("[");
-		int i = 0;
-		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext()
-				&& i < maxLen; i++) {
-			if (i > 0)
-				builder.append(", ");
-			builder.append(iterator.next());
-		}
-		builder.append("]");
-		return builder.toString();
+		return "DesignDocument ["
+				+ (views != null ? "views=" + views + ", " : "")
+				+ (lists != null ? "lists=" + lists + ", " : "")
+				+ (shows != null ? "shows=" + shows + ", " : "")
+				+ (updateHandlers != null ? "updateHandlers=" + updateHandlers + ", " : "")
+				+ (language != null ? "language=" + language + ", " : "")
+				+ (filters != null ? "filters=" + filters : "") + "]";
 	}
 
 	/**
@@ -391,35 +364,16 @@ public class DesignDocument extends OpenCouchDbDocument {
             return true;
         }
 
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
 		@Override
 		public String toString() {
-	    	try {
-				return mapper.writeValueAsString(this);
-			} catch (JsonProcessingException e) {
-				final int maxLen = 10;
-				return "View ["
-						+ (map != null ? "map=" + map + ", " : "")
-						+ (reduce != null ? "reduce=" + reduce + ", " : "")
-						+ (anonymous != null ? "anonymous="
-								+ toString(anonymous.entrySet(), maxLen) : "")
-						+ "]";
-			}
+			return "View [" + (map != null ? "map=" + map + ", " : "")
+					+ (reduce != null ? "reduce=" + reduce + ", " : "")
+					+ (anonymous != null ? "anonymous=" + anonymous : "") + "]";
 		}
 
-		private String toString(Collection<?> collection, int maxLen) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("[");
-			int i = 0;
-			for (Iterator<?> iterator = collection.iterator(); iterator
-					.hasNext() && i < maxLen; i++) {
-				if (i > 0)
-					builder.append(", ");
-				builder.append(iterator.next());
-			}
-			builder.append("]");
-			return builder.toString();
-		}
-        
     }
 
 }
