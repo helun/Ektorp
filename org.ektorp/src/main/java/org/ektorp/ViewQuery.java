@@ -271,7 +271,8 @@ public class ViewQuery {
 		return this;
 	}
     /**
-     * For multiple-key queries (as of CouchDB 0.9) using {@code GET} HTTP method. Keys will be JSON-encoded.
+     * For multiple-key queries (as of CouchDB 0.9), the HTTP method is determined by {@link #usePostForMultipleKeys(boolean)}
+     * (the default is to use {@code GET} when HTTP request fits, otherwise {@code POST}). Keys will be JSON-encoded.
      * @param keyList a list of Object, will be JSON encoded according to each element's type.
      * @return the view query for chained calls
      * @see #usePostForMultipleKeys(Collection)
@@ -284,7 +285,7 @@ public class ViewQuery {
     }
     /**
      * Specify behavior when multiple {@link #keys(Collection)} is used:
-	 * <p>If {@code false}, use {@code GET} when URI fits in a HTTP request, otherwise use {@code POST} (which CouchDB 0.9+).
+	 * <p>If {@code false} (default), use {@code GET} when URI fits in a HTTP request, otherwise use {@code POST} (which CouchDB 0.9+).
 	 * <p>If {@code true}, force use {@code POST} HTTP method for {@link #keys(Collection)} (requires CouchDB 0.9+). 
 	 * @see #keys(Collection)
 	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
