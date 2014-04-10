@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.*;
 import org.junit.*;
 import org.mockito.*;
+import org.mockito.internal.stubbing.answers.ThrowsException;
 
 public class CouchDbRepositorySupportTest {
 
@@ -18,29 +19,32 @@ public class CouchDbRepositorySupportTest {
 
 	@Before
 	public void setUp() throws Exception {
-		db = mock(CouchDbConnector.class);
+		db = mock(CouchDbConnector.class, new ThrowsException(new UnsupportedOperationException("This interaction was not expected on this mock")));
+        doNothing().when(db).createDatabaseIfNotExists();
 		repo = new CouchDbRepositorySupport<TestDoc>(TestDoc.class, db);
 	}
 
 	private void setupDesignDoc() throws Exception {
-		when(db.contains("_design/TestDoc")).thenReturn(Boolean.TRUE);
+		doReturn(Boolean.TRUE).when(db).contains("_design/TestDoc");
 		ObjectMapper om = new ObjectMapper();
 		DesignDocument dd = om.readValue(getClass().getResourceAsStream("design_doc.json"), DesignDocument.class);
-		when(db.get(DesignDocument.class, "_design/TestDoc")).thenReturn(dd);
+		doReturn(dd).when(db).get(DesignDocument.class, "_design/TestDoc");
 	}
 
 	@Test
 	public void add_should_create_a_doc_in_db() {
 		TestDoc t = new TestDoc("id", "f");
+        doNothing().when(db).create(t);
 		repo.add(t);
-		verify(db).create(t);
+		verify(db).create(eq(t));
 	}
 
 	@Test
 	public void add_should_accept_doc_with_no_id_set() {
 		TestDoc t = new TestDoc("f");
+        doNothing().when(db).create(t);
 		repo.add(t);
-		verify(db).create(t);
+		verify(db).create(eq(t));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -59,7 +63,8 @@ public class CouchDbRepositorySupportTest {
 		queryResult.add(new TestDoc("id2", "f"));
 		queryResult.add(new TestDoc("id3", "f"));
 
-		when(db.queryView(any(ViewQuery.class), eq(TestDoc.class))).thenReturn(queryResult);
+		doReturn(queryResult).when(db).queryView(any(ViewQuery.class), eq(TestDoc.class));
+        doReturn(null).when(db).path();
 
 		List<TestDoc> all = repo.getAll();
 		assertEquals(3, all.size());
@@ -87,55 +92,62 @@ public class CouchDbRepositorySupportTest {
 		allIds.add("id3");
 		allIds.add("_design/TestDoc");
 
-		when(db.getAllDocIds()).thenReturn(allIds);
-		when(db.get(TestDoc.class, "id1")).thenReturn(new TestDoc("id", "f"));
-		when(db.get(TestDoc.class, "id2")).thenReturn(new TestDoc("id2", "f"));
-		when(db.get(TestDoc.class, "id3")).thenReturn(new TestDoc("id3", "f"));
+		doReturn(allIds).when(db).getAllDocIds();
+		doReturn(new TestDoc("id", "f")).when(db).get(TestDoc.class, "id1");
+		doReturn(new TestDoc("id2", "f")).when(db).get(TestDoc.class, "id2");
+		doReturn(new TestDoc("id3", "f")).when(db).get(TestDoc.class, "id3");
+        doReturn(false).when(db).contains("_design/TestDoc");
 
 		List<TestDoc> all = repo.getAll();
 		assertEquals(3, all.size());
+        verify(db).contains(eq("_design/TestDoc"));
 	}
 
 	@Test
 	public void get_should_load_doc_from_db() {
-		when(db.get(TestDoc.class, "docid")).thenReturn(new TestDoc("docid", "f"));
+		doReturn(new TestDoc("docid", "f")).when(db).get(TestDoc.class, "docid");
 		TestDoc td = repo.get("docid");
 		assertNotNull(td);
 	}
 
 	@Test
 	public void remove_should_delete_doc_in_db() {
+        doReturn(null).when(db).delete("docid", "rev");
+
 		TestDoc td = new TestDoc("docid", "f");
 		td.setRevision("rev");
 		repo.remove(td);
-		verify(db).delete("docid", "rev");
+		verify(db).delete(eq("docid"), eq("rev"));
 	}
 
 	@Test
 	public void update_should_update_db() {
-		TestDoc td = new TestDoc("docid", "f");
+        TestDoc td = new TestDoc("docid", "f");
+        doNothing().when(db).update(td);
 		repo.update(td);
-		verify(db).update(td);
+		verify(db).update(eq(td));
 	}
 
 	@Test
 	public void contains_should_return_true_when_doc_exists() {
-		when(db.contains("doc_id")).thenReturn(Boolean.TRUE);
+		doReturn(Boolean.TRUE).when(db).contains("doc_id");
 		assertTrue(repo.contains("doc_id"));
 	}
 
 	@Test
 	public void contains_should_return_false_when_doc_does_not_exists() {
 		List<Revision> revs = Collections.emptyList();
-		when(db.getRevisions("doc_id")).thenReturn(revs);
+		doReturn(revs).when(db).getRevisions("doc_id");
+        doReturn(false).when(db).contains("doc_id");
 		assertFalse(repo.contains("doc_id"));
 	}
 
 	@Test
 	public void initStandardDesignDocument_should_update_db_when_view_is_added() {
 		DesignDocument dd = new DesignDocument("_design/TestDoc");
-		when(db.contains(dd.getId())).thenReturn(Boolean.TRUE);
-		when(db.get(DesignDocument.class, dd.getId())).thenReturn(dd);
+		doReturn(Boolean.TRUE).when(db).contains(dd.getId());
+		doReturn(dd).when(db).get(DesignDocument.class, dd.getId());
+        doNothing().when(db).update(dd);
 
 		TestRepo repo = new TestRepo(db);
 		repo.initStandardDesignDocument();
@@ -148,7 +160,8 @@ public class CouchDbRepositorySupportTest {
 	@Test
 	public void initStandardDesignDocument_should_create_designDoc_if_none_exists() {
 
-		when(db.contains("_design/TestDoc")).thenReturn(Boolean.FALSE);
+		doReturn(Boolean.FALSE).when(db).contains("_design/TestDoc");
+        doNothing().when(db).update(any(DesignDocument.class));
 
 		TestRepo repo = new TestRepo(db);
 		repo.initStandardDesignDocument();
@@ -162,13 +175,21 @@ public class CouchDbRepositorySupportTest {
 	@Test
 	public void given_view_already_exists_then_it_should_be_preserved() {
 		DesignDocument dd = new DesignDocument("_design/TestDoc");
+        final String ddId = dd.getId();
 		DesignDocument.View existing = new DesignDocument.View("function(doc) {my map function}");
 		dd.addView("by_field", existing);
-		when(db.contains(dd.getId())).thenReturn(Boolean.TRUE);
-		when(db.get(DesignDocument.class, dd.getId())).thenReturn(dd);
+        assertSame(existing, dd.get("by_field"));
+
+        doReturn(Boolean.TRUE).when(db).contains(ddId);
+		doReturn(dd).when(db).get(DesignDocument.class, ddId);
+        doNothing().when(db).update(dd);
 
 		TestRepo repo = new TestRepo(db);
 		repo.initStandardDesignDocument();
+
+        verify(db).contains(ddId);
+        verify(db).get(DesignDocument.class, ddId);
+        verify(db).update(dd);
 
 		assertSame(existing, dd.get("by_field"));
 	}
@@ -184,8 +205,8 @@ public class CouchDbRepositorySupportTest {
 		updated.setRevision("second");
 		updated.addView("by_field", existing);
 
-		when(db.contains(conflicting.getId())).thenReturn(Boolean.TRUE);
-		when(db.get(DesignDocument.class, conflicting.getId())).thenReturn(conflicting, updated);
+		doReturn(Boolean.TRUE).when(db).contains(conflicting.getId());
+		doReturn(conflicting).doReturn(updated).when(db).get(DesignDocument.class, conflicting.getId());
 
 		doThrow(new UpdateConflictException())
 				.doNothing()
@@ -209,11 +230,18 @@ public class CouchDbRepositorySupportTest {
 		DesignDocument dd = new DesignDocument("_design/TestDoc");
 		DesignDocument.View existing = new DesignDocument.View("function(doc) {not same}");
 		dd.addView("example_view", existing);
-		when(db.contains(dd.getId())).thenReturn(Boolean.TRUE);
-		when(db.get(DesignDocument.class, dd.getId())).thenReturn(dd);
+        assertSame(existing, dd.get("example_view"));
+
+		doReturn(Boolean.TRUE).when(db).contains(dd.getId());
+		doReturn(dd).when(db).get(DesignDocument.class, dd.getId());
+        doNothing().when(db).update(dd);
 
 		TestRepo repo = new TestRepo(db);
 		repo.initStandardDesignDocument();
+
+        verify(db).contains(dd.getId());
+        verify(db).get(DesignDocument.class, dd.getId());
+        verify(db).update(dd);
 
 		assertNotSame(existing, dd.get("example_view"));
 	}
