@@ -580,6 +580,13 @@ public class ViewQuery {
 			return cachedQuery;
 		}
 
+        URI query = buildQueryURI();
+
+		cachedQuery = query.toString();
+		return cachedQuery;
+	}
+
+    public URI buildQueryURI() {
 		URI query = buildViewPath();
 
 		if (isNotEmpty(key)) {
@@ -645,9 +652,7 @@ public class ViewQuery {
 		if(updateSeq) {
 			query.param("update_seq", "true");
 		}
-
-		cachedQuery = query.toString();
-		return cachedQuery;
+		return query;
 	}
 
 	public ViewQuery clone() {
