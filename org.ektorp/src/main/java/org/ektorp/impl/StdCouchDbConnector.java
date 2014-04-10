@@ -10,10 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
@@ -38,7 +34,13 @@ import org.ektorp.ViewResult;
 import org.ektorp.changes.ChangesCommand;
 import org.ektorp.changes.ChangesFeed;
 import org.ektorp.changes.DocumentChange;
-import org.ektorp.http.*;
+import org.ektorp.http.HttpClient;
+import org.ektorp.http.HttpResponse;
+import org.ektorp.http.HttpStatus;
+import org.ektorp.http.ResponseCallback;
+import org.ektorp.http.RestTemplate;
+import org.ektorp.http.StdResponseHandler;
+import org.ektorp.http.URI;
 import org.ektorp.impl.changes.ContinuousChangesFeed;
 import org.ektorp.impl.changes.StdDocumentChange;
 import org.ektorp.util.Assert;
@@ -46,6 +48,10 @@ import org.ektorp.util.Documents;
 import org.ektorp.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -57,6 +63,12 @@ public class StdCouchDbConnector implements CouchDbConnector {
     private static final int DEFAULT_HEARTBEAT_INTERVAL = 9000;
     private static final Logger LOG = LoggerFactory
             .getLogger(StdCouchDbConnector.class);
+    /**
+     * Maximum length of {@link ViewQuery#getKeysAsJsonArray()} for a
+     * {@code GET} HTTP request in {@link #executeQuery(ViewQuery, ResponseCallback)},
+     * otherwise uses {@code POST}. 
+     */
+    private static final int MAX_KEYS_LENGTH_FOR_GET = 3000; 
     private static final ResponseCallback<Void> VOID_RESPONSE_HANDLER = new StdResponseHandler<Void>();
     protected final ObjectMapper objectMapper;
     private JsonSerializer jsonSerializer;
@@ -422,11 +434,23 @@ public class StdCouchDbConnector implements CouchDbConnector {
 		LOG.debug("Querying CouchDb view at {}.", query);
 		T result;
 		if (!query.isCacheOk()) {
-			result = query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(), query.getKeysAsJson(), rh)
-					: restTemplate.getUncached(query.buildQuery(), rh);
+			if (query.hasMultipleKeys()) {
+				final String keysAsJsonArray = query.getKeysAsJsonArray();
+				result = query.isUsingPostForMultipleKeys() || keysAsJsonArray.length() > MAX_KEYS_LENGTH_FOR_GET
+						? restTemplate.postUncached(query.buildQuery(), "{\"keys\":" + keysAsJsonArray + "}", rh)
+						: restTemplate.getUncached(query.buildQuery(keysAsJsonArray), rh);
+			} else {
+				result = restTemplate.getUncached(query.buildQuery(), rh);
+			}
 		} else {
-			result = query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(), query.getKeysAsJson(), rh)
-					: restTemplate.get(query.buildQuery(), rh);
+			if (query.hasMultipleKeys()) {
+				final String keysAsJsonArray = query.getKeysAsJsonArray();
+				result = query.isUsingPostForMultipleKeys() || keysAsJsonArray.length() > MAX_KEYS_LENGTH_FOR_GET
+						? restTemplate.post(query.buildQuery(), "{\"keys\":" + keysAsJsonArray + "}", rh)
+						: restTemplate.get(query.buildQuery(keysAsJsonArray), rh);
+			} else {
+				result = restTemplate.get(query.buildQuery(), rh);
+			}
 		}
 		LOG.debug("Answer from view query: {}.", result);
 		return result;

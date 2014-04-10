@@ -1,20 +1,29 @@
 package org.ektorp.support;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.*;
+import java.io.IOException;
 
-import org.apache.commons.io.*;
+import org.apache.commons.io.IOUtils;
+import org.ektorp.util.JSONComparator;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ektorp.util.*;
-import org.junit.*;
 
 public class DesignDocumentTest {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(DesignDocumentTest.class);
 	DesignDocument dd = new DesignDocument("_design/TestDoc");
 
 	@Before
@@ -117,6 +126,19 @@ public class DesignDocumentTest {
 		assertSerialization(om);
 	}
 	
+	/**
+	 * @see {@code design_doc.json}
+	 * @throws IOException
+	 */
+	@Test
+	public void tostring_should_provide_info() throws IOException {
+		String json = dd.toString();
+		log.debug("DesignDocument.toString: {}", json);
+		assertTrue(json.contains("_design/TestDoc"));
+		assertTrue(json.contains("12345"));
+		assertTrue(json.contains("function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }"));
+	}
+
 	@Test
 	public void view_functions_with_line_breaks_should_serialze_just_fine() throws Exception {
 		dd.addView("by_lastname", new DesignDocument.View("function(doc)\n{ if (doc.Type == 'TestDoc') {\nemit(doc.LastName, doc)\n}\n}"));

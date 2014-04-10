@@ -7,14 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.ektorp.http.URI;
 import org.ektorp.impl.StdObjectMapperFactory;
 import org.ektorp.util.Assert;
 import org.ektorp.util.Exceptions;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  *
@@ -36,6 +37,14 @@ public class ViewQuery {
 	private String viewName;
     private Object key;
     private Keys keys;
+	/**
+	 * If {@code false}, use {@code GET} when URI fits in a HTTP request, otherwise use {@code POST}.
+	 * If {@code true}, force use {@code POST} HTTP method for {@code keys}. 
+	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
+	 * @see #keys(Collection)
+	 * @see #usePostForMultipleKeys(boolean)
+	 */
+	private boolean usePostForMultipleKeys = false;
 	private Object startKey;
 	private String startDocId;
 	private Object endKey;
@@ -262,13 +271,27 @@ public class ViewQuery {
 		return this;
 	}
     /**
-     * For multiple-key queries (as of CouchDB 0.9). Keys will be JSON-encoded.
+     * For multiple-key queries (as of CouchDB 0.9), the HTTP method is determined by {@link #usePostForMultipleKeys(boolean)}
+     * (the default is to use {@code GET} when HTTP request fits, otherwise {@code POST}). Keys will be JSON-encoded.
      * @param keyList a list of Object, will be JSON encoded according to each element's type.
      * @return the view query for chained calls
+     * @see #usePostForMultipleKeys(Collection)
+     * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
      */
     public ViewQuery keys(Collection<?> keyList) {
         reset();
         keys = Keys.of(keyList);
+        return this;
+    }
+    /**
+     * Specify behavior when multiple {@link #keys(Collection)} is used:
+	 * <p>If {@code false} (default), use {@code GET} when URI fits in a HTTP request, otherwise use {@code POST} (which CouchDB 0.9+).
+	 * <p>If {@code true}, force use {@code POST} HTTP method for {@link #keys(Collection)} (requires CouchDB 0.9+). 
+	 * @see #keys(Collection)
+	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
+     */
+    public ViewQuery usePostForMultipleKeys(boolean usePostForMultipleKeys) {
+    	this.usePostForMultipleKeys = usePostForMultipleKeys;
         return this;
     }
 
@@ -558,7 +581,23 @@ public class ViewQuery {
     public boolean hasMultipleKeys() {
     	return keys != null;
     }
+    
+	/**
+	 * If {@code true}, force use {code POST} HTTP method for {@link #keys(Collection)},
+	 * otherwise auto ({@code GET} or {@code POST} depending on HTTP request size). 
+	 * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
+	 * @see #keys(Collection)
+	 * @see #usePostForMultipleKeys(Collection)
+	 */
+    public boolean isUsingPostForMultipleKeys() {
+		return usePostForMultipleKeys;
+	}
 
+    /**
+     * Get {@link #keys} as JSON object.
+     * @return
+     * @see #getKeysAsJsonArray()
+     */
     public String getKeysAsJson() {
     	if (keys == null) {
     		return "{\"keys\":[]}";
@@ -566,6 +605,17 @@ public class ViewQuery {
         return keys.toJson(mapper);
     }
 
+    /**
+     * Get {@link #keys} as JSON array.
+     * @return
+     * @see #getKeysAsJson()
+     */
+    public String getKeysAsJsonArray() {
+    	if (keys == null) {
+    		return "[]";
+    	}
+        return keys.toJsonArray(mapper);
+    }
 
     public Object getStartKey() {
 		return startKey;
@@ -575,7 +625,13 @@ public class ViewQuery {
 		return endKey;
 	}
 
-	public String buildQuery() {
+	/**
+	 * Builds the HTTP query.
+	 * @param keysAsJsonArray If not {@code null} (typically from {@link #getKeysAsJsonArray()}),
+	 * 		it will be included as {@code keys} HTTP query parameter.
+	 * @return
+	 */
+	public String buildQuery(String keysAsJsonArray) {
 		if (cachedQuery != null) {
 			return cachedQuery;
 		}
@@ -584,6 +640,10 @@ public class ViewQuery {
 
 		if (isNotEmpty(key)) {
 			query.param("key", jsonEncode(key));
+		}
+		
+		if (keysAsJsonArray != null) {
+			query.param("keys", keysAsJsonArray);
 		}
 
 		if (isNotEmpty(startKey)) {
@@ -650,6 +710,15 @@ public class ViewQuery {
 		return cachedQuery;
 	}
 
+	/**
+	 * Builds the HTTP query without including {@link #keys(Collection)}).
+	 * @return
+	 */
+	public String buildQuery() {
+		return buildQuery(null);
+	}
+	
+	@Override
 	public ViewQuery clone() {
 		ViewQuery copy = new ViewQuery();
 		copy.mapper = mapper;
@@ -886,6 +955,7 @@ public class ViewQuery {
 			this.keys = Arrays.asList(keys);
 		}
 		
+		@Override
 		public Keys clone() {
 			return new Keys(keys);
 		}
@@ -906,6 +976,19 @@ public class ViewQuery {
 				throw Exceptions.propagate(e);
 			}
 		}
+
+		public String toJsonArray(ObjectMapper mapper) {
+			ArrayNode keysNode = mapper.createArrayNode();
+			for (Object key : keys) {
+				keysNode.addPOJO(key);
+			}
+			try {
+				return mapper.writeValueAsString(keysNode);
+			} catch (Exception e) {
+				throw Exceptions.propagate(e);
+			}
+		}
+
 	}
 
 

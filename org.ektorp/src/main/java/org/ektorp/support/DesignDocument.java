@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import org.ektorp.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -234,8 +233,24 @@ public class DesignDocument extends OpenCouchDbDocument {
     private boolean updateOnDiff() {
         return Boolean.getBoolean(AUTO_UPDATE_VIEW_ON_CHANGE) || Boolean.getBoolean(UPDATE_ON_DIFF);
     }
+    
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "DesignDocument ["
+				+ "id=" + getId() + ", "
+				+ "_rev=" + getRevision() + ", "
+				+ (views != null ? "views=" + views + ", " : "")
+				+ (lists != null ? "lists=" + lists + ", " : "")
+				+ (shows != null ? "shows=" + shows + ", " : "")
+				+ (updateHandlers != null ? "updateHandlers=" + updateHandlers + ", " : "")
+				+ (language != null ? "language=" + language + ", " : "")
+				+ (filters != null ? "filters=" + filters : "") + "]";
+	}
 
-    /**
+	/**
      * Definition of a view in a design document.
      *
      * @author henrik lundgren
@@ -350,6 +365,16 @@ public class DesignDocument extends OpenCouchDbDocument {
             	return false;
             return true;
         }
+
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "View [" + (map != null ? "map=" + map + ", " : "")
+					+ (reduce != null ? "reduce=" + reduce + ", " : "")
+					+ (anonymous != null ? "anonymous=" + anonymous : "") + "]";
+		}
 
     }
 
