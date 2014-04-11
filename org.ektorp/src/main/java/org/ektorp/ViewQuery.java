@@ -3,6 +3,7 @@ package org.ektorp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -270,6 +271,14 @@ public class ViewQuery {
         reset();
         keys = Keys.of(keyList);
         return this;
+    }
+
+    public Keys getKeys() {
+        return keys;
+    }
+
+    public Collection<?> getKeysValues() {
+        return keys.getValues();
     }
 
 	/**
@@ -889,6 +898,10 @@ public class ViewQuery {
 
 		private Keys(Object[] keys) {
 			this.keys = Arrays.asList(keys);
+		}
+
+        public List<?> getValues() {
+            return Collections.unmodifiableList(keys);
 		}
 		
 		public Keys clone() {
