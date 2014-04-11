@@ -25,6 +25,8 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	private int totalRows = -1;
 	private int offset = -1;
 	private String updateSeq;
+
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SE_BAD_FIELD")
 	private List<Row> rows;
 
 	public ViewResult(JsonNode resultNode, boolean ignoreNotFound) {

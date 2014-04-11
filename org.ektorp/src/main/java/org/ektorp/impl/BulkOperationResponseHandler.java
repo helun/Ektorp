@@ -33,6 +33,7 @@ public class BulkOperationResponseHandler extends StdResponseHandler<List<Docume
 	}
 
 	@Override
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SF_SWITCH_NO_DEFAULT")
 	public List<DocumentOperationResult> success(HttpResponse hr)
 			throws Exception {
 		JsonParser jp = objectMapper.getFactory().createParser(hr.getContent());

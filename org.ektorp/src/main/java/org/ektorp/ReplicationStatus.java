@@ -27,9 +27,11 @@ public class ReplicationStatus implements Serializable {
 	String sessionId;
 
 	@JsonProperty("source_last_seq")
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SE_BAD_FIELD")
 	JsonNode sourceLastSequence;
 
 	@JsonProperty("history")
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SE_BAD_FIELD")
 	List<History> history;
 
 	private Map<String, Object> unknownFields;
