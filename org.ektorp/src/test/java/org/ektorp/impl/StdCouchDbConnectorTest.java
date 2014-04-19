@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.ektorp.*;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
@@ -19,9 +21,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.mockito.internal.verification.VerificationModeFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import static java.lang.String.format;
@@ -59,7 +60,7 @@ public class StdCouchDbConnectorTest {
     }
 
     @Test
-    public void testCreate() {
+    public void testCreate() throws IOException {
         td.setId("some_id");
         setupNegativeContains(td.getId());
         doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
@@ -68,7 +69,7 @@ public class StdCouchDbConnectorTest {
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
         assertEquals("some_id", td.getId());
         assertEquals("123D123", td.getRevision());
-        assertEqualJson("create.json", ac.getValue());
+        assertEqualJson("create.json", Charset.forName("UTF-8"), ac.getValue());
     }
 
     @Test
@@ -114,7 +115,7 @@ public class StdCouchDbConnectorTest {
     }
 
     @Test
-    public void save_document_with_utf8_charset() {
+    public void save_document_with_utf8_charset() throws IOException {
         td.setId("some_id");
         td.name = "Örjan Åäö";
         setupNegativeContains(td.getId());
@@ -122,18 +123,30 @@ public class StdCouchDbConnectorTest {
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
-        assertEqualJson("charset.json", ac.getValue());
+        assertEqualJson("charset.json", Charset.forName("UTF-8"), ac.getValue());
     }
 
     @Test
-    public void create_should_post_if_id_is_missing() {
+    public void save_document_with_ISO_8859_1_charset() throws IOException {
+        td.setId("some_id");
+        td.name = "Örjan Åäö";
+        setupNegativeContains(td.getId());
+        doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
+        dbCon.create(td);
+        ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
+        verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
+        assertEqualJson("charset-ISO-8859-1.json", Charset.forName("ISO-8859-1"), ac.getValue());
+    }
+
+    @Test
+    public void create_should_post_if_id_is_missing() throws IOException {
         doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).post(anyString(), anyString());
         dbCon.create(td);
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).post(eq(TEST_DB_PATH), ac.capture());
         assertEquals("some_id", td.getId());
         assertEquals("123D123", td.getRevision());
-        assertEqualJson("create_with_no_id.json", ac.getValue());
+        assertEqualJson("create_with_no_id.json", Charset.forName("UTF-8"), ac.getValue());
     }
 
     @Test
@@ -193,7 +206,7 @@ public class StdCouchDbConnectorTest {
     }
 
     @Test
-    public void update() {
+    public void update() throws IOException {
         td.setId("some_id");
         td.setRevision("123D123");
         doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
@@ -202,7 +215,7 @@ public class StdCouchDbConnectorTest {
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
         assertEquals("some_id", td.getId());
         assertEquals("123D123", td.getRevision());
-        assertEqualJson("update.json", ac.getValue());
+        assertEqualJson("update.json", Charset.forName("UTF-8"), ac.getValue());
     }
 
     @Test(expected = UpdateConflictException.class)
@@ -466,7 +479,7 @@ public class StdCouchDbConnectorTest {
     }
 
     @Test
-    public void dates_should_be_serialized_in_ISO_8601_format() {
+    public void dates_should_be_serialized_in_ISO_8601_format() throws IOException {
         setupNegativeContains("some_id");
         doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
 
@@ -483,7 +496,7 @@ public class StdCouchDbConnectorTest {
         ArgumentCaptor<String> ac = ArgumentCaptor.forClass(String.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
         String json = ac.getValue();
-        assertEqualJson("dates.json", json);
+        assertEqualJson("dates.json", Charset.forName("UTF-8"), json);
 
         doReturn(HttpResponseStub.valueOf(201, json)).when(httpClient).get("/test_db/some_id");
 
@@ -835,25 +848,30 @@ public class StdCouchDbConnectorTest {
         }
     }
 
-    protected void assertEqualJson(String expectedFileName, String actual) {
-        String facit = getString(expectedFileName);
-        assertTrue(format("expected: %s was: %s", facit, actual), JSONComparator.areEqual(facit, actual));
+    protected void assertEqualJson(String expectedFileName, Charset expectedFileCharset, String actual) {
+        Reader expectedReader = new InputStreamReader(getClass().getResourceAsStream(expectedFileName), expectedFileCharset);
+        Reader actualReader = new StringReader(actual);
+        assertTrue(format("expected: %s was: %s", getString(expectedFileName, expectedFileCharset), actual), JSONComparator.areEqual(expectedReader, actualReader));
     }
 
-    protected void assertEqualJson(String expectedFileName, byte[] actual) {
-        byte[] facit = getBytes(expectedFileName);
-        assertTrue(format("expected: %s was: %s", facit, actual), JSONComparator.areEqual(facit, actual));
+    protected void assertEqualJson(String expectedFileName, Charset expectedFileCharset, byte[] actual) throws IOException {
+        Reader expectedReader = new InputStreamReader(getClass().getResourceAsStream(expectedFileName), expectedFileCharset);
+        Reader actualReader = new InputStreamReader(new ByteArrayInputStream(actual), Charset.forName("UTF-8"));
+        assertTrue(format("expected: %s was: %s", FileUtils.readFileToString(new File(getClass().getResource(expectedFileName).getFile()), expectedFileCharset.name()), actual), JSONComparator.areEqual(expectedReader, actualReader));
     }
 
 
-    protected String getString(String resourceName) {
+    protected String getString(String resourceName, Charset charset) {
         InputStream inputStream = null;
+        Reader reader = null;
         try {
             inputStream = getClass().getResourceAsStream(resourceName);
-            return IOUtils.toString(inputStream, "UTF-8");
+            reader = new InputStreamReader(inputStream, charset);
+            return IOUtils.toString(reader);
         } catch (IOException e) {
             throw Exceptions.propagate(e);
         } finally {
+            IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(inputStream);
         }
     }
