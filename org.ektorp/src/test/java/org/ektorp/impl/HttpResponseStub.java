@@ -1,29 +1,34 @@
 package org.ektorp.impl;
 
 import java.io.*;
+import java.nio.charset.Charset;
 
+import org.apache.commons.io.input.ReaderInputStream;
 import org.ektorp.http.*;
 
 public class HttpResponseStub implements HttpResponse {
 
-	int code;
-	String body;
-	
-	HttpResponseStub(int code, String body) {
+    public static HttpResponse valueOf(int code, String body) {
+        return new HttpResponseStub(code, body);
+    }
+
+    private final int code;
+
+    private final String body;
+
+    private final Charset charset = Charset.forName("UTF-8");
+
+    HttpResponseStub(int code, String body) {
 		this.code = code;
 		this.body = body;
 	}
-	
-	public static HttpResponse valueOf(int code, String body) {
-		return new HttpResponseStub(code, body);
-	}
-	
+
 	public int getCode() {
 		return code;
 	}
 
 	public InputStream getContent() {
-		return new ByteArrayInputStream(body.getBytes());
+		return new ReaderInputStream(new StringReader(body), charset);
 	}
 
 	public String getETag() {
