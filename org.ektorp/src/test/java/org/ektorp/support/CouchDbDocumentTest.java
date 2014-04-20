@@ -3,7 +3,10 @@ package org.ektorp.support;
 import static org.junit.Assert.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.junit.*;
+
+import java.io.InputStream;
 
 public class CouchDbDocumentTest {
 
@@ -11,7 +14,14 @@ public class CouchDbDocumentTest {
 
 	@Test
 	public void loadBasicDoc() throws Exception {
-		TestDoc td = mapper.readValue(getClass().getResourceAsStream("basic_doc.json"), TestDoc.class);
+        TestDoc td;
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = getClass().getResourceAsStream("basic_doc.json");
+            td = mapper.readValue(resourceAsStream, TestDoc.class);
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
 		assertNotNull(td);
 		assertEquals("some_id", td.getId());
 		assertEquals("3-a1a9b39ee3cc39181b796a69cb48521c", td.getRevision());

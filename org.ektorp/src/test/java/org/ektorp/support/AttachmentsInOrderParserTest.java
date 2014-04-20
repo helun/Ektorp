@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,10 +36,15 @@ public class AttachmentsInOrderParserTest
     @Before
     public void setUp() throws IOException
     {
-        InputStream attachmentsInputStream = getClass().getResourceAsStream("attachments.json");
-
         JsonFactory jsonFactory = new JsonFactory();
-        attachmentsJsonParser = jsonFactory.createParser(attachmentsInputStream);
+
+        InputStream attachmentsInputStream = null;
+        try {
+            attachmentsInputStream = getClass().getResourceAsStream("attachments.json");
+            attachmentsJsonParser = jsonFactory.createParser(attachmentsInputStream);
+        } finally {
+            IOUtils.closeQuietly(attachmentsInputStream);
+        }
 
         knownOrderList = Arrays.asList(KNOWN_ORDER);
     }

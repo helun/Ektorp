@@ -85,11 +85,31 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void testCreateFromJsonNode() throws Exception {
+
         doReturn(HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV)).when(httpClient).put(anyString(), anyString());
-        JsonNode root = new ObjectMapper().readValue(getClass().getResourceAsStream("create_from_json_node.json"),
-                JsonNode.class);
+
+        JsonNode root;
+        {
+            InputStream resourceAsStream = null;
+            try {
+                resourceAsStream = getClass().getResourceAsStream("create_from_json_node.json");
+                root = new ObjectMapper().readValue(resourceAsStream, JsonNode.class);
+            } finally {
+                IOUtils.closeQuietly(resourceAsStream);
+            }
+        }
         dbCon.create("some_id", root);
-        String facit = IOUtils.toString(getClass().getResourceAsStream("create_from_json_node.json"), "UTF-8").trim();
+
+        String facit;
+        {
+            InputStream resourceAsStream = null;
+            try {
+                resourceAsStream = getClass().getResourceAsStream("create_from_json_node.json");
+                facit = IOUtils.toString(resourceAsStream, "UTF-8").trim();
+            } finally {
+                IOUtils.closeQuietly(resourceAsStream);
+            }
+        }
         verify(httpClient).put("/test_db/some_id", facit);
     }
 
