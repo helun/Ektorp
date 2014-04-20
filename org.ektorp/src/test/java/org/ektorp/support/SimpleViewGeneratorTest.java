@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -277,11 +278,11 @@ public class SimpleViewGeneratorTest {
 	@SuppressWarnings("serial")
 	public static class TestDoc extends CouchDbDocument {
 		
-		public Set<String> domainNames;
-		public String name;
-		public String lastName;
-		public String accountId;
-		public String parentId;
+		private Set<String> domainNames;
+        private String name;
+        private String lastName;
+        private String accountId;
+        private String parentId;
 		
 		public String getName() {
 			return name;
@@ -403,7 +404,7 @@ public class SimpleViewGeneratorTest {
 		}
 	}
 	
-	public static class DiscriminatingChild {
+	public static class DiscriminatingChild implements Serializable {
 		
 		private String parentId;
 		@TypeDiscriminator
