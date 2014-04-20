@@ -22,7 +22,6 @@ public class ViewBasedCollectionTest {
 
 	ViewBasedCollection collectionHandler;
 	CouchDbConnector db = mock(CouchDbConnector.class);
-	ObjectMapper mapper = new StdObjectMapperFactory().createObjectMapper();
 	ConstructibleAnnotatedCollection cac = mock(ConstructibleAnnotatedCollection.class);
 
 	TestChildType child1 = new TestChildType("child1", "rev");
