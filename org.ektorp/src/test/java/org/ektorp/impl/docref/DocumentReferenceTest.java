@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.io.*;
 import java.util.*;
 
+import org.apache.commons.io.IOUtils;
 import org.ektorp.*;
 import org.ektorp.http.*;
 import org.ektorp.impl.*;
@@ -157,7 +158,7 @@ public class DocumentReferenceTest {
 	}
 
 	@Test
-	public void untouched_member_of_lazy_collection_should_not_cause_update() {
+	public void untouched_member_of_lazy_collection_should_not_cause_update() throws IOException {
 		setupGetDocResponseForDocWithBackReferences();
 		LazyLounge sofa = dbCon.get(LazyLounge.class, TEST_LOUNGE_ID);
 		
@@ -224,19 +225,14 @@ public class DocumentReferenceTest {
 		verify(httpClient).getUncached(Matchers.matches(".*_docrefs_.*"));
 	}
 
-	public String readFile(String fileName) {
-		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(this
-					.getClass().getResourceAsStream(fileName)));
-			String str;
-			while ((str = in.readLine()) != null) {
-				sb.append(str);
-			}
-			in.close();
-		} catch (IOException e) {
+	public String readFile(String fileName) throws IOException {
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = this.getClass().getResourceAsStream(fileName);
+            return IOUtils.toString(resourceAsStream, "UTF-8");
+		} finally {
+            IOUtils.closeQuietly(resourceAsStream);
 		}
-		return sb.toString();
 	}
 
 	private void updateLounge(Object sofa, String rev) {
