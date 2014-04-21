@@ -92,7 +92,7 @@ public class AndroidHttpClientTest {
 
         AndroidHttpClient service = new AndroidHttpClient(client, backend);
 
-        HttpResponse androidHttpResponse = service.post("", new ByteArrayInputStream("".getBytes()));
+        HttpResponse androidHttpResponse = service.post("", new ByteArrayInputStream(new byte[0]));
         assertNotNull(androidHttpResponse);
     }
 
