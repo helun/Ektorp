@@ -91,7 +91,7 @@ public class StdCouchDbConnectorTest {
         {
             InputStream resourceAsStream = null;
             try {
-                resourceAsStream = getClass().getResourceAsStream("create_from_json_node.json");
+                resourceAsStream = StdCouchDbConnectorTest.class.getResourceAsStream("create_from_json_node.json");
                 root = new ObjectMapper().readValue(resourceAsStream, JsonNode.class);
             } finally {
                 IOUtils.closeQuietly(resourceAsStream);
@@ -103,7 +103,7 @@ public class StdCouchDbConnectorTest {
         {
             InputStream resourceAsStream = null;
             try {
-                resourceAsStream = getClass().getResourceAsStream("create_from_json_node.json");
+                resourceAsStream = StdCouchDbConnectorTest.class.getResourceAsStream("create_from_json_node.json");
                 facit = IOUtils.toString(resourceAsStream, "UTF-8").trim();
             } finally {
                 IOUtils.closeQuietly(resourceAsStream);
@@ -846,24 +846,23 @@ public class StdCouchDbConnectorTest {
         }
     }
 
-    protected void assertEqualJson(String expectedFileName, Charset expectedFileCharset, String actual) throws IOException {
+    protected static void assertEqualJson(String expectedFileName, Charset expectedFileCharset, String actual) throws IOException {
         Reader expectedReader = new StringReader(getString(expectedFileName, expectedFileCharset));
         Reader actualReader = new StringReader(actual);
         assertTrue(format("expected: %s was: %s", getString(expectedFileName, expectedFileCharset), actual), JSONComparator.areEqual(expectedReader, actualReader));
     }
 
-    protected void assertEqualJson(String expectedFileName, Charset expectedFileCharset, byte[] actual) throws IOException {
+    protected static void assertEqualJson(String expectedFileName, Charset expectedFileCharset, byte[] actual) throws IOException {
         Reader expectedReader = new StringReader(getString(expectedFileName, expectedFileCharset));
         Reader actualReader = new InputStreamReader(new ByteArrayInputStream(actual), Charset.forName("UTF-8"));
         assertTrue(format("expected: %s was: %s", getString(expectedFileName, expectedFileCharset), new String(actual, Charset.forName("UTF-8"))), JSONComparator.areEqual(expectedReader, actualReader));
     }
 
-
-    protected String getString(String resourceName, Charset charset) throws IOException {
+    protected static String getString(String resourceName, Charset charset) throws IOException {
         InputStream inputStream = null;
         Reader reader = null;
         try {
-            inputStream = getClass().getResourceAsStream(resourceName);
+            inputStream = StdCouchDbConnectorTest.class.getResourceAsStream(resourceName);
             reader = new InputStreamReader(inputStream, charset);
             return IOUtils.toString(reader);
         } finally {
@@ -875,7 +874,7 @@ public class StdCouchDbConnectorTest {
     protected byte[] getBytes(String resourceName) throws IOException {
         InputStream inputStream = null;
         try {
-            inputStream = getClass().getResourceAsStream(resourceName);
+            inputStream = StdCouchDbConnectorTest.class.getResourceAsStream(resourceName);
             return IOUtils.toByteArray(inputStream);
         } finally {
             IOUtils.closeQuietly(inputStream);

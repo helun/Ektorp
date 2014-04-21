@@ -3,6 +3,7 @@ package org.ektorp.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.PurgeResult;
@@ -20,6 +21,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -120,8 +122,14 @@ public class StreamedCouchDbConnectorTest extends StdCouchDbConnectorTest {
     public void testCreateFromJsonNode() throws Exception {
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
         doAnswer(new MarshallEntityAndReturnAnswer(output, HttpResponseStub.valueOf(201, OK_RESPONSE_WITH_ID_AND_REV))).when(httpClient).put(anyString(), any(HttpEntity.class));
-        JsonNode root = new ObjectMapper().readValue(getClass().getResourceAsStream("create_from_json_node.json"),
-                JsonNode.class);
+        JsonNode root;
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = StdCouchDbConnectorTest.class.getResourceAsStream("create_from_json_node.json");
+            root = new ObjectMapper().readValue(resourceAsStream, JsonNode.class);
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
         dbCon.create("some_id", root);
         ArgumentCaptor<HttpEntity> ac = ArgumentCaptor.forClass(HttpEntity.class);
         verify(httpClient).put(eq("/test_db/some_id"), ac.capture());
