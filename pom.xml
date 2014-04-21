@@ -52,7 +52,7 @@
         <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
 
         <findbugs.skip>false</findbugs.skip>
-        <findbugs.includeTests>false</findbugs.includeTests>
+        <findbugs.includeTests>true</findbugs.includeTests>
     </properties>
 
     <dependencyManagement>
