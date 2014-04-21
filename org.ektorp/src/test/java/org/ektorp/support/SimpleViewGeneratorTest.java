@@ -279,9 +279,16 @@ public class SimpleViewGeneratorTest {
 	public static class TestDoc extends CouchDbDocument {
 		
 		private Set<String> domainNames;
+
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_UNWRITTEN_FIELD")
         private String name;
+
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_UNWRITTEN_FIELD")
         private String lastName;
+
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_UNWRITTEN_FIELD")
         private String accountId;
+
         private String parentId;
 		
 		public String getName() {
@@ -405,8 +412,9 @@ public class SimpleViewGeneratorTest {
 	}
 	
 	public static class DiscriminatingChild implements Serializable {
-		
-		private String parentId;
+
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_UNWRITTEN_FIELD")
+        private String parentId;
 		@TypeDiscriminator
 		private String otherField;
 		
