@@ -10,8 +10,6 @@ import java.util.List;
 
 public class InputStreamWrapperBulkExecutor implements BulkExecutor<InputStream> {
 
-    protected URI dbURI;
-
     protected RestTemplate restTemplate;
 
     protected ObjectMapper objectMapper;
@@ -21,7 +19,6 @@ public class InputStreamWrapperBulkExecutor implements BulkExecutor<InputStream>
     protected String bulkDocsUri;
 
     public InputStreamWrapperBulkExecutor(URI dbURI, RestTemplate restTemplate, ObjectMapper objectMapper) {
-        this.dbURI = dbURI;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.writer = new BulkDocumentWriter(objectMapper);
