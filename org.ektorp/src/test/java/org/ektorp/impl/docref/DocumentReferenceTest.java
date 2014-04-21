@@ -127,7 +127,7 @@ public class DocumentReferenceTest {
 		lounge.sitDown(People.nisse());
 		lounge.sitDown(People.kalle());
 
-		updateLounge(lounge, "");
+		updateLounge(lounge);
 		String expectedJSON = String.format(
 				"{\"color\":\"blue\",%s\"_id\":\"lounge_id\"}", "");
 		verify(httpClient).put(Matchers.matches(".*/lounge_id"),
@@ -196,7 +196,7 @@ public class DocumentReferenceTest {
 		verifyNoMoreInteractions(httpClient);
 		assertEquals(2, sofa.getSeatedPeople().size());
 		verifyDocRefsLoaded();
-		updateLounge(sofa, sofa.getRevision());
+		updateLounge(sofa);
 	}
 	
 	@Test
@@ -235,11 +235,9 @@ public class DocumentReferenceTest {
 		}
 	}
 
-	private void updateLounge(Object sofa, String rev) {
+	private void updateLounge(Object sofa) {
 
 		setupUpdateResponse();
-		
-		rev = rev.length() == 0 ? "" : "\"_rev\":\"" + rev + "\",";
 		
 		when(
 				httpClient.post(Matchers.matches(".*_bulk_docs"),
