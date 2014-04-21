@@ -190,7 +190,7 @@ public class StreamedCouchDbConnectorTest extends StdCouchDbConnectorTest {
         byte[] json = output.toByteArray();
         assertEqualJson("dates.json", Charset.forName("UTF-8"), json);
 
-        doReturn(HttpResponseStub.valueOf(201, new String(json))).when(httpClient).get("/test_db/some_id");
+        doReturn(HttpResponseStub.valueOf(201, output.toString("UTF-8"))).when(httpClient).get("/test_db/some_id");
 
         DateDoc deserialized = dbCon.get(DateDoc.class, dd.getId());
         assertEquals(dt, deserialized.getDateTime());
