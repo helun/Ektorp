@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.ReaderInputStream;
 import org.ektorp.*;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdHttpClient;
@@ -848,41 +846,37 @@ public class StdCouchDbConnectorTest {
         }
     }
 
-    protected void assertEqualJson(String expectedFileName, Charset expectedFileCharset, String actual) {
-        Reader expectedReader = new InputStreamReader(getClass().getResourceAsStream(expectedFileName), expectedFileCharset);
+    protected void assertEqualJson(String expectedFileName, Charset expectedFileCharset, String actual) throws IOException {
+        Reader expectedReader = new StringReader(getString(expectedFileName, expectedFileCharset));
         Reader actualReader = new StringReader(actual);
         assertTrue(format("expected: %s was: %s", getString(expectedFileName, expectedFileCharset), actual), JSONComparator.areEqual(expectedReader, actualReader));
     }
 
     protected void assertEqualJson(String expectedFileName, Charset expectedFileCharset, byte[] actual) throws IOException {
-        Reader expectedReader = new InputStreamReader(getClass().getResourceAsStream(expectedFileName), expectedFileCharset);
+        Reader expectedReader = new StringReader(getString(expectedFileName, expectedFileCharset));
         Reader actualReader = new InputStreamReader(new ByteArrayInputStream(actual), Charset.forName("UTF-8"));
-        assertTrue(format("expected: %s was: %s", FileUtils.readFileToString(new File(getClass().getResource(expectedFileName).getFile()), expectedFileCharset.name()), actual), JSONComparator.areEqual(expectedReader, actualReader));
+        assertTrue(format("expected: %s was: %s", getString(expectedFileName, expectedFileCharset), new String(actual, Charset.forName("UTF-8"))), JSONComparator.areEqual(expectedReader, actualReader));
     }
 
 
-    protected String getString(String resourceName, Charset charset) {
+    protected String getString(String resourceName, Charset charset) throws IOException {
         InputStream inputStream = null;
         Reader reader = null;
         try {
             inputStream = getClass().getResourceAsStream(resourceName);
             reader = new InputStreamReader(inputStream, charset);
             return IOUtils.toString(reader);
-        } catch (IOException e) {
-            throw Exceptions.propagate(e);
         } finally {
             IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(inputStream);
         }
     }
 
-    protected byte[] getBytes(String resourceName) {
+    protected byte[] getBytes(String resourceName) throws IOException {
         InputStream inputStream = null;
         try {
             inputStream = getClass().getResourceAsStream(resourceName);
             return IOUtils.toByteArray(inputStream);
-        } catch (IOException e) {
-            throw Exceptions.propagate(e);
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
