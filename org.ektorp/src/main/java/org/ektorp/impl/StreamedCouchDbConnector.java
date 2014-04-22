@@ -13,7 +13,6 @@ import org.ektorp.http.StdResponseHandler;
 import org.ektorp.util.Assert;
 import org.ektorp.util.Documents;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +24,11 @@ public class StreamedCouchDbConnector extends StdCouchDbConnector {
 
     public StreamedCouchDbConnector(String databaseName, CouchDbInstance dbi, ObjectMapperFactory om) {
         super(databaseName, dbi, om);
+    }
+
+    {
+        setCollectionBulkExecutor(new EntityCollectionBulkExecutor(dbURI, restTemplate, objectMapper));
+        setInputStreamBulkExecutor(new InputStreamBulkEntityBulkExecutor(dbURI, restTemplate, objectMapper));
     }
 
     protected HttpEntity createHttpEntity(Object o) {
@@ -57,15 +61,6 @@ public class StreamedCouchDbConnector extends StdCouchDbConnector {
         HttpEntity entity = createHttpEntity(node);
 
         restTemplate.put(URIWithDocId(id), entity);
-    }
-
-    @Override
-    public List<DocumentOperationResult> executeBulk(Collection<?> objects,
-                                                     boolean allOrNothing) {
-
-        // FIXME : the super method uses an ExecutorService to transform the Objects Collections to a JSON document using a PipedInputStream + a PipedOutputStream
-        // TODO : override the method using kind of the same pattern as the JacksonableEntity to generate the Bulk request JSON document
-        return super.executeBulk(objects, allOrNothing);
     }
 
     @Override

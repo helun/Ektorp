@@ -14,27 +14,7 @@ import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ektorp.AttachmentInputStream;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.CouchDbInstance;
-import org.ektorp.DbAccessException;
-import org.ektorp.DbInfo;
-import org.ektorp.DbPath;
-import org.ektorp.DesignDocInfo;
-import org.ektorp.DocumentOperationResult;
-import org.ektorp.Options;
-import org.ektorp.Page;
-import org.ektorp.PageRequest;
-import org.ektorp.PurgeResult;
-import org.ektorp.ReplicationCommand;
-import org.ektorp.ReplicationStatus;
-import org.ektorp.Revision;
-import org.ektorp.StreamingChangesResult;
-import org.ektorp.StreamingViewResult;
-import org.ektorp.UpdateConflictException;
-import org.ektorp.UpdateHandlerRequest;
-import org.ektorp.ViewQuery;
-import org.ektorp.ViewResult;
+import org.ektorp.*;
 import org.ektorp.changes.ChangesCommand;
 import org.ektorp.changes.ChangesFeed;
 import org.ektorp.changes.DocumentChange;
@@ -71,7 +51,11 @@ public class StdCouchDbConnector implements CouchDbConnector {
 	protected final RevisionResponseHandler revisionHandler;
     private final DocIdResponseHandler docIdResponseHandler;
 
-    private final ThreadLocalBulkBufferHolder bulkBufferManager = new ThreadLocalBulkBufferHolder();
+    private LocalBulkBuffer localBulkBuffer;
+
+    private BulkExecutor<Collection<?>> collectionBulkExecutor;
+
+    private BulkExecutor<InputStream> inputStreamBulkExecutor;
 
     private final static Options EMPTY_OPTIONS = new Options();
 
@@ -95,6 +79,33 @@ public class StdCouchDbConnector implements CouchDbConnector {
         this.restTemplate = new RestTemplate(dbi.getConnection());
         this.revisionHandler = new RevisionResponseHandler(objectMapper);
         this.docIdResponseHandler = new DocIdResponseHandler(objectMapper);
+
+        collectionBulkExecutor = new BulkOperationCollectionBulkExecutor(dbURI, restTemplate, objectMapper) {
+            @Override
+            protected JsonSerializer getJsonSerializer() {
+                return jsonSerializer;
+            }
+        };
+        localBulkBuffer = new DefaultLocalBulkBuffer() {
+            @Override
+            protected BulkExecutor getBulkExecutor() {
+                return collectionBulkExecutor;
+            }
+        };
+
+        inputStreamBulkExecutor = new InputStreamWrapperBulkExecutor(dbURI, restTemplate, objectMapper);
+    }
+
+    public void setLocalBulkBuffer(LocalBulkBuffer localBulkBuffer) {
+        this.localBulkBuffer = localBulkBuffer;
+    }
+
+    public void setCollectionBulkExecutor(BulkExecutor<Collection<?>> collectionBulkExecutor) {
+        this.collectionBulkExecutor = collectionBulkExecutor;
+    }
+
+    public void setInputStreamBulkExecutor(BulkExecutor<InputStream> inputStreamBulkExecutor) {
+        this.inputStreamBulkExecutor = inputStreamBulkExecutor;
     }
 
     @Override
@@ -107,7 +118,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         Assert.notNull(o, "Document may not be null");
         Assert.isTrue(Documents.isNew(o), "Object must be new");
 
-        String json = jsonSerializer.toJson(o);
+        String json = serializeToJson(o);
         String id = Documents.getId(o);
         DocumentOperationResult result;
         if (id != null && id.length() != 0) {
@@ -123,7 +134,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
     public void create(String id, Object node) {
         assertDocIdHasValue(id);
         Assert.notNull(node, "node may not be null");
-        restTemplate.put(URIWithDocId(id), jsonSerializer.toJson(node));
+        restTemplate.put(URIWithDocId(id), serializeToJson(node));
     }
 
     protected String URIWithDocId(String id) {
@@ -203,7 +214,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     @Override
     public PurgeResult purge(Map<String, List<String>> revisionsToPurge) {
-        return restTemplate.post(dbURI.append("_purge").toString(), jsonSerializer.toJson(revisionsToPurge),
+        return restTemplate.post(dbURI.append("_purge").toString(), serializeToJson(revisionsToPurge),
                 new StdResponseHandler<PurgeResult>() {
                     @Override
                     public PurgeResult success(HttpResponse hr) throws Exception {
@@ -346,7 +357,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         Assert.notNull(o, "Document cannot be null");
         final String id = Documents.getId(o);
         assertDocIdHasValue(id);
-        restTemplate.put(dbURI.append(id).toString(), jsonSerializer.toJson(o),
+        restTemplate.put(dbURI.append(id).toString(), serializeToJson(o),
                 new StdResponseHandler<Void>() {
 
                     @Override
@@ -508,7 +519,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
                         return objectMapper.readValue(hr.getContent(),
                                 DbInfo.class);
                     }
-                });
+                }
+        );
     }
 
     @Override
@@ -582,8 +594,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     @Override
-    public List<DocumentOperationResult> executeAllOrNothing(
-            InputStream inputStream) {
+    public List<DocumentOperationResult> executeAllOrNothing(InputStream inputStream) {
         return executeBulk(inputStream, true);
     }
 
@@ -592,20 +603,12 @@ public class StdCouchDbConnector implements CouchDbConnector {
         return executeBulk(inputStream, false);
     }
 
-    private List<DocumentOperationResult> executeBulk(InputStream inputStream,
-            boolean allOrNothing) {
-        BulkDocumentWriter writer = new BulkDocumentWriter(objectMapper);
-
-        return restTemplate.post(
-            dbURI.append("_bulk_docs").toString(),
-            writer.createInputStreamWrapper(allOrNothing, inputStream),
-            new BulkOperationResponseHandler(objectMapper));
-
+    public List<DocumentOperationResult> executeBulk(InputStream inputStream, boolean allOrNothing) {
+        return inputStreamBulkExecutor.executeBulk(inputStream, allOrNothing);
     }
 
     @Override
-    public List<DocumentOperationResult> executeAllOrNothing(
-            Collection<?> objects) {
+    public List<DocumentOperationResult> executeAllOrNothing(Collection<?> objects) {
         return executeBulk(objects, true);
     }
 
@@ -616,52 +619,35 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     @Override
     public void addToBulkBuffer(Object o) {
-        bulkBufferManager.add(o);
-        LOG.debug("{} added to bulk buffer", o);
+        this.localBulkBuffer.addToBulkBuffer(o);
     }
 
     @Override
     public void clearBulkBuffer() {
-        bulkBufferManager.clear();
-        LOG.debug("bulk buffer cleared");
+        this.localBulkBuffer.clearBulkBuffer();
     }
 
     @Override
     public List<DocumentOperationResult> flushBulkBuffer() {
-        try {
-            Collection<?> buffer = bulkBufferManager.getCurrentBuffer();
-            if (buffer != null && !buffer.isEmpty()) {
-                LOG.debug("flushing bulk buffer");
-                return executeBulk(buffer);
-            } else {
-                LOG.debug("bulk buffer was empty");
-                return Collections.emptyList();
-            }
-        } finally {
-            clearBulkBuffer();
-        }
-
+        return this.localBulkBuffer.flushBulkBuffer();
     }
 
+    /**
+     * @deprecated override method serializeToJson in order to change Serialization to JSON.
+     */
+    @Deprecated
     public void setJsonSerializer(JsonSerializer js) {
         Assert.notNull(js, "JsonSerializer may not be null");
         this.jsonSerializer = js;
     }
 
+    protected String serializeToJson(Object o) {
+        return jsonSerializer.toJson(o);
+    }
+
     public List<DocumentOperationResult> executeBulk(Collection<?> objects,
 			boolean allOrNothing) {
-		BulkOperation op = jsonSerializer.createBulkOperation(objects,
-				allOrNothing);
-		try {
-			List<DocumentOperationResult> result = restTemplate.post(
-					dbURI.append("_bulk_docs").toString(),
-					op.getData(),
-					new BulkOperationResponseHandler(objects, objectMapper));
-			op.awaitCompletion();
-			return result;
-		} finally {
-			op.close();
-		}
+		return collectionBulkExecutor.executeBulk(objects, allOrNothing);
 	}
 
     @Override
