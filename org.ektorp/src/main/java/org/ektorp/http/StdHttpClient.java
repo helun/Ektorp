@@ -178,13 +178,13 @@ public class StdHttpClient implements HttpClient {
 			}
 			LOG.trace("{} {} {} {}", new Object[] { request.getMethod(), request.getURI(),
 					rsp.getStatusLine().getStatusCode(), rsp.getStatusLine().getReasonPhrase() });
-			return createStdHttpResponse(rsp, request);
+			return createHttpResponse(rsp, request);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}		
 	}
 
-	protected HttpResponse createStdHttpResponse(org.apache.http.HttpResponse rsp, HttpUriRequest httpRequest) {
+	protected HttpResponse createHttpResponse(org.apache.http.HttpResponse rsp, HttpUriRequest httpRequest) {
 		return new StdHttpResponse(rsp.getEntity(), rsp.getStatusLine(), httpRequest, rsp.getFirstHeader("ETag"));
 	}
 
