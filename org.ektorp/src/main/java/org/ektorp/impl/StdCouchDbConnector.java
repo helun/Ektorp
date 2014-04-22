@@ -45,6 +45,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
     private final String dbName;
 
     protected final RestTemplate restTemplate;
+    protected QueryExecutor queryExecutor;
 
     private final CouchDbInstance dbInstance;
 
@@ -79,6 +80,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
         this.restTemplate = new RestTemplate(dbi.getConnection());
         this.revisionHandler = new RevisionResponseHandler(objectMapper);
         this.docIdResponseHandler = new DocIdResponseHandler(objectMapper);
+        this.queryExecutor = new DefaultQueryExecutor(this.restTemplate);
 
         collectionBulkExecutor = new BulkOperationCollectionBulkExecutor(dbURI, restTemplate, objectMapper) {
             @Override
@@ -106,6 +108,13 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     public void setInputStreamBulkExecutor(BulkExecutor<InputStream> inputStreamBulkExecutor) {
         this.inputStreamBulkExecutor = inputStreamBulkExecutor;
+    }
+
+    /**
+     * Set an alternative QueryExecutor instance in order to change the executeQuery implementation as you like.
+     */
+    public void setQueryExecutor(QueryExecutor queryExecutor) {
+        this.queryExecutor = queryExecutor;
     }
 
     @Override
@@ -428,19 +437,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
         return executeQuery(query, rh);
     }
 
-	private <T> T executeQuery(final ViewQuery query,
-			ResponseCallback<T> rh) {
-		LOG.debug("Querying CouchDb view at {}.", query);
-		T result;
-		if (!query.isCacheOk()) {
-			result = query.hasMultipleKeys() ? restTemplate.postUncached(query.buildQuery(), query.getKeysAsJson(), rh)
-					: restTemplate.getUncached(query.buildQuery(), rh);
-		} else {
-			result = query.hasMultipleKeys() ? restTemplate.post(query.buildQuery(), query.getKeysAsJson(), rh)
-					: restTemplate.get(query.buildQuery(), rh);
-		}
-		LOG.debug("Answer from view query: {}.", result);
-		return result;
+	protected <T> T executeQuery(final ViewQuery query, ResponseCallback<T> rh) {
+		return queryExecutor.executeQuery(query, rh);
 	}
 
     @Override

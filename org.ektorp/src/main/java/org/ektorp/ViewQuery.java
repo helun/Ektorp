@@ -3,6 +3,7 @@ package org.ektorp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -270,6 +271,14 @@ public class ViewQuery {
         reset();
         keys = Keys.of(keyList);
         return this;
+    }
+
+    public Keys getKeys() {
+        return keys;
+    }
+
+    public Collection<?> getKeysValues() {
+        return keys.getValues();
     }
 
 	/**
@@ -580,6 +589,13 @@ public class ViewQuery {
 			return cachedQuery;
 		}
 
+        URI query = buildQueryURI();
+
+		cachedQuery = query.toString();
+		return cachedQuery;
+	}
+
+    public URI buildQueryURI() {
 		URI query = buildViewPath();
 
 		if (isNotEmpty(key)) {
@@ -645,9 +661,7 @@ public class ViewQuery {
 		if(updateSeq) {
 			query.param("update_seq", "true");
 		}
-
-		cachedQuery = query.toString();
-		return cachedQuery;
+		return query;
 	}
 
 	public ViewQuery clone() {
@@ -884,6 +898,10 @@ public class ViewQuery {
 
 		private Keys(Object[] keys) {
 			this.keys = Arrays.asList(keys);
+		}
+
+        public List<?> getValues() {
+            return Collections.unmodifiableList(keys);
 		}
 		
 		public Keys clone() {
