@@ -27,6 +27,7 @@ public class PageRequest {
 	private final boolean back;
 	private final int page;
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DB_DUPLICATE_BRANCHES")
 	public static ViewQuery applyPagingParameters(ViewQuery q, PageRequest pr) {
 		ViewQuery pagedQuery = q.clone();
 		if (pr.page > 0) {

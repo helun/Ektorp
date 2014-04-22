@@ -667,6 +667,7 @@ public class Base64
      * @throws IllegalArgumentException if source array, offset, or length are invalid
      * @since 2.0
      */
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_DEFAULT_ENCODING")
     public static String encodeBytes( byte[] source, int off, int len, int options ) throws java.io.IOException {
         byte[] encoded = encodeBytesToBytes( source, off, len, options );
 
@@ -720,6 +721,7 @@ public class Base64
      * @throws IllegalArgumentException if source array, offset, or length are invalid
      * @since 2.3.1
      */
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings({"DE_MIGHT_IGNORE"})
     public static byte[] encodeBytesToBytes( byte[] source, int off, int len, int options ) throws java.io.IOException {
 
         if( source == null ){
@@ -1074,6 +1076,7 @@ public class Base64
      * @throws NullPointerException if <tt>s</tt> is null
      * @since 1.4
      */
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings({"DM_DEFAULT_ENCODING", "DE_MIGHT_IGNORE"})
     public static byte[] decode( String s, int options ) throws java.io.IOException {
         
         if( s == null ){

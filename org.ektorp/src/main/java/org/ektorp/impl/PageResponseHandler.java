@@ -42,6 +42,7 @@ public class PageResponseHandler<T> extends StdResponseHandler<Page<T>> {
 	}
 	
 	@Override
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DB_DUPLICATE_BRANCHES")
 	public Page<T> success(HttpResponse hr) throws Exception {
 		parser.parseResult(hr.getContent());
 		List<T> rows = parser.getRows();

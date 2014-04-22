@@ -89,6 +89,7 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
 		thread.interrupt();
 	}
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
 	private void sendInterruptMarker()  {
 		LOG.debug("Sending interrupt marker in order to interrupt feed consumer");
 		changes.offer(INTERRUPT_MARKER);

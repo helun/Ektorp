@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
    @Type(value = StdIndexerTask.class, name = "indexer"),
    @Type(value = StdDatabaseCompactionTask.class, name = "database_compaction"),
    @Type(value = StdViewCompactionTask.class, name = "view_compaction") })
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EI_EXPOSE_REP")
 public abstract class StdActiveTask implements ActiveTask {
 
     private String pid;

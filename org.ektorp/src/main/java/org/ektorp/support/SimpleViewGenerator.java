@@ -130,6 +130,7 @@ public class SimpleViewGenerator {
 				});
 	}
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="VA_FORMAT_STRING_EXTRA_ARGUMENTS_PASSED")
 	private String resolveTypeDiscriminator(final Class<?> persistentType) {
 		final List<String> discrimintators = new ArrayList<String>();
 		TypeDiscriminator td = persistentType
