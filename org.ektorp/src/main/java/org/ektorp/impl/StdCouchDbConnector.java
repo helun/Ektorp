@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpEntity;
 import org.ektorp.*;
 import org.ektorp.changes.ChangesCommand;
 import org.ektorp.changes.ChangesFeed;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author henrik lundgren
  *
  */
-public class StdCouchDbConnector implements CouchDbConnector, AttachmentCouchDbConnector {
+public class StdCouchDbConnector implements CouchDbConnector {
 
     private static final int DEFAULT_HEARTBEAT_INTERVAL = 9000;
     private static final Logger LOG = LoggerFactory
@@ -193,6 +194,16 @@ public class StdCouchDbConnector implements CouchDbConnector, AttachmentCouchDbC
     @Override
     public String createAttachment(String docId, String revision, AttachmentInputStream data) {
         return attachmentCouchDbConnector.createAttachment(docId, revision, data);
+    }
+
+    @Override
+    public String createAttachment(String docId, HttpEntity attachmentEntity, String attachmentName) {
+        return attachmentCouchDbConnector.createAttachment(docId, attachmentEntity, attachmentName);
+    }
+
+    @Override
+    public String createAttachment(String docId, String revision, HttpEntity attachmentEntity, String attachmentName) {
+        return attachmentCouchDbConnector.createAttachment(docId, revision, attachmentEntity, attachmentName);
     }
 
     @Override

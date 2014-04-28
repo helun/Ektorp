@@ -1,5 +1,6 @@
 package org.ektorp.impl;
 
+import org.apache.http.HttpEntity;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.RestTemplate;
@@ -37,6 +38,21 @@ public class StdAttachmentCouchDbConnector implements AttachmentCouchDbConnector
             uri.param("rev", revision);
         }
         return restTemplate.put(uri.toString(), data, data.getContentType(), data.getContentLength(), revisionHandler).getRevision();
+    }
+
+    @Override
+    public String createAttachment(String docId, HttpEntity attachmentEntity, String attachmentName) {
+        return createAttachment(docId, null, attachmentEntity, attachmentName);
+    }
+
+    @Override
+    public String createAttachment(String docId, String revision, HttpEntity attachmentEntity, String attachmentName) {
+        assertDocIdHasValue(docId);
+        URI uri = dbURI.append(docId).append(attachmentName);
+        if (revision != null) {
+            uri.param("rev", revision);
+        }
+        return restTemplate.put(uri.toString(), attachmentEntity, revisionHandler).getRevision();
     }
 
     @Override

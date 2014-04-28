@@ -9,6 +9,7 @@ import org.ektorp.changes.ChangesCommand;
 import org.ektorp.changes.ChangesFeed;
 import org.ektorp.changes.DocumentChange;
 import org.ektorp.http.HttpClient;
+import org.ektorp.impl.AttachmentCouchDbConnector;
 
 /**
  * Primary interface for working with Objects mapped as documents in CouchDb.
@@ -18,7 +19,7 @@ import org.ektorp.http.HttpClient;
  * @author henrik lundgren
  * 
  */
-public interface CouchDbConnector extends LocalBulkBuffer {
+public interface CouchDbConnector extends LocalBulkBuffer, AttachmentCouchDbConnector {
     /**
      * 
      * @param id
