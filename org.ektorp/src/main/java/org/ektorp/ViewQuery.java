@@ -24,6 +24,57 @@ import org.ektorp.util.Exceptions;
  */
 public class ViewQuery {
 
+	private class KeyOrRawKey {
+
+		private String rawKey;
+
+		private Object key;
+
+		private boolean isRaw;
+
+		public void setKey(Object value) {
+			this.key = value;
+			this.rawKey = null;
+			isRaw = false;
+		}
+
+		public void setRawKey(String value) {
+			this.key = null;
+			this.rawKey = value;
+			isRaw = true;
+		}
+
+		public boolean isNull() {
+			if (isRaw) {
+				return rawKey == null;
+			} else {
+				return key == null;
+			}
+		}
+
+		public String asEncoded() {
+			if (isRaw) {
+				return rawKey;
+			} else {
+				try {
+					return mapper.writeValueAsString(key);
+				} catch (Exception e) {
+					throw Exceptions.propagate(e);
+				}
+			}
+		}
+
+		public void copyTo(KeyOrRawKey other) {
+			if (isRaw) {
+				other.setRawKey(rawKey);
+			} else {
+				other.setKey(key);
+			}
+		}
+		
+	}
+	
+
 	private final static ObjectMapper DEFAULT_MAPPER = new StdObjectMapperFactory().createObjectMapper();
 	private final static String ALL_DOCS_VIEW_NAME = "_all_docs";
 	private final static int NOT_SET = -1;
@@ -35,11 +86,11 @@ public class ViewQuery {
 	private String dbPath;
 	private String designDocId;
 	private String viewName;
-    private Object key;
+    private final KeyOrRawKey key = new KeyOrRawKey();
     private Keys keys;
-	private Object startKey;
+	private final KeyOrRawKey startKey = new KeyOrRawKey();
 	private String startDocId;
-	private Object endKey;
+	private final KeyOrRawKey endKey = new KeyOrRawKey();
 	private String endDocId;
 	private int limit = NOT_SET;
 	private String staleOk;
@@ -188,7 +239,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery key(String s) {
 		reset();
-		key = s;
+		key.setKey(s);
 		return this;
 	}
 	/**
@@ -197,7 +248,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery rawKey(String s) {
 		reset();
-		key = parseJson(s);
+		key.setRawKey(s);
 		return this;
 	}
 
@@ -214,7 +265,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery key(int i) {
 		reset();
-		key = i;
+		key.setKey(i);
 		return this;
 	}
 	/**
@@ -223,7 +274,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery key(long l) {
 		reset();
-		key = l;
+		key.setKey(l);
 		return this;
 	}
 	/**
@@ -232,7 +283,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery key(float f) {
 		reset();
-		key = f;
+		key.setKey(f);
 		return this;
 	}
 	/**
@@ -241,7 +292,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery key(double d) {
 		reset();
-		key = d;
+		key.setKey(d);
 		return this;
 	}
 	/**
@@ -250,7 +301,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery key(boolean b) {
 		reset();
-		key = b;
+		key.setKey(b);
 		return this;
 	}
 	/**
@@ -259,7 +310,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery key(Object o) {
 		reset();
-		key = o;
+		key.setKey(o);
 		return this;
 	}
     /**
@@ -287,7 +338,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery startKey(String s) {
 		reset();
-		startKey = s;
+		startKey.setKey(s);
 		return this;
 	}
 
@@ -297,7 +348,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery rawStartKey(String s) {
 		reset();
-		startKey = parseJson(s);
+		startKey.setRawKey(s);
 		return this;
 	}
 	/**
@@ -306,7 +357,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery startKey(int i) {
 		reset();
-		startKey = i;
+		startKey.setKey(i);
 		return this;
 	}
 	/**
@@ -315,7 +366,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery startKey(long l) {
 		reset();
-		startKey = l;
+		startKey.setKey(l);
 		return this;
 	}
 	/**
@@ -324,7 +375,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery startKey(float f) {
 		reset();
-		startKey = f;
+		startKey.setKey(f);
 		return this;
 	}
 	/**
@@ -333,7 +384,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery startKey(double d) {
 		reset();
-		startKey = d;
+		startKey.setKey(d);
 		return this;
 	}
 	/**
@@ -342,7 +393,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery startKey(boolean b) {
 		reset();
-		startKey = b;
+		startKey.setKey(b);
 		return this;
 	}
 
@@ -352,7 +403,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery startKey(Object o) {
 		reset();
-		startKey = o;
+		startKey.setKey(o);
 		return this;
 	}
 
@@ -367,7 +418,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery endKey(String s) {
 		reset();
-		endKey = s;
+		endKey.setKey(s);
 		return this;
 	}
 	/**
@@ -376,7 +427,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery rawEndKey(String s) {
 		reset();
-		endKey = parseJson(s);
+		endKey.setRawKey(s);
 		return this;
 	}
 	/**
@@ -385,7 +436,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery endKey(int i) {
 		reset();
-		endKey = i;
+		endKey.setKey(i);
 		return this;
 	}
 	/**
@@ -394,7 +445,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery endKey(long l) {
 		reset();
-		endKey = l;
+		endKey.setKey(l);
 		return this;
 	}
 	/**
@@ -403,7 +454,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery endKey(float f) {
 		reset();
-		endKey = f;
+		endKey.setKey(f);
 		return this;
 	}
 	/**
@@ -412,7 +463,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery endKey(double d) {
 		reset();
-		endKey = d;
+		endKey.setKey(d);
 		return this;
 	}
 	/**
@@ -421,7 +472,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery endKey(boolean b) {
 		reset();
-		endKey = b;
+		endKey.setKey(b);
 		return this;
 	}
 
@@ -431,7 +482,7 @@ public class ViewQuery {
 	 */
 	public ViewQuery endKey(Object o) {
 		reset();
-		endKey = o;
+		endKey.setKey(o);
 		return this;
 	}
 
@@ -598,16 +649,16 @@ public class ViewQuery {
     public URI buildQueryURI() {
 		URI query = buildViewPath();
 
-		if (isNotEmpty(key)) {
-			query.param("key", jsonEncode(key));
+		if (!key.isNull()) {
+			query.param("key", key.asEncoded());
 		}
 
-		if (isNotEmpty(startKey)) {
-			query.param("startkey", jsonEncode(startKey));
+		if (!startKey.isNull()) {
+			query.param("startkey", startKey.asEncoded());
 		}
 
-		if (isNotEmpty(endKey)) {
-			query.param("endkey", jsonEncode(endKey));
+		if (!endKey.isNull()) {
+			query.param("endkey", endKey.asEncoded());
 		}
 
 		if (isNotEmpty(startDocId)) {
@@ -673,13 +724,13 @@ public class ViewQuery {
 		copy.descending = descending;
 		copy.designDocId = designDocId;
 		copy.endDocId = endDocId;
-		copy.endKey = endKey;
+		endKey.copyTo(copy.endKey);
 		copy.group = group;
 		copy.groupLevel = groupLevel;
 		copy.ignoreNotFound = ignoreNotFound;
 		copy.includeDocs = includeDocs;
 		copy.inclusiveEnd = inclusiveEnd;
-		copy.key = key;
+		key.copyTo(copy.key);
 		if (keys != null) {
 			copy.keys = keys.clone();
 		}
@@ -690,19 +741,12 @@ public class ViewQuery {
 		copy.skip = copy.skip;
 		copy.staleOk = staleOk;
 		copy.startDocId = startDocId;
-		copy.startKey = startKey;
+		startKey.copyTo(startKey);
 		copy.updateSeq = updateSeq;
 		copy.viewName = viewName;
 		return copy;
 	}
 	
-	private String jsonEncode(Object key) {
-		try {
-			return mapper.writeValueAsString(key);
-		} catch (Exception e) {
-			throw Exceptions.propagate(e);
-		}
-	}
 	private void appendQueryParams(URI query) {
 		for (Map.Entry<String, String> param : queryParams.entrySet()) {
 			query.param(param.getKey(), param.getValue());
