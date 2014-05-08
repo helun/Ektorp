@@ -1,5 +1,20 @@
 Change log
 ==========
+Changes in version 1.4.2
+------------------------
+Noteworthy changes:
+### Fixes
+* #161: StreamingViewResult hasNext
+* #157: Get Ektorp to more flexibly handle getAllDocIds() responses
+
+### Improvements
+
+* Spring shutdown listener
+* Introduce query executor strategy
+* Replaced commons-logging with jcl-over-slf4j
+* Upgrade to HTTPClient 4.3, fixes #133
+* new StreamedCouchDbConnector, see issue #148
+
 Changes in version 1.4.1
 ------------------------
 Ektorp 1.4.1 fixes some issues found in 1.4.0
