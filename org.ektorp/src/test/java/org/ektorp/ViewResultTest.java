@@ -2,9 +2,11 @@ package org.ektorp;
 
 import static org.junit.Assert.*;
 
+import java.io.InputStream;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.junit.*;
 
 public class ViewResultTest {
@@ -112,6 +114,12 @@ public class ViewResultTest {
     }
 
     private ViewResult readResult(String path) throws Exception {
-        return new ViewResult(om.readTree(getClass().getResourceAsStream(path)), false);
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = getClass().getResourceAsStream(path);
+            return new ViewResult(om.readTree(resourceAsStream), false);
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
     }
 }

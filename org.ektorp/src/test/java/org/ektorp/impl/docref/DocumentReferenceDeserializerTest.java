@@ -74,21 +74,6 @@ public class DocumentReferenceDeserializerTest {
 		updateLoungeAndVerifySavedContent(lounge, lounge.getRevision());
 	}
 
-	public String readFile(String fileName) {
-		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(this
-					.getClass().getResourceAsStream(fileName)));
-			String str;
-			while ((str = in.readLine()) != null) {
-				sb.append(str);
-			}
-			in.close();
-		} catch (IOException e) {
-		}
-		return sb.toString();
-	}
-
 	private void updateLoungeAndVerifySavedContent(SetLounge sofa, String rev) {
 
 		when(httpClient.put(anyString(), anyString())).thenReturn(
