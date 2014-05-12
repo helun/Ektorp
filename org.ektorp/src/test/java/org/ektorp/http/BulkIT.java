@@ -11,10 +11,7 @@ import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.impl.StdObjectMapperFactory;
 import org.ektorp.impl.StreamedCouchDbConnector;
 import org.ektorp.support.CouchDbDocument;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +47,9 @@ Caused by: java.net.SocketException: Connection reset
         at org.ektorp.http.StdHttpClient.executeRequest(StdHttpClient.java:96)
         ... 5 more
 */
-@Ignore
-public class BulkTest {
+public class BulkIT {
 
-    private final static Logger LOG = LoggerFactory.getLogger(StdCouchDbInstance.class);
+    private final static Logger LOG = LoggerFactory.getLogger(BulkIT.class);
 
     private HttpClient httpClient;
 
@@ -67,7 +63,7 @@ public class BulkTest {
 
     private boolean createDatabaseIfNeeded = true;
 
-    private boolean deleteDatabaseIfNeeded = false;
+    private boolean deleteDatabaseIfNeeded = true;
 
     @Before
     public void setUp() {
@@ -165,7 +161,7 @@ public class BulkTest {
     }
 
     public void doUpdateInBulkWithOneElement(CouchDbConnector db) throws Exception {
-        final int iterationsCount = 100;
+        final int iterationsCount = 10;
 
         // create document "myid"
         try {
@@ -192,8 +188,8 @@ public class BulkTest {
 
 
     public void doUpdateInBulkWithManyElements(CouchDbConnector db) {
-        final int iterationsCount = 20;
-        final int elementsCount = 200;
+        final int iterationsCount = 10;
+        final int elementsCount = 20;
 
         final List<String> allDocIds = new ArrayList<String>();
 
@@ -219,7 +215,7 @@ public class BulkTest {
 
         for (int i = 0; i < elementsCount; i++) {
             String currentId = "TestDocumentBean-" + i;
-            TestDocumentBean bean = new TestDocumentBean(RandomStringUtils.randomAlphanumeric(32), RandomStringUtils.randomAlphanumeric(16), new Date(), 0);
+            TestDocumentBean bean = new TestDocumentBean(RandomStringUtils.randomAlphanumeric(32), RandomStringUtils.randomAlphanumeric(16), System.currentTimeMillis(), 0);
             String currentRevision = currentRevisionById.get(currentId);
             if (currentRevision != null) {
                 bean.setId(currentId);
@@ -240,11 +236,12 @@ public class BulkTest {
 
             List<TestDocumentBean> docList = db.queryView(q, TestDocumentBean.class);
             for (TestDocumentBean b : docList) {
+                Assert.assertNotNull(b.firstName);
+                Assert.assertNotNull(b.getLastName());
+                Assert.assertNotNull(b.dateOfBirth);
                 // check version is as expected
-                if (b.version != i - 1) {
-                    throw new IllegalStateException("Bean state is not as expected : " + b);
-                }
-                b.version = i;
+                Assert.assertEquals("Bean state is not as expected", i - 1, b.getVersion());
+                b.setVersion(i);
             }
 
             long bulkOpStart = System.currentTimeMillis();
@@ -258,7 +255,7 @@ public class BulkTest {
         List<TestDocumentBean> docList = db.queryView(q, TestDocumentBean.class);
         for (TestDocumentBean b : docList) {
             // check version is as expected
-            if (b.version != iterationsCount) {
+            if (b.getVersion() != iterationsCount) {
                 throw new IllegalStateException("Bean state is not as expected : " + b);
             }
         }
@@ -268,7 +265,7 @@ public class BulkTest {
     }
 
     public void doUpdateInBulkWithOneSmallInputStream(CouchDbConnector db) throws Exception {
-        final int iterationsCount = 100;
+        final int iterationsCount = 10;
 
         // create or update the document, with initial "i" value of 0
         final String id = "myid";
@@ -314,20 +311,52 @@ public class BulkTest {
 
 
     public static class TestDocumentBean extends CouchDbDocument {
-        public String lastName;
-        public String firstName;
-        public Date dateOfBirth;
-        public int version;
+        private String lastName;
+        private String firstName;
+        private Long dateOfBirth;
+        private int version = -1;
 
         public TestDocumentBean() {
 
         }
 
-        public TestDocumentBean(String lastName, String firstName, Date dateOfBirth, int version) {
+        public TestDocumentBean(String lastName, String firstName, Long dateOfBirth, int version) {
             this.lastName = lastName;
             this.firstName = firstName;
             this.dateOfBirth = dateOfBirth;
             this.version = version;
+        }
+
+        public int getVersion() {
+            return version;
+        }
+
+        public void setVersion(int version) {
+            this.version = version;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        public Long getDateOfBirth() {
+            return dateOfBirth;
+        }
+
+        public void setDateOfBirth(Long dateOfBirth) {
+            this.dateOfBirth = dateOfBirth;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
         }
     }
 
