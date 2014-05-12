@@ -53,6 +53,10 @@
 
         <findbugs.skip>false</findbugs.skip>
         <findbugs.includeTests>false</findbugs.includeTests>
+
+        <skipITs>true</skipITs>
+        <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
     </properties>
 
     <dependencyManagement>
@@ -149,6 +153,25 @@
                     <artifactId>findbugs-maven-plugin</artifactId>
                     <version>2.5.3</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.16</version>
+                    <configuration>
+                        <argLine>${jacoco.agent.argLine}</argLine>
+                        <includes>
+                            <include>**/*IT.java</include>
+                        </includes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -207,6 +230,23 @@
                         <configuration>
                             <skip>false</skip>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <skipITs>${skipITs}</skipITs>
+                    <!-- to fool Sonar to show test success for both unit and integration tests together -->
+                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <argLine>${jacoco.agent.argLine}</argLine>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -293,5 +333,60 @@
                 <sonarVersion>2.1</sonarVersion>
             </properties>
         </profile>
+
+
+        <profile>
+            <id>sonar</id>
+            <!-- Enable coverage computation via JaCoCo for Sonar's needs -->
+
+            <properties>
+                <skipITs>false</skipITs>
+            </properties>
+
+            <build>
+                <plugins>
+                    <!--
+                    Compute integration test coverage for Sonar
+                    Note: REQUIRES MAVEN 3 - throws InstantiationException: java.util.List otherwise
+                    Beware: Sonar doesn't run the verify phase; you should always 'mvn clean install' before running sonar
+                    -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <configuration>
+                            <propertyName>jacoco.agent.argLine</propertyName>
+                            <!-- default: argLine -->
+                            <includes>
+                                <include>org/ektorp/**</include>
+                            </includes>
+                            <destFile>${project.build.directory}/jacoco-integration.exec</destFile>
+                            <!-- agent -->
+                            <dataFile>${project.build.directory}/jacoco-integration.exec</dataFile>
+                            <!-- report -->
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <!--
+                                Generate coverage report html in target/site/jacoco/ from target/jacoco.exec
+                                Exec.: mvn verify site
+                                -->
+                                <id>report</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
     </profiles>
 </project>
