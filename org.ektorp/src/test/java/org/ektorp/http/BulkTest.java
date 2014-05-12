@@ -219,7 +219,7 @@ public class BulkTest {
 
         for (int i = 0; i < elementsCount; i++) {
             String currentId = "TestDocumentBean-" + i;
-            TestDocumentBean bean = new TestDocumentBean(RandomStringUtils.randomAlphanumeric(32), RandomStringUtils.randomAlphanumeric(16), System.currentTimeMillis(), 0);
+            TestDocumentBean bean = new TestDocumentBean(RandomStringUtils.randomAlphanumeric(32), RandomStringUtils.randomAlphanumeric(16), new Date(), 0);
             String currentRevision = currentRevisionById.get(currentId);
             if (currentRevision != null) {
                 bean.setId(currentId);
@@ -314,16 +314,16 @@ public class BulkTest {
 
 
     public static class TestDocumentBean extends CouchDbDocument {
-        private String lastName;
-        private String firstName;
-        private Long dateOfBirth;
-        private int version;
+        public String lastName;
+        public String firstName;
+        public Date dateOfBirth;
+        public int version;
 
         public TestDocumentBean() {
 
         }
 
-        public TestDocumentBean(String lastName, String firstName, Long dateOfBirth, int version) {
+        public TestDocumentBean(String lastName, String firstName, Date dateOfBirth, int version) {
             this.lastName = lastName;
             this.firstName = firstName;
             this.dateOfBirth = dateOfBirth;
