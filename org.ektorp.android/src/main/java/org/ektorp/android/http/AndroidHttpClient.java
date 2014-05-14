@@ -1,14 +1,11 @@
 package org.ektorp.android.http;
 
-import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -16,10 +13,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
 import org.ektorp.http.*;
 import org.ektorp.util.Exceptions;
 import org.slf4j.Logger;
@@ -108,27 +102,12 @@ public class AndroidHttpClient extends StdHttpClient {
             }
         }
 
+        // TODO : the only difference with super method is about when the compression parameter is true, but it is false by default, so we should consider deleting the Overriding method 
         @Override
         public org.apache.http.client.HttpClient configureClient() {
-            HttpParams params = new BasicHttpParams();
-            HttpProtocolParams.setUseExpectContinue(params, useExpectContinue);
-            HttpConnectionParams.setConnectionTimeout(params, connectionTimeout);
-            HttpConnectionParams.setSoTimeout(params, socketTimeout);
-            HttpConnectionParams.setTcpNoDelay(params, Boolean.TRUE);
-
-            String protocol = "http";
-
-            if (enableSSL)
-                protocol = "https";
-
-            params.setParameter(ClientPNames.DEFAULT_HOST, new HttpHost(host,
-                    port, protocol));
-            if (proxy != null) {
-                params.setParameter(ConnRoutePNames.DEFAULT_PROXY,
-                        new HttpHost(proxy, proxyPort, protocol));
-            }
-            DefaultHttpClient client = new DefaultHttpClient(
-                    configureConnectionManager(params), params);
+            HttpParams params = configureHttpParams();
+            ClientConnectionManager connectionManager = configureConnectionManager(params);
+            DefaultHttpClient client = new DefaultHttpClient(connectionManager, params);
             if (username != null && password != null) {
                 client.getCredentialsProvider().setCredentials(
                         new AuthScope(host, port, AuthScope.ANY_REALM),

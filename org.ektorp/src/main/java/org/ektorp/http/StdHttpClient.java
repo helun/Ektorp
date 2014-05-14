@@ -370,24 +370,7 @@ public class StdHttpClient implements HttpClient {
 		}
 
 		public org.apache.http.client.HttpClient configureClient() {
-			HttpParams params = new BasicHttpParams();
-			HttpProtocolParams.setUseExpectContinue(params, useExpectContinue);
-			HttpConnectionParams
-					.setConnectionTimeout(params, connectionTimeout);
-			HttpConnectionParams.setSoTimeout(params, socketTimeout);
-			HttpConnectionParams.setTcpNoDelay(params, Boolean.TRUE);
-
-            String protocol = "http";
-
-			if (enableSSL)
-                protocol = "https";
-
-			params.setParameter(ClientPNames.DEFAULT_HOST, new HttpHost(host,
-					port, protocol));
-			if (proxy != null) {
-				params.setParameter(ConnRoutePNames.DEFAULT_PROXY,
-						new HttpHost(proxy, proxyPort, protocol));
-			}
+			HttpParams params = configureHttpParams();
 			ClientConnectionManager connectionManager = configureConnectionManager(params);
 			DefaultHttpClient client = new DefaultHttpClient(connectionManager, params);
 			if (username != null && password != null) {
@@ -402,6 +385,29 @@ public class StdHttpClient implements HttpClient {
 				return new DecompressingHttpClient(client);
 			}
 			return client;
+		}
+
+		/**
+		 * this method is protected so that you can Override it
+		 */
+		protected HttpParams configureHttpParams() {
+			HttpParams params = new BasicHttpParams();
+			HttpProtocolParams.setUseExpectContinue(params, useExpectContinue);
+			HttpConnectionParams.setConnectionTimeout(params, connectionTimeout);
+			HttpConnectionParams.setSoTimeout(params, socketTimeout);
+			HttpConnectionParams.setTcpNoDelay(params, Boolean.TRUE);
+
+			String protocol = "http";
+
+			if (enableSSL) {
+				protocol = "https";
+			}
+
+			params.setParameter(ClientPNames.DEFAULT_HOST, new HttpHost(host, port, protocol));
+			if (proxy != null) {
+				params.setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxy, proxyPort, protocol));
+			}
+			return params;
 		}
 
 		public Builder port(int i) {
