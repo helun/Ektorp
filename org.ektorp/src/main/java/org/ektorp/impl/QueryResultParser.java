@@ -1,20 +1,21 @@
 package org.ektorp.impl;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ektorp.DbAccessException;
-import org.ektorp.ViewResultException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.ektorp.DbAccessException;
+import org.ektorp.ViewResultException;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Henrik Lundgren (original implementation)
@@ -110,10 +111,10 @@ public class QueryResultParser<T> {
             }
             if (row.doc != null) {
                 dataField = INCLUDED_DOC_FIELD_NAME;
-                rows.add(mapper.readValue(row.doc.traverse(), type));
+                rows.add(mapper.readValue(row.doc.traverse(jp.getCodec()), type));
             } else {
                 dataField = VALUE_FIELD_NAME;
-                rows.add(mapper.readValue(row.value.traverse(), type));
+                rows.add(mapper.readValue(row.value.traverse(jp.getCodec()), type));
             }
             firstId = row.id;
             firstKey = row.key;
