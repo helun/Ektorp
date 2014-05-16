@@ -43,8 +43,8 @@
         <log4j.version>1.2.13</log4j.version>
         <mockito.version>1.8.5</mockito.version>
         <junit.version>4.8.2</junit.version>
-        <joda.time.version>1.6.2</joda.time.version>
-        <jackson.version>2.2.2</jackson.version>
+        <joda.time.version>2.3</joda.time.version>
+        <jackson.version>2.3.3</jackson.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <commons.io.version>2.0.1</commons.io.version>
         <httpclient.version>4.3</httpclient.version>
