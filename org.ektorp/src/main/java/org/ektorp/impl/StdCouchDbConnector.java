@@ -416,9 +416,7 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     @Override
     public void createDatabaseIfNotExists() {
-        if (!dbInstance.checkIfDbExists(new DbPath(dbName))) {
-            dbInstance.createDatabase(dbName);
-        }
+		dbInstance.createDatabaseIfNotExists(dbName);
     }
 
     @Override
