@@ -72,11 +72,16 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	    return restTemplate.head(db.getPath(), new StdResponseHandler<Boolean>() {
 		@Override
 		public Boolean error(HttpResponse hr) {
-		    return false;
+			if(hr.getCode() == HttpStatus.NOT_FOUND) {
+				// only 404 is a valid response, anything else is an error
+				// see http://docs.couchdb.org/en/latest/api/database/common.html#head--db
+				return false;
+			}
+			throw StdResponseHandler.createDbAccessException(hr);
 		}
 		@Override
 		public Boolean success(HttpResponse hr) throws Exception {
-		    return true;
+			return true;
 		}
 	    });
 	}
