@@ -1,13 +1,13 @@
 package org.ektorp.impl;
 
--import com.fasterxml.jackson.annotation.JsonAutoDetect;
- import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
- import com.fasterxml.jackson.core.JsonParser;
- import com.fasterxml.jackson.core.JsonToken;
- import com.fasterxml.jackson.databind.JsonNode;
- import com.fasterxml.jackson.databind.ObjectMapper;
- import org.ektorp.DbAccessException;
- import org.ektorp.ViewResultException;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.ektorp.DbAccessException;
+import org.ektorp.ViewResultException;
  
 /**
  * @author Henrik Lundgren (original implementation)
