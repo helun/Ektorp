@@ -328,6 +328,8 @@ public class DocumentsTest {
 	}
 
 	public static class ExtendedDocument extends TestDocument {
+
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
 		public String id;
 
 		public String getId(String s) {

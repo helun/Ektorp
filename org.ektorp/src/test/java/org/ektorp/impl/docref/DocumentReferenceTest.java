@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.io.*;
 import java.util.*;
 
+import org.apache.commons.io.IOUtils;
 import org.ektorp.*;
 import org.ektorp.http.*;
 import org.ektorp.impl.*;
@@ -126,7 +127,7 @@ public class DocumentReferenceTest {
 		lounge.sitDown(People.nisse());
 		lounge.sitDown(People.kalle());
 
-		updateLounge(lounge, "");
+		updateLounge(lounge);
 		String expectedJSON = String.format(
 				"{\"color\":\"blue\",%s\"_id\":\"lounge_id\"}", "");
 		verify(httpClient).put(Matchers.matches(".*/lounge_id"),
@@ -157,7 +158,7 @@ public class DocumentReferenceTest {
 	}
 
 	@Test
-	public void untouched_member_of_lazy_collection_should_not_cause_update() {
+	public void untouched_member_of_lazy_collection_should_not_cause_update() throws IOException {
 		setupGetDocResponseForDocWithBackReferences();
 		LazyLounge sofa = dbCon.get(LazyLounge.class, TEST_LOUNGE_ID);
 		
@@ -195,7 +196,7 @@ public class DocumentReferenceTest {
 		verifyNoMoreInteractions(httpClient);
 		assertEquals(2, sofa.getSeatedPeople().size());
 		verifyDocRefsLoaded();
-		updateLounge(sofa, sofa.getRevision());
+		updateLounge(sofa);
 	}
 	
 	@Test
@@ -224,26 +225,19 @@ public class DocumentReferenceTest {
 		verify(httpClient).getUncached(Matchers.matches(".*_docrefs_.*"));
 	}
 
-	public String readFile(String fileName) {
-		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(this
-					.getClass().getResourceAsStream(fileName)));
-			String str;
-			while ((str = in.readLine()) != null) {
-				sb.append(str);
-			}
-			in.close();
-		} catch (IOException e) {
+	public String readFile(String fileName) throws IOException {
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = this.getClass().getResourceAsStream(fileName);
+            return IOUtils.toString(resourceAsStream, "UTF-8");
+		} finally {
+            IOUtils.closeQuietly(resourceAsStream);
 		}
-		return sb.toString();
 	}
 
-	private void updateLounge(Object sofa, String rev) {
+	private void updateLounge(Object sofa) {
 
 		setupUpdateResponse();
-		
-		rev = rev.length() == 0 ? "" : "\"_rev\":\"" + rev + "\",";
 		
 		when(
 				httpClient.post(Matchers.matches(".*_bulk_docs"),

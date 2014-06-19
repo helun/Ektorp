@@ -2,10 +2,12 @@ package org.ektorp;
 
 import static org.junit.Assert.*;
 
+import java.io.InputStream;
 import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.junit.*;
 
 public class DocumentOperationResponseTest {
@@ -14,8 +16,16 @@ public class DocumentOperationResponseTest {
 	public void read_from_json() throws Exception {
 		ObjectMapper om = new ObjectMapper();
 		TypeReference<List<DocumentOperationResult>> tr = new TypeReference<List<DocumentOperationResult>>(){};
-		List<DocumentOperationResult> result = om.readValue(getClass().getResourceAsStream("document_operation_response.json"), tr);
-		assertEquals(3, result.size());
+
+        List<DocumentOperationResult> result;
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = getClass().getResourceAsStream("document_operation_response.json");
+            result = om.readValue(resourceAsStream, tr);
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
+        assertEquals(3, result.size());
 
 		assertTrue(result.get(0).isErroneous());
 		assertEquals("0", result.get(0).getId());

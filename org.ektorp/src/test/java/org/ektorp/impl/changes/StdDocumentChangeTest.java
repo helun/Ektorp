@@ -3,6 +3,7 @@ package org.ektorp.impl.changes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import junit.framework.Assert;
+import org.apache.commons.io.IOUtils;
 import org.ektorp.StreamingChangesResult;
 import org.ektorp.changes.DocumentChange;
 import org.ektorp.http.HttpResponse;
@@ -10,6 +11,7 @@ import org.ektorp.impl.ResponseOnFileStub;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -82,8 +84,7 @@ public class StdDocumentChangeTest {
     public void test_streaming_changes() throws IOException {
 	    HttpResponse httpResponse = ResponseOnFileStub.newInstance(200, "changes/changes_full.json");
 	    
-	    StreamingChangesResult changes = new StreamingChangesResult(new ObjectMapper(),
-                httpResponse);
+	    StreamingChangesResult changes = new StreamingChangesResult(new ObjectMapper(), httpResponse);
 	    int i = 0;
         for (DocumentChange documentChange : changes) {
             Assert.assertEquals(++i, documentChange.getSequence());
@@ -93,7 +94,13 @@ public class StdDocumentChangeTest {
     }
 
 	private JsonNode load(String id) throws IOException {
-		return mapper.readTree(getClass().getResourceAsStream(id));
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = getClass().getResourceAsStream(id);
+            return mapper.readTree(resourceAsStream);
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
 	}
 
 }

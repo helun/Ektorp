@@ -3,7 +3,10 @@ package org.ektorp;
 import static org.junit.Assert.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.junit.*;
+
+import java.io.InputStream;
 
 
 public class DesignDocInfoTest {
@@ -12,7 +15,14 @@ public class DesignDocInfoTest {
 	@Test
 	public void test_from_json() throws Exception {
 		ObjectMapper om = new ObjectMapper();
-		DesignDocInfo info = om.readValue(getClass().getResourceAsStream("design_doc_info.json"), DesignDocInfo.class);
+        DesignDocInfo info;
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = getClass().getResourceAsStream("design_doc_info.json");
+            info = om.readValue(resourceAsStream, DesignDocInfo.class);
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
 		assertEquals("exampleDesignDoc", info.getName());
 
 		DesignDocInfo.ViewIndex idx = info.getViewIndex();

@@ -4,7 +4,7 @@
     <artifactId>org.ektorp.parent</artifactId>
     <packaging>pom</packaging>
     <name>Ektorp Parent</name>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.3-SNAPSHOT</version>
     <description>a Java CouchDB persistence library</description>
     <scm>
         <connection>scm:git:git@github.com:helun/Ektorp.git</connection>
@@ -52,7 +52,7 @@
         <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
 
         <findbugs.skip>false</findbugs.skip>
-        <findbugs.includeTests>false</findbugs.includeTests>
+        <findbugs.includeTests>true</findbugs.includeTests>
     </properties>
 
     <dependencyManagement>

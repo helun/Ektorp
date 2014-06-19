@@ -31,16 +31,16 @@ public class DesignDocumentTest {
 	@Test
 	public void should_deserialize_from_design_doc_json_from_db() throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper om = new ObjectMapper();
-		DesignDocument dd = om.readValue(getClass().getResourceAsStream("design_doc.json"), DesignDocument.class);
-		assertDeserialization(dd);
+        DesignDocument dd = loadDesignDocumentFromResource(om);
+        assertDeserialization(dd);
 	}
 
-	@Test
+    @Test
 	public void should_deserialize_with_auto_detect_getters_disabled() throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper om = new ObjectMapper();
 		om.getSerializationConfig().with(MapperFeature.AUTO_DETECT_GETTERS);
-		DesignDocument dd = om.readValue(getClass().getResourceAsStream("design_doc.json"), DesignDocument.class);
-		assertDeserialization(dd);
+        DesignDocument dd = loadDesignDocumentFromResource(om);
+        assertDeserialization(dd);
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class DesignDocumentTest {
 		ObjectMapper om = new ObjectMapper();
 		assertSerialization(om);
 	}
-	
+
 	@Test
 	public void view_functions_with_line_breaks_should_serialze_just_fine() throws Exception {
 		dd.addView("by_lastname", new DesignDocument.View("function(doc)\n{ if (doc.Type == 'TestDoc') {\nemit(doc.LastName, doc)\n}\n}"));
@@ -138,5 +138,15 @@ public class DesignDocumentTest {
 		String expected = IOUtils.toString(getClass().getResourceAsStream("design_doc.json"));
 		assertTrue(JSONComparator.areEqual(json, expected));
 	}
+
+    private DesignDocument loadDesignDocumentFromResource(ObjectMapper om) throws IOException {
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = getClass().getResourceAsStream("design_doc.json");
+            return om.readValue(resourceAsStream, DesignDocument.class);
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
+    }
 
 }
