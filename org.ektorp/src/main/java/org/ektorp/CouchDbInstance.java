@@ -27,7 +27,9 @@ public interface CouchDbInstance {
 
 	void createDatabase(DbPath path);
 	void createDatabase(String path);
-	
+	boolean createDatabaseIfNotExists(DbPath path);
+	boolean createDatabaseIfNotExists(String path);
+
 	void deleteDatabase(String path);
 	/**
 	 * 

@@ -50,11 +50,33 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	}
 
 	public void createDatabase(DbPath db) {
-		if (checkIfDbExists(db)) {
+		if (!createDatabaseIfNotExists(db)) {
 			throw new DbAccessException(format("A database with path %s already exists", db.getPath()));
 		}
+	}
+
+	public boolean createDatabaseIfNotExists(String path) {
+		return createDatabaseIfNotExists(DbPath.fromString(path));
+	}
+
+	public boolean createDatabaseIfNotExists(final DbPath db) {
 		LOG.debug("creating db path: {}", db.getPath());
-		restTemplate.put(db.getPath());
+		return restTemplate.put(db.getPath(), new StdResponseHandler<Boolean>() {
+			@Override
+			public Boolean error(HttpResponse hr) {
+				if (hr.getCode() == HttpStatus.PRECONDITION_FAILED) {
+					// 412 indicates existing database
+					// see http://docs.couchdb.org/en/latest/api/database/common.html#put--db
+					LOG.debug("database at db path {} already exists.", db.getPath());
+					return false;
+				}
+				throw StdResponseHandler.createDbAccessException(hr);
+			}
+			@Override
+			public Boolean success(HttpResponse hr) throws Exception {
+				return true;
+			}
+		});
 	}
 
 	public void deleteDatabase(String path) {
@@ -72,11 +94,16 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	    return restTemplate.head(db.getPath(), new StdResponseHandler<Boolean>() {
 		@Override
 		public Boolean error(HttpResponse hr) {
-		    return false;
+			if(hr.getCode() == HttpStatus.NOT_FOUND) {
+				// only 404 is a valid response, anything else is an error
+				// see http://docs.couchdb.org/en/latest/api/database/common.html#head--db
+				return false;
+			}
+			throw StdResponseHandler.createDbAccessException(hr);
 		}
 		@Override
 		public Boolean success(HttpResponse hr) throws Exception {
-		    return true;
+			return true;
 		}
 	    });
 	}

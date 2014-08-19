@@ -39,6 +39,10 @@ public class RestTemplate {
 		handleVoidResponse(client.put(path));
 	}
 
+	public <T> T put(String path, ResponseCallback<T> callback) {
+		return handleResponse(callback, client.put(path));
+	}
+
 	public <T> T put(String path, String content, ResponseCallback<T> callback) {
 		return handleResponse(callback, client.put(path, content));
 	}
