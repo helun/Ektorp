@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+ 
 /**
  * @author Henrik Lundgren (original implementation)
  * @author Pascal Gélinas (rewrite for issue #98)
@@ -110,10 +110,10 @@ public class QueryResultParser<T> {
             }
             if (row.doc != null) {
                 dataField = INCLUDED_DOC_FIELD_NAME;
-                rows.add(mapper.readValue(row.doc.traverse(), type));
+                rows.add(mapper.readValue(row.doc.traverse(jp.getCodec()), type));
             } else {
                 dataField = VALUE_FIELD_NAME;
-                rows.add(mapper.readValue(row.value.traverse(), type));
+                rows.add(mapper.readValue(row.value.traverse(jp.getCodec()), type));
             }
             firstId = row.id;
             firstKey = row.key;
