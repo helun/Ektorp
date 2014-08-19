@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpEntity;
 import org.ektorp.*;
 import org.ektorp.changes.ChangesCommand;
 import org.ektorp.changes.ChangesFeed;
@@ -58,6 +59,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
 
     private BulkExecutor<InputStream> inputStreamBulkExecutor;
 
+    private AttachmentCouchDbConnector attachmentCouchDbConnector;
+
     private final static Options EMPTY_OPTIONS = new Options();
 
     public StdCouchDbConnector(String databaseName, CouchDbInstance dbInstance) {
@@ -95,6 +98,8 @@ public class StdCouchDbConnector implements CouchDbConnector {
             }
         };
 
+        attachmentCouchDbConnector = new StdAttachmentCouchDbConnector(dbURI, restTemplate, revisionHandler);
+        
         inputStreamBulkExecutor = new InputStreamWrapperBulkExecutor(dbURI, restTemplate, objectMapper);
     }
 
@@ -172,47 +177,33 @@ public class StdCouchDbConnector implements CouchDbConnector {
     }
 
     @Override
+    public AttachmentInputStream getAttachment(String id, String attachmentId) {
+        return attachmentCouchDbConnector.getAttachment(id, attachmentId);
+    }
+
+    @Override
+    public AttachmentInputStream getAttachment(String id, String attachmentId, String revision) {
+        return attachmentCouchDbConnector.getAttachment(id, attachmentId, revision);
+    }
+
+    @Override
     public String createAttachment(String docId, AttachmentInputStream data) {
-        return createAttachment(docId, null, data);
+        return attachmentCouchDbConnector.createAttachment(docId, data);
     }
 
     @Override
-    public String createAttachment(String docId, String revision,
-            AttachmentInputStream data) {
-        assertDocIdHasValue(docId);
-        URI uri = dbURI.append(docId).append(data.getId());
-        if (revision != null) {
-            uri.param("rev", revision);
-        }
-        return restTemplate.put(uri.toString(), data, data.getContentType(),
-                data.getContentLength(), revisionHandler).getRevision();
+    public String createAttachment(String docId, String revision, AttachmentInputStream data) {
+        return attachmentCouchDbConnector.createAttachment(docId, revision, data);
     }
 
     @Override
-    public AttachmentInputStream getAttachment(final String id,
-            final String attachmentId) {
-        assertDocIdHasValue(id);
-        Assert.hasText(attachmentId, "attachmentId may not be null or empty");
-
-		LOG.trace("fetching attachment for doc: {} attachmentId: {}", id, attachmentId);
-        return getAttachment(attachmentId, dbURI.append(id).append(attachmentId));
+    public String createAttachment(String docId, HttpEntity attachmentEntity, String attachmentName) {
+        return attachmentCouchDbConnector.createAttachment(docId, attachmentEntity, attachmentName);
     }
 
     @Override
-    public AttachmentInputStream getAttachment(String id, String attachmentId,
-    		String revision) {
-    	assertDocIdHasValue(id);
-        Assert.hasText(attachmentId, "attachmentId may not be null or empty");
-        Assert.hasText(revision, "revision may not be null or empty");
-
-		LOG.trace("fetching attachment for doc: {} attachmentId: {}", id, attachmentId);
-        return getAttachment(attachmentId, dbURI.append(id).append(attachmentId).param("rev", revision));
-    }
-
-    private AttachmentInputStream getAttachment(String attachmentId, URI uri) {
-    	HttpResponse r = restTemplate.get(uri.toString());
-        return new AttachmentInputStream(attachmentId, r.getContent(),
-                r.getContentType(), r.getContentLength());
+    public String createAttachment(String docId, String revision, HttpEntity attachmentEntity, String attachmentName) {
+        return attachmentCouchDbConnector.createAttachment(docId, revision, attachmentEntity, attachmentName);
     }
 
     @Override
