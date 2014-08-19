@@ -42,6 +42,7 @@ public class ReplicationCommandTest {
 		queryParams.put("key", "value");
 		
 		ReplicationCommand rc = new ReplicationCommand.Builder()
+		                            .id("0a81b645497e6270611ec3419767a584+continuous+create_target")
 									.source("http://example.org/example-database")
 									.target("http://admin:password@127.0.0.1:5984/example-database")
 									.proxy("http://localhost:8888")
@@ -65,6 +66,7 @@ public class ReplicationCommandTest {
         queryParams.put("key", "value");
 
         ReplicationCommand cmd = new ReplicationCommand.Builder()
+                .id("0a81b645497e6270611ec3419767a584+continuous+create_target")
                 .source("http://example.org/example-database")
                 .target("http://admin:password@127.0.0.1:5984/example-database")
                 .proxy("http://localhost:8888")
@@ -90,6 +92,7 @@ public class ReplicationCommandTest {
         queryParams.put("key", "value");
 
         ReplicationCommand cmd = new ReplicationCommand.Builder()
+                .id("0a81b645497e6270611ec3419767a584+continuous+create_target")
                 .source("http://example.org/example-database")
                 .target("http://admin:password@127.0.0.1:5984/example-database")
                 .proxy("http://localhost:8888")

@@ -25,6 +25,9 @@ public class ReplicationStatus implements Serializable {
 
 	@JsonProperty("session_id")
 	String sessionId;
+	
+	@JsonProperty("_local_id")
+	String id;
 
 	@JsonProperty("source_last_seq")
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SE_BAD_FIELD")
@@ -47,6 +50,10 @@ public class ReplicationStatus implements Serializable {
 	public String getSessionId() {
 		return sessionId;
 	}
+	
+	public String getId() {
+        return id;
+    }
 
 	public String getSourceLastSequence() {
 		return sourceLastSequence != null ? sourceLastSequence.asText() : null;

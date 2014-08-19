@@ -1,18 +1,20 @@
 package org.ektorp;
 
+import java.io.Serializable;
+import java.util.Collection;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.ektorp.util.Assert;
-
-import java.io.Serializable;
-import java.util.Collection;
 
 @JsonInclude(Include.NON_NULL)
 public class ReplicationCommand implements Serializable {
 
 	private static final long serialVersionUID = 6919908757724780784L;
 
+	@JsonProperty("_local_id")
+	public final String id;
+	   
 	@JsonProperty
 	public final String source;
 
@@ -44,7 +46,8 @@ public class ReplicationCommand implements Serializable {
     public final Object sinceSeq;
 
     private ReplicationCommand(Builder b) {
-		source = b.source;
+		id = b.id;
+        source = b.source;
 		target = b.target;
 		proxy = b.proxy;
 		filter = b.filter;
@@ -58,6 +61,7 @@ public class ReplicationCommand implements Serializable {
 
 	public static class Builder {
 
+	    private String id;
 		private String source;
 		private String target;
 		private String proxy;
@@ -69,6 +73,17 @@ public class ReplicationCommand implements Serializable {
         private String sinceSeqAsString;
         private Long sinceSeqAsLong;
 		private Object queryParams;
+		
+		/**
+		 * Id of replication.
+		 * @param s
+		 * @return
+		 */
+		public Builder id(String s) {
+		    id = s;
+		    return this;
+		}
+		
 		/**
 		 * Source and target can both point at local databases, remote databases and any combination of these.
 		 *
@@ -175,8 +190,6 @@ public class ReplicationCommand implements Serializable {
         }
 
 		public ReplicationCommand build() {
-			Assert.hasText(source, "source may not be null or empty");
-			Assert.hasText(target, "target may not be null or empty");
 			return new ReplicationCommand(this);
 		}
 	}
