@@ -384,6 +384,22 @@ public interface CouchDbConnector extends LocalBulkBuffer {
     DbInfo getDbInfo();
 
     /**
+     * Provides access to the database's underlying security configuration
+     *
+     * @return the <em>optional</em> database {@link Security}
+     */
+    Security getSecurity();
+
+    /**
+     * Provides a way to update the database's underlying security configuration
+     *
+     * @param security
+     *          the {@link Security} to update
+     * @return the update {@link Status}
+     */
+    Status updateSecurity(Security security);
+
+    /**
      * Obtains information about a given design document, including the index, index size and current status of the
      * design document and associated index information.
      * 

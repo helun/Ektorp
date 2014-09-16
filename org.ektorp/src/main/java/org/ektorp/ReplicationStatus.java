@@ -1,10 +1,13 @@
 package org.ektorp;
 
-import java.io.*;
-import java.util.*;
-
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -13,12 +16,9 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author henrik lundgren
  *
  */
-public class ReplicationStatus implements Serializable {
+public class ReplicationStatus extends Status implements Serializable {
 
 	private static final long serialVersionUID = 6617269292660336903L;
-
-	@JsonProperty("ok")
-	boolean ok;
 
 	@JsonProperty("no_changes")
 	boolean noChanges;
@@ -36,12 +36,6 @@ public class ReplicationStatus implements Serializable {
 	@JsonProperty("history")
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SE_BAD_FIELD")
 	List<History> history;
-
-	private Map<String, Object> unknownFields;
-
-	public boolean isOk() {
-		return ok;
-	}
 
 	public boolean isNoChanges() {
 		return noChanges;
@@ -65,22 +59,6 @@ public class ReplicationStatus implements Serializable {
 
 	public List<History> getHistory() {
 		return history;
-	}
-
-	private Map<String, Object> unknown() {
-		if (unknownFields == null) {
-			unknownFields = new HashMap<String, Object>();
-		}
-		return unknownFields;
-	}
-
-	@JsonAnySetter
-	public void setUnknown(String key, Object value) {
-		unknown().put(key, value);
-	}
-
-	public Object getField(String key) {
-		return unknown().get(key);
 	}
 
 	public static class History {
