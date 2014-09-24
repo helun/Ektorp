@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
- 
+
 /**
  * @author Henrik Lundgren (original implementation)
  * @author Pascal Gélinas (rewrite for issue #98)
@@ -33,7 +33,7 @@ public class QueryResultParser<T> {
     private static final String UPDATE_SEQUENCE_NAME = "update_seq";
 
     private int totalRows = -1;
-    private int offset = -1;
+    private long offset = -1;
     private List<T> rows;
     private Long updateSequence;
 
@@ -72,7 +72,7 @@ public class QueryResultParser<T> {
         while (jp.nextValue() != JsonToken.END_OBJECT) {
             String currentName = jp.getCurrentName();
             if (OFFSET_FIELD_NAME.equals(currentName)) {
-                offset = jp.getIntValue();
+                offset = jp.getLongValue();
             } else if (TOTAL_ROWS_FIELD_NAME.equals(currentName)) {
                 totalRows = jp.getIntValue();
             } else if (ROWS_FIELD_NAME.equals(currentName)) {
@@ -169,7 +169,7 @@ public class QueryResultParser<T> {
         return totalRows;
     }
 
-    public int getOffset() {
+    public long getOffset() {
         return offset;
     }
 
