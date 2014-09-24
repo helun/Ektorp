@@ -20,11 +20,13 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 	private boolean writeDatesAsTimestamps = false;
 
 	public synchronized ObjectMapper createObjectMapper() {
-		if (instance == null) {
-			instance = new ObjectMapper();
-			applyDefaultConfiguration(instance);
+		ObjectMapper result = instance;
+		if (result == null) {
+			result = new ObjectMapper();
+			applyDefaultConfiguration(result);
+			instance = result;
 		}
-		return instance;
+		return result;
 	}
 
 	public ObjectMapper createObjectMapper(CouchDbConnector connector) {
