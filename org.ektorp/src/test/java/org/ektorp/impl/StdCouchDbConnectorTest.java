@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.answers.ThrowsException;
+import org.mockito.internal.verification.VerificationModeFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -235,6 +236,7 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void should_create_db_if_missing() {
+        doReturn(HttpResponseStub.valueOf(404, "{\"error\":\"not_found\",\"reason\":\"no_db_file\"}")).when(httpClient).head("/test_db/");
 		doReturn(HttpResponseStub.valueOf(HttpStatus.CREATED, null)).when(httpClient).put("/test_db/");
 		dbCon.createDatabaseIfNotExists();
 		verify(httpClient).put("/test_db/");
@@ -242,9 +244,14 @@ public class StdCouchDbConnectorTest {
 
     @Test
     public void should_not_create_db_if_already_exists() {
-		doReturn(HttpResponseStub.valueOf(HttpStatus.PRECONDITION_FAILED, null)).when(httpClient).put("/test_db/");
-		dbCon.createDatabaseIfNotExists();
-		verify(httpClient).put("/test_db/");
+        doReturn(HttpResponseStub
+                .valueOf(
+                        200,
+                        "{\"test_db\":\"global\",\"doc_count\":1,\"doc_del_count\":0,\"update_seq\":3,\"purge_seq\":0,\"compact_running\":false,\"disk_size\":100,\"instance_start_time\":\"130\",\"disk_format_version\":5,\"committed_update_seq\":3}"))
+                .when(httpClient).head("/test_db/");
+
+        dbCon.createDatabaseIfNotExists();
+        verify(httpClient, VerificationModeFactory.times(0)).put(anyString());
     }
 
     @Test
