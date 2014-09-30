@@ -1,0 +1,87 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.ektorp</groupId>
+	<artifactId>org.ektorp.audit</artifactId>
+	<packaging>jar</packaging>
+	<name>Ektorp Audit</name>
+	<version>1.4.2</version>
+	<description>Provides Automatic Auditing support to Ektorp</description>
+	<parent>
+		<groupId>org.ektorp</groupId>
+		<artifactId>org.ektorp.parent</artifactId>
+		<version>1.4.2</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.ektorp</groupId>
+			<artifactId>org.ektorp</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.1.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<version>1.7</version>
+				<configuration>
+					<weaveDependencies>
+						<weaveDependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-webmvc</artifactId>
+						</weaveDependency>
+						<weaveDependency>
+							<groupId>org.ektorp</groupId>
+							<artifactId>org.ektorp</artifactId>
+						</weaveDependency>
+					</weaveDependencies>
+					<Xlint>ignore</Xlint>
+					<verbose>true</verbose>
+				</configuration>
+			</plugin>
+		</plugins>
+
+	</build>
+</project>
