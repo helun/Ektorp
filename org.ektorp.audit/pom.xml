@@ -12,6 +12,19 @@
 		<artifactId>org.ektorp.parent</artifactId>
 		<version>1.4.2</version>
 	</parent>
+    <developers>
+        <developer>
+            <id>eric.benzacar</id>
+            <name>Eric Benzacar</name>
+            <email>ebenzacar@gmail.com</email>
+            <url>https://github.com/benze/Ektorp.git</url>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
 
 	<dependencies>
 		<dependency>
