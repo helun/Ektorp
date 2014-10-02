@@ -60,6 +60,10 @@ public class StdCouchDbInstance implements CouchDbInstance {
 	}
 
 	public boolean createDatabaseIfNotExists(final DbPath db) {
+		boolean databaseAlreadyExists = checkIfDbExists(db);
+		if (databaseAlreadyExists) {
+			return false;
+		}
 		LOG.debug("creating db path: {}", db.getPath());
 		return restTemplate.put(db.getPath(), new StdResponseHandler<Boolean>() {
 			@Override
@@ -83,7 +87,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 		Assert.notNull(path);
 		restTemplate.delete(DbPath.fromString(path).getPath());
 	}
-	
+
 	@Override
 	public boolean checkIfDbExists(String path) {
 	    return checkIfDbExists(DbPath.fromString(path));
