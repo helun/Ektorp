@@ -15,7 +15,8 @@ import org.ektorp.util.Exceptions;
  */
 public class PageRequest {
 
-	private static final String NEXT_KEY_FIELD_NAME = "k";
+	private static final String NEXT_KEY_FIELD_NAME = "key";
+	private static final String NEXT_DOCID_FIELD_NAME = "id";
 	private static final String PAGE_SIZE_FIELD_NAME = "s";
 	private static final String BACK_FIELD_NAME = "b";
 	private static final String PAGE_FIELD_NAME = "p";
@@ -27,7 +28,6 @@ public class PageRequest {
 	private final boolean back;
 	private final int page;
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DB_DUPLICATE_BRANCHES")
 	public static ViewQuery applyPagingParameters(ViewQuery q, PageRequest pr) {
 		ViewQuery pagedQuery = q.clone();
 		if (pr.page > 0) {
@@ -39,11 +39,10 @@ public class PageRequest {
 			}
 			if (pr.back) {
 				pagedQuery.descending(!pagedQuery.isDescending());
-			}	
+			}
 		}
-		
-		int offset = pr.back ? 1 : 1;
-		pagedQuery.limit(pr.getPageSize() + offset);
+		int additionalRowsToQuery = 1;
+		pagedQuery.limit(pr.getPageSize() + additionalRowsToQuery);
 		return pagedQuery;
 	}
 
@@ -79,12 +78,24 @@ public class PageRequest {
 			JsonNode n = MAPPER.readTree(new ByteArrayInputStream(Base64
 					.decode(link, Base64.URL_SAFE)));
 
-			KeyIdPair key = parseNextKey(n);
+			JsonNode keyNode = n.get(NEXT_KEY_FIELD_NAME);
+			JsonNode docIdNode = n.get(NEXT_DOCID_FIELD_NAME);
+			String docId = null;
+			if (docIdNode != null) {
+				docId = docIdNode.asText();
+			}
+
+			KeyIdPair keyIdPair;
+			if (keyNode != null || docId != null) {
+				keyIdPair = new KeyIdPair(keyNode, docId);
+			} else {
+				keyIdPair = null;
+			}
 			int pageSize = n.get(PAGE_SIZE_FIELD_NAME).intValue();
 			boolean back = n.get(BACK_FIELD_NAME).asInt() == 1;
 			int page = n.get(PAGE_FIELD_NAME).asInt();
 			return new Builder()
-						.nextKey(key)
+						.nextKey(keyIdPair)
 						.pageSize(pageSize)
 						.back(back)
 						.page(page)
@@ -94,22 +105,6 @@ public class PageRequest {
 		}
 	}
 
-	private static KeyIdPair parseNextKey(JsonNode n) {
-		return parseKey(NEXT_KEY_FIELD_NAME, n);
-	}
-
-	private static KeyIdPair parseKey(String fieldName, JsonNode n) {
-		KeyIdPair key;
-		JsonNode nextKey = n.get(fieldName);
-		if (nextKey != null) {
-			String docId = nextKey.fieldNames().next();
-			key = new KeyIdPair(nextKey.get(docId), docId);
-		} else {
-			key = null;
-		}
-		return key;
-	} 
-	
 	public String asLink() {
 		try {
 			return Base64.encodeBytes(MAPPER.writeValueAsBytes(asJson()),
@@ -122,7 +117,12 @@ public class PageRequest {
 	public JsonNode asJson() {
 		ObjectNode n = MAPPER.createObjectNode();
 		if (nextKey != null) {
-			n.putObject(NEXT_KEY_FIELD_NAME).put(nextKey.docId, nextKey.key);
+			if (nextKey.key != null) {
+				n.put(NEXT_KEY_FIELD_NAME, nextKey.key);
+			}
+			if (nextKey.docId != null) {
+				n.put(NEXT_DOCID_FIELD_NAME, nextKey.docId);
+			}
 		}
 		n.put(PAGE_SIZE_FIELD_NAME, pageSize);
 		n.put(BACK_FIELD_NAME, back ? 1 : 0);
@@ -160,7 +160,14 @@ public class PageRequest {
 
 	@Override
 	public String toString() {
-		return asJson().toString();
+		StringBuilder builder = new StringBuilder();
+		builder.append(this.getClass().getName()).append("(");
+		builder.append("pageSize=").append(pageSize);
+		builder.append(",page=").append(page);
+		builder.append(",back=").append(back);
+		builder.append(",nextKey=").append(nextKey);
+		builder.append(")");
+		return builder.toString();
 	}
 
 	
@@ -252,8 +259,21 @@ public class PageRequest {
 		public int getPrevPage() {
 			return page - 1;
 		}
-	} 
-	
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append(this.getClass().getName()).append("(");
+			builder.append("pageSize=").append(pageSize);
+			builder.append(",page=").append(page);
+			builder.append(",back=").append(back);
+			builder.append(",nextKey=").append(nextKey);
+			builder.append(")");
+			return builder.toString();
+        }
+
+	}
+
 	private static final class KeyIdPair {
 		final JsonNode key;
 		final String docId;
@@ -294,6 +314,15 @@ public class PageRequest {
 			return true;
 		}
 		
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append(this.getClass().getName()).append("(");
+			builder.append("key=").append(key);
+			builder.append(",docId=").append(docId);
+			builder.append(")");
+			return builder.toString();
+		}
 		
 	}
 
