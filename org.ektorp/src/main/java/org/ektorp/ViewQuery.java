@@ -1,5 +1,6 @@
 package org.ektorp;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,6 +62,14 @@ public class ViewQuery {
 				} catch (Exception e) {
 					throw Exceptions.propagate(e);
 				}
+			}
+		}
+
+		public Object asDecoded() {
+			if (isRaw) {
+				return parseJson(rawKey);
+			} else {
+				return key;
 			}
 		}
 
@@ -612,7 +621,7 @@ public class ViewQuery {
 	}
 
 	public Object getKey() {
-		return key;
+		return key.asDecoded();
 	}
 
     public boolean hasMultipleKeys() {
@@ -628,11 +637,11 @@ public class ViewQuery {
 
 
     public Object getStartKey() {
-		return startKey;
+		return startKey.asDecoded();
 	}
 
 	public Object getEndKey() {
-		return endKey;
+		return endKey.asDecoded();
 	}
 
 	public String buildQuery() {
@@ -741,7 +750,7 @@ public class ViewQuery {
 		copy.skip = skip;
 		copy.staleOk = staleOk;
 		copy.startDocId = startDocId;
-		startKey.copyTo(startKey);
+		startKey.copyTo(copy.startKey);
 		copy.updateSeq = updateSeq;
 		copy.viewName = viewName;
 		return copy;
