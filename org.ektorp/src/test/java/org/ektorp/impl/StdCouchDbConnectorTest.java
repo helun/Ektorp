@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.ektorp.*;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.HttpStatus;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.*;
 
 public class StdCouchDbConnectorTest {
 
+    protected static final String OK_RESPONSE = "{\"ok\":true}";
     protected static final String OK_RESPONSE_WITH_ID_AND_REV = "{\"ok\":true,\"id\":\"some_id\",\"rev\":\"123D123\"}";
     protected static final String TEST_DB_PATH = "/test_db/";
     CouchDbConnector dbCon;
@@ -237,7 +239,7 @@ public class StdCouchDbConnectorTest {
     @Test
     public void should_create_db_if_missing() {
         doReturn(HttpResponseStub.valueOf(404, "{\"error\":\"not_found\",\"reason\":\"no_db_file\"}")).when(httpClient).head("/test_db/");
-		doReturn(HttpResponseStub.valueOf(HttpStatus.CREATED, null)).when(httpClient).put("/test_db/");
+		doReturn(HttpResponseStub.valueOf(HttpStatus.CREATED, OK_RESPONSE)).when(httpClient).put("/test_db/");
 		dbCon.createDatabaseIfNotExists();
 		verify(httpClient).put("/test_db/");
     }
@@ -581,6 +583,7 @@ public class StdCouchDbConnectorTest {
     public void testSetRevsLimit() {
         HttpResponse rsp = mock(HttpResponse.class);
         doReturn(Boolean.TRUE).when(rsp).isSuccessful();
+        doReturn(new ReaderInputStream(new StringReader(OK_RESPONSE))).when(rsp).getContent();
         doReturn(rsp).when(httpClient).put(anyString(), anyString());
         dbCon.setRevisionLimit(500);
         verify(httpClient).put("/test_db/_revs_limit", "500");
@@ -598,6 +601,7 @@ public class StdCouchDbConnectorTest {
     private HttpResponse setupResponseOnPost() {
         HttpResponse rsp = mock(HttpResponse.class);
         doReturn(Boolean.TRUE).when(rsp).isSuccessful();
+        doReturn(new ReaderInputStream(new StringReader(OK_RESPONSE))).when(rsp).getContent();
         doReturn(rsp).when(httpClient).post(anyString(), anyString());
         return rsp;
     }
