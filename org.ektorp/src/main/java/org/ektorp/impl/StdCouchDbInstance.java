@@ -78,7 +78,7 @@ public class StdCouchDbInstance implements CouchDbInstance {
 			}
 			@Override
 			public Boolean success(HttpResponse hr) throws Exception {
-				return true;
+				return checkResponseBodyOkAndReturnDefaultValue(hr, true, objectMapper);
 			}
 		});
 	}
