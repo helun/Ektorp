@@ -1,5 +1,10 @@
 Change log
 ==========
+Changes in version 1.4.3
+------------------------
+1.4.3 is a bugfix release
+[Changes are here](https://github.com/helun/Ektorp/commits/master)
+
 Changes in version 1.4.2
 ------------------------
 Noteworthy changes:
