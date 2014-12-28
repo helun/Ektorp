@@ -4,12 +4,12 @@
 	<artifactId>org.ektorp.spring</artifactId>
 	<packaging>jar</packaging>
 	<name>Ektorp Spring</name>
-	<version>1.4.3-SNAPSHOT</version>
+	<version>1.4.3</version>
 	<description>Provides Spring support to Ektorp</description>
 	<parent>
 		<groupId>org.ektorp</groupId>
 		<artifactId>org.ektorp.parent</artifactId>
-		<version>1.4.3-SNAPSHOT</version>
+		<version>1.4.3</version>
 	</parent>
 
 	<dependencies>

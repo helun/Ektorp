@@ -4,12 +4,12 @@
 	<artifactId>org.ektorp</artifactId>
 	<packaging>jar</packaging>
 	<name>Ektorp</name>
-	<version>1.4.3-SNAPSHOT</version>
+	<version>1.4.3</version>
 	<description>a Java CouchDB persistence library</description>
 	<parent>
 		<artifactId>org.ektorp.parent</artifactId>
 		<groupId>org.ektorp</groupId>
-		<version>1.4.3-SNAPSHOT</version>
+		<version>1.4.3</version>
 	</parent>
 
 	<dependencies>
