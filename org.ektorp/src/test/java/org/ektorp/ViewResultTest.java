@@ -5,7 +5,10 @@ import static org.junit.Assert.*;
 import java.io.InputStream;
 import java.util.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.MissingNode;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.*;
 
@@ -39,6 +42,24 @@ public class ViewResultTest {
         assertEquals(4, rows.get(0).getValueAsInt());
         assertEquals(5, rows.get(1).getValueAsInt());
         assertEquals(6, rows.get(2).getValueAsInt());
+
+    }
+
+    @Test
+    public void test_read_grouped_result() throws Exception {
+        ViewResult result = readResult("impl/group_view_result.json");
+        assertEquals(2, result.getSize());
+        List<ViewResult.Row> rows = result.getRows();
+        
+        assertEquals(null, rows.get(0).getIdAsNode().textValue());
+
+        assertEquals(null, rows.get(0).getId());
+        assertEquals("h", rows.get(0).getKey());
+        assertEquals(2, rows.get(0).getValueAsInt());
+
+        assertEquals(null, rows.get(0).getId());
+        assertEquals("m", rows.get(1).getKey());
+        assertEquals(1, rows.get(1).getValueAsInt());
 
     }
 
