@@ -154,8 +154,12 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 		}
 
 		public String getId() {
-			return rowNode.get(ID_FIELD_NAME).textValue();
+			return rowNode.findPath(ID_FIELD_NAME).textValue();
 		}
+
+        public JsonNode getIdAsNode() {
+            return rowNode.findPath(ID_FIELD_NAME);
+        }
 
 		public String getKey() {
 			return nodeAsString(getKeyAsNode());
