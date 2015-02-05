@@ -301,5 +301,14 @@
                 <sonarVersion>2.1</sonarVersion>
             </properties>
         </profile>
+        <profile>
+            <id>jdk16</id>
+            <activation>
+                <jdk>1.6</jdk>
+            </activation>
+            <properties>
+                <findbugs.skip>true</findbugs.skip>
+            </properties>
+        </profile>
     </profiles>
 </project>
