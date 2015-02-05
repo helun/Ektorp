@@ -1,0 +1,21 @@
+{
+  "pid":"0.992.0>",
+  "checkpointed_source_seq":95948,
+  "continuous":true,
+  "doc_id":null,
+  "doc_write_failures":0,
+  "docs_read":8,
+  "docs_written":8,
+  "missing_revisions_found":8,
+  "progress":100,
+  "replication_id":"cc86d412959b7c453ab661ce23312db7+continuous",
+  "revisions_checked":777,
+  "source":"sourceDB",
+  "source_seq":373378,
+  "started_on":1422566612,
+  "target":"targetDB",
+  "type":"replication",
+  "updated_on":1422581543
+}
+
+

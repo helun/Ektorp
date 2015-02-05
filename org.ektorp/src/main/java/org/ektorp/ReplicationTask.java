@@ -75,4 +75,10 @@ public interface ReplicationTask extends ActiveTask {
      * @return the latest sequence number of the source database which has been processed by this task
      */
     long getCheckpointedSourceSequenceId();
+
+	/**
+	 * Defines replication checkpoint interval in milliseconds. Replicator will requests from the Source database at the specified interval
+	 */
+	Long getCheckpointInterval();
+
 }
