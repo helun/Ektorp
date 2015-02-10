@@ -147,7 +147,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>${findbugs.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -307,7 +307,25 @@
                 <jdk>1.6</jdk>
             </activation>
             <properties>
-                <findbugs.skip>true</findbugs.skip>
+                <findbugs.plugin.version>2.5.3</findbugs.plugin.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>jdk7</id>
+            <activation>
+                <jdk>1.7</jdk>
+            </activation>
+            <properties>
+                <findbugs.plugin.version>2.5.3</findbugs.plugin.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>jdk8</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <properties>
+                <findbugs.plugin.version>3.0.0</findbugs.plugin.version>
             </properties>
         </profile>
     </profiles>
