@@ -19,6 +19,9 @@ public class DesignDocumentTest {
 
 	@Before
 	public void setup() {
+		System.clearProperty(DesignDocument.UPDATE_ON_DIFF);
+		System.clearProperty(DesignDocument.AUTO_UPDATE_VIEW_ON_CHANGE);
+
 		dd.setRevision("12345");
 		dd.addView("all", new DesignDocument.View("function(doc) { if (doc.Type == 'TestDoc')  emit(null, doc.id) }"));
 		dd.addView("by_lastname", new DesignDocument.View("function(doc) { if (doc.Type == 'TestDoc')  emit(doc.LastName, doc) }"));
@@ -26,6 +29,12 @@ public class DesignDocumentTest {
 		view.setAnonymous("module", "exports.info = {artiest : {name : 'artiest', properties : {naam : {name : 'naam', type : 'string', required : true, searchable : true}}}}");
 		dd.addView("lib", view);
 		dd.setLanguage("javascript");
+	}
+
+	@After
+	public void tearDown() {
+		System.clearProperty(DesignDocument.UPDATE_ON_DIFF);
+		System.clearProperty(DesignDocument.AUTO_UPDATE_VIEW_ON_CHANGE);
 	}
 
 	@Test

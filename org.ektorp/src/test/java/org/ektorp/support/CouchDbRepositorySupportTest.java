@@ -19,9 +19,18 @@ public class CouchDbRepositorySupportTest {
 
 	@Before
 	public void setUp() throws Exception {
+		System.clearProperty(DesignDocument.UPDATE_ON_DIFF);
+		System.clearProperty(DesignDocument.AUTO_UPDATE_VIEW_ON_CHANGE);
+		
 		db = mock(CouchDbConnector.class, new ThrowsException(new UnsupportedOperationException("This interaction was not expected on this mock")));
         doNothing().when(db).createDatabaseIfNotExists();
 		repo = new CouchDbRepositorySupport<TestDoc>(TestDoc.class, db);
+	}
+
+	@After
+	public void tearDown() {
+		System.clearProperty(DesignDocument.UPDATE_ON_DIFF);
+		System.clearProperty(DesignDocument.AUTO_UPDATE_VIEW_ON_CHANGE);
 	}
 
 	private void setupDesignDoc() throws Exception {
