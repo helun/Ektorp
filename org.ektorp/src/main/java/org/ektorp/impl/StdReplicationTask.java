@@ -17,6 +17,7 @@ public class StdReplicationTask extends StdActiveTask implements ReplicationTask
     private String sourceDatabase;
     private String targetDatabase;
     private long sourceSequenceId;
+    private Long checkpointInterval;
     private long checkpointedSourceSequenceId;
 
     @Override
@@ -139,4 +140,13 @@ public class StdReplicationTask extends StdActiveTask implements ReplicationTask
         this.checkpointedSourceSequenceId = checkpointedSourceSequenceId;
     }
 
+	@Override
+	public Long getCheckpointInterval() {
+		return checkpointInterval;
+	}
+
+	@JsonProperty(required = false, value = "checkpoint_interval")
+	public void setCheckpointInterval(Long checkpointInterval) {
+		this.checkpointInterval = checkpointInterval;
+	}
 }
