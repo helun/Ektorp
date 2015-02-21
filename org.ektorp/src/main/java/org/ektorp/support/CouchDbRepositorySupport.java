@@ -64,19 +64,34 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		stdDesignDocumentId = NameConventions.designDocName(type);
 	}
 	/**
-	 * Alternative constructor allowing a custom design document name (not linked to the type class name)
+	 * Alternative constructor allowing a custom design document name (not linked to the type class name).
+     *
 	 * @param type
 	 * @param db
 	 * @param designDocName
 	 */
 	protected CouchDbRepositorySupport(Class<T> type, CouchDbConnector db, String designDocName) {
-		Assert.notNull(db, "CouchDbConnector may not be null");
-		Assert.notNull(type);
-		this.db = db;
-		this.type = type;
-		db.createDatabaseIfNotExists();
-		stdDesignDocumentId = NameConventions.designDocName(designDocName);
-	}
+        this(type, db, designDocName, true);
+    }
+
+    /**
+     * Alternative constructor allowing a custom design document name (not linked to the type class name)
+     * @param type repository type
+     * @param db database connector
+     * @param designDocName design document Id
+     * @param createIfNotExists true if db should be created if it doesnt' exist
+     */
+    protected CouchDbRepositorySupport(Class<T> type, CouchDbConnector db, String designDocName, boolean createIfNotExists) {
+        Assert.notNull(db, "CouchDbConnector may not be null");
+        Assert.notNull(type);
+        this.db = db;
+        this.type = type;
+        if (createIfNotExists) {
+            db.createDatabaseIfNotExists();
+        }
+        stdDesignDocumentId = NameConventions.designDocName(designDocName);
+    }
+
 	/**
 	 * @throws UpdateConflictException if there was an update conflict.
 	 */
