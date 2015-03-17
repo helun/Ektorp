@@ -26,6 +26,7 @@ public class SimpleViewGenerator {
 	private final static String ITERABLE_PROPERTY_BODY = "for (var i in doc.%s) {emit(doc.%s[i], doc._id);}";
 	private final static String REFERING_CHILDREN_AS_SET_W_ORDER_BY = "function(doc) { if(%s) { emit([doc.%s, '%s', doc.%s], null); } }";
 	private final static String REFERING_CHILDREN_AS_SET = "function(doc) { if(%s) { emit([doc.%s, '%s'], null); } }";
+	private final static String LINE_ENDING = String.format("%n");
 
 	private SoftReference<ObjectMapper> mapperRef;
 
@@ -275,7 +276,7 @@ public class SimpleViewGenerator {
 		try {
 			String json = loadResourceFromClasspath(repositoryClass,
 					input.file());
-			return mapper().readValue(json.replaceAll("\n", ""),
+			return mapper().readValue(json.replaceAll(LINE_ENDING, ""),
 					DesignDocument.View.class);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
