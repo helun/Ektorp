@@ -47,7 +47,7 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 
 	private void applyDefaultConfiguration(ObjectMapper om) {
 		om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, this.writeDatesAsTimestamps);
-		om.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.NON_NULL);
+		om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
 }
