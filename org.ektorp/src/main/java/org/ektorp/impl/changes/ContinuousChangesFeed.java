@@ -28,7 +28,7 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final static DocumentChange INTERRUPT_MARKER = new StdDocumentChange(NullNode.getInstance());
     private final static Set<Class<?>> INTERRUPTED_EXCEPTION_TYPES = new HashSet<Class<?>>();
-    private final PublishSubject onAdded = PublishSubject.create();
+    private final PublishSubject<StdDocumentChange> onAdded = PublishSubject.create();
 
     static {
         INTERRUPTED_EXCEPTION_TYPES.add(InterruptedException.class);
@@ -137,7 +137,7 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
         onAdded.onNext(stdDocumentChange);
     }
     
-    public Observable onAdded() {
+    public Observable<StdDocumentChange> onAdded() {
         return onAdded;
     }
 
