@@ -5,6 +5,8 @@ import java.util.*;
 
 import com.fasterxml.jackson.annotation.*;
 import org.ektorp.util.*;
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  *
  * @author henrik lundgren
@@ -31,7 +33,8 @@ public class DbInfo implements Serializable {
 	@JsonProperty("purge_seq")
 	int purgeSeq;
 	@JsonProperty("update_seq")
-	String updateSeq;
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SE_BAD_FIELD")
+	JsonNode updateSeq;
 	/**
 	 * Used to future proof this class, if new fields are added by CouchDb they will be found here.
 	 */
@@ -86,20 +89,20 @@ public class DbInfo implements Serializable {
 	 * @return Current number of updates to the database
 	 */
 	public long getUpdateSeq() {
-		return Long.parseLong(updateSeq);
+		return updateSeq.asLong();
 	}
 	/**
 	 * Cloudant uses generated strings for update sequence.
 	 * @return
 	 */
 	public String getUpdateSeqAsString() {
-		return updateSeq;
+		return updateSeq.asText();
 	}
 	/**
 	 * @return false if db is an Cloudant instance.
 	 */
 	public boolean isUpdateSeqNumeric() {
-		return updateSeq != null && updateSeq.matches("^\\d*$");
+		return updateSeq != null && (updateSeq.isInt() || updateSeq.isLong());
 	}
 
 	@JsonCreator
