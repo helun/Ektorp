@@ -1324,7 +1324,7 @@ public boolean contains(String docId);</programlisting>
 
         <programlisting language="javascript">[{"_id":"_design/Sofa",
     "views":{
-        "all": {"map": "function(doc) { if (doc.type = 'Sofa' ) emit( null, doc._id ) } "}
+        "all": {"map": "function(doc) { if (doc.type == 'Sofa' ) emit( null, doc._id ) } "}
      }
 }]</programlisting>
       </section>
