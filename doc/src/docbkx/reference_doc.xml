@@ -2099,7 +2099,7 @@ password=geheimnis</programlisting>
       by the DataLoaders themselves.</para>
 
       <section>
-        <title>Declaing the InitialDataLoader in the Application
+        <title>Declaring the InitialDataLoader in the Application
         Context</title>
 
         <para>The InitialDataLoader work best if its dependencies are
