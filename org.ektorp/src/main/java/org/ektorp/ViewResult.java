@@ -22,7 +22,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	private static final String TOTAL_ROWS_FIELD_NAME = "total_rows";
 	private static final String UPDATE_SEQ = "update_seq";
 	private static final long serialVersionUID = 4750290767933801714L;
-	private int totalRows = -1;
+	private long totalRows = -1;
 	private int offset = -1;
 	private String updateSeq;
 
@@ -33,7 +33,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
         Assert.notNull(resultNode, "resultNode may not be null");
 		Assert.isTrue(resultNode.findPath("rows").isArray(), "result must contain 'rows' field of array type");
 		if (resultNode.get(TOTAL_ROWS_FIELD_NAME) != null) {
-			totalRows = resultNode.get(TOTAL_ROWS_FIELD_NAME).intValue();
+			totalRows = resultNode.get(TOTAL_ROWS_FIELD_NAME).longValue();
 		}
 		if (resultNode.get(OFFSET_FIELD_NAME) != null) {
 			offset = resultNode.get(OFFSET_FIELD_NAME).intValue();
@@ -76,7 +76,7 @@ public class ViewResult implements Iterable<ViewResult.Row>, Serializable {
 	 *
 	 * @return -1 if result did not contain a total_rows field
 	 */
-	public int getTotalRows() {
+	public long getTotalRows() {
 		return totalRows;
 	}
 

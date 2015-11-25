@@ -5,14 +5,14 @@ import java.util.List;
 
 public class Page<T> implements Iterable<T> {
 
-	private final int totalSize;
+	private final long totalSize;
 	private final int pageSize;
 	private final PageRequest previousPageRequest;
 	private final PageRequest nextPageRequest;
 	
 	private final List<T> rows;
 	
-	public Page(List<T> rows, int totalSize, int pageSize, PageRequest previousPageRequest,  PageRequest nextPageRequest) {
+	public Page(List<T> rows, long  totalSize, int pageSize, PageRequest previousPageRequest,  PageRequest nextPageRequest) {
 		this.rows = rows;
 		this.totalSize = totalSize;
 		this.pageSize = pageSize;
@@ -49,7 +49,7 @@ public class Page<T> implements Iterable<T> {
 	/**
 	 * @return the total number of items across all pages
 	 */
-	public int getTotalSize() {
+	public long getTotalSize() {
 		return totalSize;
 	}
 	/**
