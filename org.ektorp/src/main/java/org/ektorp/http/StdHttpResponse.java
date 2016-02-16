@@ -72,7 +72,11 @@ public class StdHttpResponse implements HttpResponse {
 	
 	public InputStream getContent() {
 		try {
-			return new ConnectionReleasingInputStream(entity.getContent());
+			InputStream content = entity.getContent();
+			if(content == null) {
+				return null;
+			}
+			return new ConnectionReleasingInputStream(content);
 		} catch (Exception e) {
 			throw Exceptions.propagate(e);
 		}
