@@ -1,18 +1,23 @@
 package org.ektorp.impl.changes;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
-import org.ektorp.changes.*;
+import org.ektorp.changes.ChangesFeed;
+import org.ektorp.changes.DocumentChange;
 import org.ektorp.http.HttpResponse;
-import org.ektorp.util.*;
-import org.slf4j.*;
+import org.ektorp.util.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  * @author henrik lundgren
@@ -117,7 +122,11 @@ public final class ContinuousChangesFeed implements ChangesFeed, Runnable {
 			String reason = !shouldRun ? "Cancelled" : "EOF";
 			LOG.info("Changes feed stopped. Reason: " + reason);
 		} catch (Exception e) {
-			handleException(e);
+			if(!shouldRun) {
+				LOG.info("Changes feed was interrupted");
+			} else {
+				handleException(e);
+			}
 		} finally {
 			sendInterruptMarker();
 			httpResponse.abort();
