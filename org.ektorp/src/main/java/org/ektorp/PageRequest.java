@@ -31,9 +31,15 @@ public class PageRequest {
 	public static ViewQuery applyPagingParameters(ViewQuery q, PageRequest pr) {
 		ViewQuery pagedQuery = q.clone();
 		if (pr.page > 0) {
-			if (pr.getStartKey() != null) {
-				pagedQuery.startKey(pr.getStartKey());
-			}
+            if(q.getKeysValues().size() > 0)
+            {
+                pagedQuery.keys(q.getKeysValues());
+            }
+            else {
+                if (pr.getStartKey() != null) {
+                    pagedQuery.startKey(pr.getStartKey());
+                }
+            }
 			if (pr.getStartKeyDocId() != null) {
 				pagedQuery.startDocId(pr.getStartKeyDocId());
 			}
@@ -142,10 +148,7 @@ public class PageRequest {
 		return nextKey != null ? nextKey.docId : null;
 	}
 	/**
-	 * 
-	 * @param startKey
-	 * @param startDocId
-	 * @return
+	 * @return PageRequest
 	 */
 	public PageRequest getPreviousPageRequest() {
 		return new Builder(this)
