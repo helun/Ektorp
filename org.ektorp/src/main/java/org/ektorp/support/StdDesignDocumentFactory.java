@@ -19,8 +19,19 @@ import org.ektorp.util.ReflectionUtils;
  */
 public class StdDesignDocumentFactory implements DesignDocumentFactory {
 
-    public SimpleViewGenerator viewGenerator = new SimpleViewGenerator();
+    protected SimpleViewGenerator viewGenerator;
 
+    public SimpleViewGenerator getViewGenerator() {
+    	if (viewGenerator == null) {
+    		viewGenerator = createViewGenerator();
+    	}
+    	return viewGenerator;
+    }
+    
+    protected SimpleViewGenerator createViewGenerator() {
+    	return new SimpleViewGenerator();
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -30,7 +41,7 @@ public class StdDesignDocumentFactory implements DesignDocumentFactory {
     public DesignDocument generateFrom(Object metaDataSource) {
         Class<?> metaDataClass = metaDataSource.getClass();
         DesignDocument dd = newDesignDocumentInstance();
-        Map<String, DesignDocument.View> views = viewGenerator.generateViews(metaDataSource);
+        Map<String, DesignDocument.View> views = getViewGenerator().generateViews(metaDataSource);
         dd.setViews(views);
 
         Map<String, String> lists = createListFunctions(metaDataClass);

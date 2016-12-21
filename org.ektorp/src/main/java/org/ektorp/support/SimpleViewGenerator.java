@@ -236,7 +236,7 @@ public class SimpleViewGenerator {
 		return function != null && function.startsWith("classpath:");
 	}
 
-	private DesignDocument.View loadViewFromFile(View input,
+	protected DesignDocument.View loadViewFromFile(View input,
 			Class<?> repositoryClass) {
 		String mapPath = input.map();
 		String map;
@@ -256,7 +256,7 @@ public class SimpleViewGenerator {
 		return new DesignDocument.View(map, reduce);
 	}
 
-	private String loadResourceFromClasspath(Class<?> repositoryClass,
+	protected String loadResourceFromClasspath(Class<?> repositoryClass,
 			String path) {
 		try {
 			InputStream in = repositoryClass.getResourceAsStream(path);
@@ -270,7 +270,7 @@ public class SimpleViewGenerator {
 		}
 	}
 
-	private DesignDocument.View loadViewFromFile(
+	protected DesignDocument.View loadViewFromFile(
 			Map<String, DesignDocument.View> views, View input,
 			Class<?> repositoryClass) {
 		try {
