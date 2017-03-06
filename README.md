@@ -14,9 +14,9 @@ Here are some good reasons why you should consider using Ektorp in your project:
 * *Active development.* Ektorp is actively developed and has a growing community.
 * *Choice of abstraction level.* From full object-document mapping to raw streams, Ektorp will never stop you if you need to step down an abstraction level.
 
-[API-Reference](https://helun.github.io/Ektorp/reference_documentation.html)
+Documentation
 -------------
-
+[API-Reference](https://helun.github.io/Ektorp/reference_documentation.html)
 
 Simple API
 ----------
