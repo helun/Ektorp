@@ -2065,7 +2065,9 @@ ReplicationStatus status2 = db.replicateTo("http://example.org/example-database"
 
     &lt;util:properties id="couchdbProperties" location="classpath:/couchdb.properties"/&gt;
 
-    &lt;bean id="httpClient" class="org.ektorp.spring.HttpClientFactoryBean" /&gt;
+    &lt;bean id="httpClient" class="org.ektorp.spring.HttpClientFactoryBean" &gt;
+        &lt;property name="properties" ref="couchdbProperties"/&gt;
+    &lt;/bean&gt;
 
     &lt;bean id="couchDbInstance" class="org.ektorp.impl.StdCouchDbInstance"&gt;
         &lt;constructor-arg ref="httpClient"/&gt;
