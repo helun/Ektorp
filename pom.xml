@@ -31,6 +31,17 @@
             </roles>
             <timezone>+1</timezone>
         </developer>
+        <developer>
+            <id>yann.robert</id>
+            <name>Yann ROBERT</name>
+            <email>yann.robert@anantaplex.fr</email>
+            <url>https://github.com/YannRobert</url>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
     </developers>
     <modules>
         <module>org.ektorp</module>
