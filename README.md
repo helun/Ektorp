@@ -202,7 +202,7 @@ data.close();
 
 Try it Out
 ------------
-### [Download binaries here](https://github.com/helun/Ektorp/downloads)
+### Download binaries from [maven repository](http://central.maven.org/maven2/org/ektorp/org.ektorp/)
 
 If you are using Maven:
 
