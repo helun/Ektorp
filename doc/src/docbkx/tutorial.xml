@@ -567,7 +567,7 @@ public class BlogController {
 
           <listitem>
             <para><link
-            xlink:href="http://ektorp.org/reference_documentation.html">Ektorp
+            xlink:href="https://helun.github.io/Ektorp/reference_documentation.html">Ektorp
             Reference Documentation</link></para>
           </listitem>
         </itemizedlist>

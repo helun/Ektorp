@@ -11,7 +11,7 @@
         <url>scm:git:git@github.com:helun/Ektorp.git</url>
         <developerConnection>scm:git:git@github.com:helun/Ektorp.git</developerConnection>
     </scm>
-    <url>http://www.ektorp.org</url>
+    <url>https://github.com/helun/Ektorp</url>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
