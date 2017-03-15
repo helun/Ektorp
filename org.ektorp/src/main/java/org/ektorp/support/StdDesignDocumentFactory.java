@@ -19,8 +19,16 @@ import org.ektorp.util.ReflectionUtils;
  */
 public class StdDesignDocumentFactory implements DesignDocumentFactory {
 
-    public SimpleViewGenerator viewGenerator = new SimpleViewGenerator();
+	public SimpleViewGenerator viewGenerator;
 
+	public StdDesignDocumentFactory() {
+		this(new SimpleViewGenerator());
+	}
+	
+	public StdDesignDocumentFactory(SimpleViewGenerator viewGenerator) {
+		this.viewGenerator = viewGenerator;
+	}
+	
     /*
      * (non-Javadoc)
      * 
