@@ -210,7 +210,7 @@ If you are using Maven:
 <dependency>
     <groupId>org.ektorp</groupId>
     <artifactId>org.ektorp</artifactId>
-    <version>1.4.2</version>
+    <version>1.4.4</version>
 </dependency>
 ```
 
