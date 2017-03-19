@@ -20,9 +20,11 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 
 	private static final String OFFSET_FIELD_NAME = "offset";
 	private static final String TOTAL_ROWS_FIELD_NAME = "total_rows";
+	private static final String UPDATE_SEQ_FIELD_NAME = "update_seq";
 	private static final long serialVersionUID = 4750290767936801714L;
 	private int totalRows = -1;
 	private int offset = -1;
+	private long sequence = -1;
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SE_BAD_FIELD")
 	private final BufferedReader reader;
@@ -43,12 +45,21 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 		reader = new BufferedReader(new InputStreamReader(httpResponse.getContent()));
 		try{
 		String info = reader.readLine();
-		totalRows = getFieldValue(info, TOTAL_ROWS_FIELD_NAME);
-		offset = getFieldValue(info, OFFSET_FIELD_NAME);
+		totalRows = getFieldIntValue(info, TOTAL_ROWS_FIELD_NAME);
+		offset = getFieldIntValue(info, OFFSET_FIELD_NAME);
+		sequence = getFieldLongValue(info, UPDATE_SEQ_FIELD_NAME);
 
 		}catch(IOException e) {
 			throw new DbAccessException(e);
 		}
+	}
+
+	/**
+	 *
+	 * @return -1 if result did not contain an sequence field
+	 */
+	public long getSequence() {
+		return sequence;
 	}
 
 	/**
@@ -85,13 +96,22 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 		}
 	}
 
-	private int getFieldValue(String line, String key) {
+	private int getFieldIntValue(String line, String key) {
 		int index = line.indexOf(key);
 		if (index == -1) {
 			return -1;
 		}
 		int fromIndex = index + key.length() + 2;
 		return Integer.parseInt(line.substring(fromIndex, line.indexOf(",", fromIndex)));
+	}
+
+	private long getFieldLongValue(String line, String key) {
+		int index = line.indexOf(key);
+		if (index == -1) {
+			return -1;
+		}
+		int fromIndex = index + key.length() + 2;
+		return Long.parseLong(line.substring(fromIndex, line.indexOf(",", fromIndex)));
 	}
 
 	private class StreamingViewResultIterator implements Iterator<Row>{
