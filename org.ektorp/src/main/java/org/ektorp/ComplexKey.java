@@ -1,9 +1,11 @@
 package org.ektorp;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 /**
  * Class for creating complex keys for view queries.
@@ -56,4 +58,10 @@ public class ComplexKey {
 		}
 		return key;
 	}
+	
+	@Override
+	public String toString() {
+		return components.toString();
+	}
+	
 }
