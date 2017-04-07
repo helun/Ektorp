@@ -208,6 +208,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	 */
 	protected List<T> queryView(String viewName, String key) {
 		return db.queryView(createQuery(viewName)
+		                        .reduce(false)
 								.includeDocs(true)
 								.key(key),
 							type);
@@ -224,6 +225,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	 */
 	protected List<T> queryView(String viewName, int key) {
 		return db.queryView(createQuery(viewName)
+		                        .reduce(false)
 								.includeDocs(true)
 								.key(key),
 							type);
@@ -240,6 +242,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	 */
 	protected List<T> queryView(String viewName, ComplexKey key) {
 		return db.queryView(createQuery(viewName)
+		                        .reduce(false)
 								.includeDocs(true)
 								.key(key),
 							type);
@@ -254,6 +257,7 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	 */
 	protected List<T> queryView(String viewName) {
 		return db.queryView(createQuery(viewName)
+		                        .reduce(false)
 								.includeDocs(true),
 							type);
 	}
