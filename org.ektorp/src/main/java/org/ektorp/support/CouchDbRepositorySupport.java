@@ -101,6 +101,12 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		db.create(entity);
 	}
 
+	public void add(List<T> entities) {
+		for (T entity : entities){
+			add(entity);
+		}
+	}
+
 	/**
 	 * If the repository's design document has a view named "all" it will be used
 	 * to fetch all documents of this repository's handled type.
@@ -173,12 +179,25 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 		assertEntityNotNull(entity);
 		db.delete(Documents.getId(entity), Documents.getRevision(entity));
 	}
+
+	public void remove(List<T> entities) {
+		for (T entity : entities){
+			remove(entity);
+		}
+	}
+
 	/**
 	 * @throws UpdateConflictException if there was an update conflict.
 	 */
 	public void update(T entity) {
 		assertEntityNotNull(entity);
 		db.update(entity);
+	}
+
+	public void update(List<T> entities) {
+		for (T entity : entities){
+			update(entity);
+		}
 	}
 
 	private void assertEntityNotNull(T entity) {
