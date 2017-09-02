@@ -45,7 +45,10 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 		this.writeDatesAsTimestamps = b;
 	}
 
-	private void applyDefaultConfiguration(ObjectMapper om) {
+	/**
+	 * This protected method can be overridden in order to change the configuration.
+	 */
+	protected void applyDefaultConfiguration(ObjectMapper om) {
 		om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, this.writeDatesAsTimestamps);
 
 		// method was removed in jackson 2.9.0
