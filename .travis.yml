@@ -1,4 +1,12 @@
+dist: trusty
+sudo: required
 language: java
-jdk:
-  - openjdk6
-  - oraclejdk7
+matrix:
+  include:
+    - dist: precise
+      jdk: openjdk6
+    - #dist: trusty
+      jdk: openjdk7
+    - #dist: trusty
+      jdk: openjdk8
+
