@@ -9,4 +9,11 @@ matrix:
       jdk: openjdk7
     - #dist: trusty
       jdk: openjdk8
-
+env:
+  matrix:
+    - JACKSON_VERSION=2.6.0
+    - JACKSON_VERSION=2.5.0
+    - JACKSON_VERSION=2.4.0
+    - JACKSON_VERSION=2.3.0
+script:
+  - mvn clean install -Djackson.version=$JACKSON_VERSION
