@@ -22,3 +22,6 @@ local.properties
 # IntelliJ
 .idea
 *.iml
+*.ipr
+*.iws
+
