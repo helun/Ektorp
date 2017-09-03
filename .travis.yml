@@ -1,6 +1,7 @@
 dist: trusty
 sudo: required
 language: java
+jdk: openjdk8
 matrix:
   include:
     - dist: precise
