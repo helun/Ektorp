@@ -1,7 +1,12 @@
-dist: precise
+dist: trusty
 sudo: required
 language: java
-jdk:
-  - openjdk6
-  - openjdk7
-  - openjdk8
+matrix:
+  include:
+    - dist: precise
+      jdk: openjdk6
+    - #dist: trusty
+      jdk: openjdk7
+    - #dist: trusty
+      jdk: openjdk8
+
