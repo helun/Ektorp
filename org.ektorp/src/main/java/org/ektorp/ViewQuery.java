@@ -9,14 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.ektorp.http.URI;
+import org.ektorp.impl.DefaultQueryExecutor;
+import org.ektorp.impl.QueryExecutor;
+import org.ektorp.impl.StdObjectMapperFactory;
+import org.ektorp.util.Assert;
+import org.ektorp.util.Exceptions;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.ektorp.http.URI;
-import org.ektorp.impl.StdObjectMapperFactory;
-import org.ektorp.util.Assert;
-import org.ektorp.util.Exceptions;
 
 /**
  *
@@ -323,9 +326,12 @@ public class ViewQuery {
 		return this;
 	}
     /**
-     * For multiple-key queries (as of CouchDB 0.9). Keys will be JSON-encoded.
+     * For multiple-key queries (as of CouchDB 0.9), the HTTP method is determined by {@link QueryExecutor}.
+     * Keys will be JSON-encoded.
      * @param keyList a list of Object, will be JSON encoded according to each element's type.
      * @return the view query for chained calls
+     * @see DefaultQueryExecutor
+     * @see <a href="https://github.com/helun/Ektorp/issues/165">For ViewQuery.keys(), use GET instead of POST</a>
      */
     public ViewQuery keys(Collection<?> keyList) {
         reset();
@@ -627,7 +633,12 @@ public class ViewQuery {
     public boolean hasMultipleKeys() {
     	return keys != null;
     }
-
+    
+    /**
+     * Get {@link #keys} as JSON object.
+     * @return
+     * @see #getKeysAsJsonArray()
+     */
     public String getKeysAsJson() {
     	if (keys == null) {
     		return "{\"keys\":[]}";
@@ -635,6 +646,17 @@ public class ViewQuery {
         return keys.toJson(mapper);
     }
 
+    /**
+     * Get {@link #keys} as JSON array.
+     * @return
+     * @see #getKeysAsJson()
+     */
+    public String getKeysAsJsonArray() {
+    	if (keys == null) {
+    		return "[]";
+    	}
+        return keys.toJsonArray(mapper);
+    }
 
     public Object getStartKey() {
 		return startKey.asDecoded();
@@ -644,22 +666,32 @@ public class ViewQuery {
 		return endKey.asDecoded();
 	}
 
-	public String buildQuery() {
+	/**
+	 * Builds the HTTP query.
+	 * @param keysAsJsonArray If not {@code null} (typically from {@link #getKeysAsJsonArray()}),
+	 * 		it will be included as {@code keys} HTTP query parameter.
+	 * @return
+	 */
+	public String buildQuery(String keysAsJsonArray) {
 		if (cachedQuery != null) {
 			return cachedQuery;
 		}
 
-        URI query = buildQueryURI();
+        URI query = buildQueryURI(keysAsJsonArray);
 
 		cachedQuery = query.toString();
 		return cachedQuery;
 	}
 
-    public URI buildQueryURI() {
+    public URI buildQueryURI(String keysAsJsonArray) {
 		URI query = buildViewPath();
 
 		if (!key.isNull()) {
 			query.param("key", key.asEncoded());
+		}
+		
+		if (keysAsJsonArray != null) {
+			query.param("keys", keysAsJsonArray);
 		}
 
 		if (!startKey.isNull()) {
@@ -724,7 +756,16 @@ public class ViewQuery {
 		return query;
 	}
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SA_FIELD_SELF_ASSIGNMENT", "CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"})
+	/**
+	 * Builds the HTTP query without including {@link #keys(Collection)}).
+	 * @return
+	 */
+	public String buildQuery() {
+		return buildQuery(null);
+	}
+	
+	@Override
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings({"SA_FIELD_SELF_ASSIGNMENT", "CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"})
 	public ViewQuery clone() {
 		ViewQuery copy = new ViewQuery();
 		copy.mapper = mapper;
@@ -958,7 +999,8 @@ public class ViewQuery {
             return Collections.unmodifiableList(keys);
 		}
 		
-        @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE")
+        @Override
+		@edu.umd.cs.findbugs.annotations.SuppressWarnings(value="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE")
 		public Keys clone() {
 			return new Keys(keys);
 		}
@@ -979,8 +1021,19 @@ public class ViewQuery {
 				throw Exceptions.propagate(e);
 			}
 		}
+
+		public String toJsonArray(ObjectMapper mapper) {
+			ArrayNode keysNode = mapper.createArrayNode();
+			for (Object key : keys) {
+				keysNode.addPOJO(key);
+			}
+			try {
+				return mapper.writeValueAsString(keysNode);
+			} catch (Exception e) {
+				throw Exceptions.propagate(e);
+			}
+		}
+
 	}
-
-
 
 }

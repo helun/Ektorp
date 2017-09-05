@@ -10,10 +10,12 @@ import org.slf4j.LoggerFactory;
  * This is the default implementation of the executeQuery method of StdCouchDbConnector,
  * as of before the method was delegating to the QueryExecutor strategy interface.
  *
- * Be aware that, as stated in https://github.com/helun/Ektorp/issues/165 this implementation is making use of POST HTTP method in case of multiple keys,
- * so that it may not be appropriate for hosted services like Cloudant where POST are more charged that GET.
+ * Be aware that, as stated in https://github.com/helun/Ektorp/issues/165 this
+ * implementation is making use of {@code POST} HTTP method in case of multiple keys,
+ * so that it may not be appropriate for hosted services like <a href="http://cloudant.com/">Cloudant</a>
+ * where {@code POST} requests are charged more than {@code GET}.
  *
-*/
+ */
 public class DefaultQueryExecutor implements QueryExecutor {
 
     /**
