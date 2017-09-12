@@ -333,7 +333,13 @@ public class CouchDbRepositorySupport<T> implements GenericRepository<T> {
 	protected void debugDesignDoc(DesignDocument generated) {
 		ObjectMapper om = new ObjectMapper();
 		om.configure(SerializationFeature.INDENT_OUTPUT, true);
+
+		// method was removed in jackson 2.9.0
 		om.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.NON_NULL);
+		
+		// method introduced in jackson 2.7.0
+		// om.getSerializationConfig().withPropertyInclusion(JsonInclude.Value.empty().withValueInclusion(JsonInclude.Include.NON_NULL));
+		
 		try {
 			String json = om.writeValueAsString(generated);
 			log.debug("DesignDocument source:\n" + json);
