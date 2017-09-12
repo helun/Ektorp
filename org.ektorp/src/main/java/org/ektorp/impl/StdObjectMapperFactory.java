@@ -51,11 +51,7 @@ public class StdObjectMapperFactory implements ObjectMapperFactory {
 	protected void applyDefaultConfiguration(ObjectMapper om) {
 		om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, this.writeDatesAsTimestamps);
 
-		// method was removed in jackson 2.9.0
-		om.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-		// method introduced in jackson 2.7.0
-		// om.getSerializationConfig().withPropertyInclusion(JsonInclude.Value.empty().withValueInclusion(JsonInclude.Include.NON_NULL));
+		om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
 }
