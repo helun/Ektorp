@@ -16,6 +16,11 @@ import org.ektorp.docref.DocumentReferences;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import org.junit.BeforeClass;
 
 public class SimpleViewGeneratorTest {
 
@@ -35,6 +40,42 @@ public class SimpleViewGeneratorTest {
 	
 	SimpleViewGenerator gen = new SimpleViewGenerator();
 	
+        /**
+         * Duplicate the loaded external resources to ensure line-endings are
+         * used from both Windows and Unix whatever platform we are on
+         * 
+         * @throws IOException 
+         */
+        @BeforeClass
+        public static void createWindowsUnixLineEndings() throws IOException {
+                createWindowsUnixLineEndings("complicated_view.json");
+                createWindowsUnixLineEndings("map.js");
+                createWindowsUnixLineEndings("reduce.js");
+        }
+        
+        private static void createWindowsUnixLineEndings(String resource) throws IOException {
+                // Find the resource in the classpath and create duplicates
+                File original = new File(SimpleViewGeneratorTest.class.getResource(resource).getPath());
+                File windows = new File(original.getAbsolutePath().replace(".js", "_windows.js"));
+                File unix = new File(original.getAbsolutePath().replace(".js", "_unix.js"));
+                FileReader reader = new FileReader(original);
+                FileWriter writer1 = new FileWriter(windows);
+                FileWriter writer2 = new FileWriter(unix);
+                // Read from the original and write to the duplicates
+                char[] buffer = new char[1024];
+                int r = reader.read(buffer);
+                while(r>-1) {
+                    // Replace any Windows line-endings with Unix and vice versa
+                    writer1.append(new String(buffer, 0, r).replaceAll("([^\r])\n", "$1\r\n"));
+                    writer2.append(new String(buffer, 0, r).replaceAll("\r\n", "\n"));
+                    r = reader.read(buffer);
+                }
+                writer1.flush();
+                writer1.close();
+                writer2.flush();
+                writer2.close();
+                reader.close();
+        }
 	
 	@Test
 	public void testGenerateFindByView() {
@@ -45,6 +86,78 @@ public class SimpleViewGeneratorTest {
 	@Test
 	public void views_should_be_generated_for_all_annotations() throws Exception {
 		Map<String, DesignDocument.View> result = gen.generateViews(new TestRepo());
+		assertTrue(result.containsKey("view_1"));
+		assertTrue(result.containsKey("view_2"));
+		assertTrue(result.containsKey("view_3"));
+		assertTrue(result.containsKey("by_name"));
+		assertTrue(result.containsKey("by_lastName"));
+		assertTrue(result.containsKey("by_domainName"));
+		assertEquals(expectedArrayMapFunction, result.get("by_domainName").getMap());
+		
+		assertTrue(result.containsKey("by_account"));
+		assertEquals(expectedByAccountFunction, result.get("by_account").getMap());
+		
+		assertTrue(result.containsKey("all"));
+		DesignDocument.View all = result.get("all");
+		assertEquals(ALL_VIEW_FUNCTION, all.getMap());
+		assertTrue(result.containsKey("by_special"));
+		assertNull("reduce function should not be defined", result.get("by_special").getReduce());
+		
+		assertTrue(result.containsKey("by_special2"));
+		assertFalse("map function should be loaded from file in classpath", result.get("by_special2").getMap().startsWith("classpath:"));
+		assertTrue("reduce function should be loaded from file in classpath", result.get("by_special2").getReduce().indexOf("keys") > -1);
+		assertTrue(result.containsKey("by_complicated"));
+		assertEquals(expectedComplicatedMapFunction, result.get("by_complicated").getMap());
+		assertEquals(expectedComplicatedReduceFunction, result.get("by_complicated").getReduce());
+		
+		assertTrue(result.containsKey("by_special3"));
+		assertFalse("map function should be loaded from file in classpath", result.get("by_special3").getMap().startsWith("classpath:"));
+		assertNull("reduce function should not be defined", result.get("by_special3").getReduce());
+		
+		// serialize all views so that we know they are valid in json. 
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValueAsString(result);
+	}
+        
+        @Test
+	public void views_should_be_generated_for_all_annotations_windows() throws Exception {
+		Map<String, DesignDocument.View> result = gen.generateViews(new TestRepoWindows());
+		assertTrue(result.containsKey("view_1"));
+		assertTrue(result.containsKey("view_2"));
+		assertTrue(result.containsKey("view_3"));
+		assertTrue(result.containsKey("by_name"));
+		assertTrue(result.containsKey("by_lastName"));
+		assertTrue(result.containsKey("by_domainName"));
+		assertEquals(expectedArrayMapFunction, result.get("by_domainName").getMap());
+		
+		assertTrue(result.containsKey("by_account"));
+		assertEquals(expectedByAccountFunction, result.get("by_account").getMap());
+		
+		assertTrue(result.containsKey("all"));
+		DesignDocument.View all = result.get("all");
+		assertEquals(ALL_VIEW_FUNCTION, all.getMap());
+		assertTrue(result.containsKey("by_special"));
+		assertNull("reduce function should not be defined", result.get("by_special").getReduce());
+		
+		assertTrue(result.containsKey("by_special2"));
+		assertFalse("map function should be loaded from file in classpath", result.get("by_special2").getMap().startsWith("classpath:"));
+		assertTrue("reduce function should be loaded from file in classpath", result.get("by_special2").getReduce().indexOf("keys") > -1);
+		assertTrue(result.containsKey("by_complicated"));
+		assertEquals(expectedComplicatedMapFunction, result.get("by_complicated").getMap());
+		assertEquals(expectedComplicatedReduceFunction, result.get("by_complicated").getReduce());
+		
+		assertTrue(result.containsKey("by_special3"));
+		assertFalse("map function should be loaded from file in classpath", result.get("by_special3").getMap().startsWith("classpath:"));
+		assertNull("reduce function should not be defined", result.get("by_special3").getReduce());
+		
+		// serialize all views so that we know they are valid in json. 
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValueAsString(result);
+	}
+        
+        @Test
+	public void views_should_be_generated_for_all_annotations_unix() throws Exception {
+		Map<String, DesignDocument.View> result = gen.generateViews(new TestRepoUnix());
 		assertTrue(result.containsKey("view_1"));
 		assertTrue(result.containsKey("view_2"));
 		assertTrue(result.containsKey("view_3"));
@@ -217,6 +330,120 @@ public class SimpleViewGeneratorTest {
 		}
 		
 		@View(name = "by_special3", map = "classpath:map.js")
+		public List<String> findBySpecialView3() {
+			return null;
+		}
+		
+		public List<String> findBySomethingElse() {
+			return null;
+		}
+	}
+        
+        @Views({
+		@View(name = "view_1", map = "function(doc) { ... }"),
+		@View(name = "view_2", map = "function(doc) { ... }"),
+		@View(name = "view_3", map = "function(doc) { ... }")
+	})
+	public static class TestRepoWindows {
+	
+		@View(name = "all", map = ALL_VIEW_FUNCTION)
+		public List<TestDoc> findAll() {
+			return null;
+		}
+		
+		@GenerateView
+		public List<TestDoc> findByName() {
+			return null;
+		}
+		
+		@GenerateView
+		public List<TestDoc> findByLastName() {
+			return null;
+		}
+		
+		@GenerateView
+		public TestDoc findByDomainName(String name) {
+			return null;
+		}
+		
+		@GenerateView(field = "accountId")
+		public TestDoc findByAccount(String name) {
+			return null;
+		}
+	
+		@View(name = "by_special", map = "function(doc) { ... }")
+		public List<String> findBySpecialView() {
+			return null;
+		}
+		
+		@View(name = "by_complicated", file="complicated_view_windows.json")
+		public String findByComplicatedView(String input) {
+			return "";
+		}
+	
+		@View(name = "by_special2", map = "classpath:map_windows.js", reduce = "classpath:reduce_windows.js")
+		public List<String> findBySpecialView2() {
+			return null;
+		}
+		
+		@View(name = "by_special3", map = "classpath:map_windows.js")
+		public List<String> findBySpecialView3() {
+			return null;
+		}
+		
+		public List<String> findBySomethingElse() {
+			return null;
+		}
+	}
+        
+        @Views({
+		@View(name = "view_1", map = "function(doc) { ... }"),
+		@View(name = "view_2", map = "function(doc) { ... }"),
+		@View(name = "view_3", map = "function(doc) { ... }")
+	})
+	public static class TestRepoUnix {
+	
+		@View(name = "all", map = ALL_VIEW_FUNCTION)
+		public List<TestDoc> findAll() {
+			return null;
+		}
+		
+		@GenerateView
+		public List<TestDoc> findByName() {
+			return null;
+		}
+		
+		@GenerateView
+		public List<TestDoc> findByLastName() {
+			return null;
+		}
+		
+		@GenerateView
+		public TestDoc findByDomainName(String name) {
+			return null;
+		}
+		
+		@GenerateView(field = "accountId")
+		public TestDoc findByAccount(String name) {
+			return null;
+		}
+	
+		@View(name = "by_special", map = "function(doc) { ... }")
+		public List<String> findBySpecialView() {
+			return null;
+		}
+		
+		@View(name = "by_complicated", file="complicated_view_unix.json")
+		public String findByComplicatedView(String input) {
+			return "";
+		}
+	
+		@View(name = "by_special2", map = "classpath:map_unix.js", reduce = "classpath:reduce_unix.js")
+		public List<String> findBySpecialView2() {
+			return null;
+		}
+		
+		@View(name = "by_special3", map = "classpath:map_unix.js")
 		public List<String> findBySpecialView3() {
 			return null;
 		}
