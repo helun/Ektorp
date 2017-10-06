@@ -39,44 +39,7 @@ public class SimpleViewGeneratorTest {
 	String expectedDocrefsFunctionWhereChildHasDiscriminator = "function(doc) { if(doc.otherField && doc.parentId) { emit([doc.parentId, 'children'], null); } }";
 	
 	SimpleViewGenerator gen = new SimpleViewGenerator();
-	
-        /**
-         * Duplicate the loaded external resources to ensure line-endings are
-         * used from both Windows and Unix whatever platform we are on
-         * 
-         * @throws IOException 
-         */
-        @BeforeClass
-        public static void createWindowsUnixLineEndings() throws IOException {
-                createWindowsUnixLineEndings("complicated_view.json");
-                createWindowsUnixLineEndings("map.js");
-                createWindowsUnixLineEndings("reduce.js");
-        }
-        
-        private static void createWindowsUnixLineEndings(String resource) throws IOException {
-                // Find the resource in the classpath and create duplicates
-                File original = new File(SimpleViewGeneratorTest.class.getResource(resource).getPath());
-                File windows = new File(original.getAbsolutePath().replace(".js", "_windows.js"));
-                File unix = new File(original.getAbsolutePath().replace(".js", "_unix.js"));
-                FileReader reader = new FileReader(original);
-                FileWriter writer1 = new FileWriter(windows);
-                FileWriter writer2 = new FileWriter(unix);
-                // Read from the original and write to the duplicates
-                char[] buffer = new char[1024];
-                int r = reader.read(buffer);
-                while(r>-1) {
-                    // Replace any Windows line-endings with Unix and vice versa
-                    writer1.append(new String(buffer, 0, r).replaceAll("([^\r])\n", "$1\r\n"));
-                    writer2.append(new String(buffer, 0, r).replaceAll("\r\n", "\n"));
-                    r = reader.read(buffer);
-                }
-                writer1.flush();
-                writer1.close();
-                writer2.flush();
-                writer2.close();
-                reader.close();
-        }
-	
+		
 	@Test
 	public void testGenerateFindByView() {
 		DesignDocument.View v = gen.generateFindByView("name", "");
@@ -376,17 +339,35 @@ public class SimpleViewGeneratorTest {
 			return null;
 		}
 		
-		@View(name = "by_complicated", file="complicated_view_windows.json")
+		@View(name = "by_complicated", file="complicated_view.json")
 		public String findByComplicatedView(String input) {
 			return "";
 		}
 	
-		@View(name = "by_special2", map = "classpath:map_windows.js", reduce = "classpath:reduce_windows.js")
+		@View(name = "by_special2", map = "function(doc) {\r\n" +
+                    "  if(doc.tags.length > 0) {\r\n" +
+                    "    for(var idx in doc.tags) {\r\n" +
+                    "      emit(doc.tags[idx], null);\r\n" +
+                    "    }\r\n" +
+                    "  }\r\n" +
+                    "}", reduce = "function(keys, values) {\r\n" +
+                    "  var sum = 0;\r\n" +
+                    "  for(var idx in values) {\r\n" +
+                    "    sum = sum + values[idx];\r\n" +
+                    "  }\r\n" +
+                    "  return sum;\r\n" +
+                    "}")
 		public List<String> findBySpecialView2() {
 			return null;
 		}
 		
-		@View(name = "by_special3", map = "classpath:map_windows.js")
+		@View(name = "by_special3", map = "function(doc) {\r\n" +
+                    "  if(doc.tags.length > 0) {\r\n" +
+                    "    for(var idx in doc.tags) {\r\n" +
+                    "      emit(doc.tags[idx], null);\r\n" +
+                    "    }\r\n" +
+                    "  }\r\n" +
+                    "}")
 		public List<String> findBySpecialView3() {
 			return null;
 		}
@@ -433,17 +414,35 @@ public class SimpleViewGeneratorTest {
 			return null;
 		}
 		
-		@View(name = "by_complicated", file="complicated_view_unix.json")
+		@View(name = "by_complicated", file="complicated_view.json")
 		public String findByComplicatedView(String input) {
 			return "";
 		}
 	
-		@View(name = "by_special2", map = "classpath:map_unix.js", reduce = "classpath:reduce_unix.js")
+		@View(name = "by_special2", map = "function(doc) {\n" +
+                    "  if(doc.tags.length > 0) {\n" +
+                    "    for(var idx in doc.tags) {\n" +
+                    "      emit(doc.tags[idx], null);\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}", reduce = "function(keys, values) {\n" +
+                    "  var sum = 0;\n" +
+                    "  for(var idx in values) {\n" +
+                    "    sum = sum + values[idx];\n" +
+                    "  }\n" +
+                    "  return sum;\n" +
+                    "}")
 		public List<String> findBySpecialView2() {
 			return null;
 		}
 		
-		@View(name = "by_special3", map = "classpath:map_unix.js")
+		@View(name = "by_special3", map = "function(doc) {\n" +
+                    "  if(doc.tags.length > 0) {\n" +
+                    "    for(var idx in doc.tags) {\n" +
+                    "      emit(doc.tags[idx], null);\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}")
 		public List<String> findBySpecialView3() {
 			return null;
 		}
