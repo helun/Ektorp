@@ -39,8 +39,8 @@ public class SimpleViewGeneratorTest {
 	String expectedDocrefsFunctionWhereChildHasDiscriminator = "function(doc) { if(doc.otherField && doc.parentId) { emit([doc.parentId, 'children'], null); } }";
 	
 	SimpleViewGenerator gen = new SimpleViewGenerator();
-		
-	@Test
+
+        @Test
 	public void testGenerateFindByView() {
 		DesignDocument.View v = gen.generateFindByView("name", "");
 		assertEquals(expectedFindByNameMapFunction, v.getMap());
