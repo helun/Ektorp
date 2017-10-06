@@ -243,7 +243,7 @@ public class SimpleViewGenerator {
 		if (shouldLoadFunctionFromClassPath(mapPath)) {
 			map = loadResourceFromClasspath(repositoryClass, mapPath.substring(10));
 		} else {
-			map = mapPath;
+			map = mapPath.replaceAll(LINE_ENDING, "");
 		}
 
 		String reducePath = input.reduce();
@@ -251,7 +251,7 @@ public class SimpleViewGenerator {
 		if (shouldLoadFunctionFromClassPath(reducePath)) {
 			reduce = loadResourceFromClasspath(repositoryClass, reducePath.substring(10));
 		} else {
-			reduce = reducePath.length() > 0 ? reducePath : null;
+			reduce = reducePath.length() > 0 ? reducePath.replaceAll(LINE_ENDING, "") : null;
 		}
 		return new DesignDocument.View(map, reduce);
 	}
