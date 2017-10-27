@@ -1,6 +1,5 @@
 package org.ektorp;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.ektorp.http.URI;
+import org.ektorp.impl.ObjectMapperFactory;
+import org.ektorp.impl.CachingObjectMapperFactory;
 import org.ektorp.impl.StdObjectMapperFactory;
 import org.ektorp.util.Assert;
 import org.ektorp.util.Exceptions;
@@ -84,13 +85,19 @@ public class ViewQuery {
 	}
 	
 
-	private final static ObjectMapper DEFAULT_MAPPER = new StdObjectMapperFactory().createObjectMapper();
+	private static ObjectMapperFactory DEFAULT_OBJECT_MAPPER_FACTORY = new CachingObjectMapperFactory(new StdObjectMapperFactory());
+	
+	public static void setDefaultObjectMapperFactory(ObjectMapperFactory objectMapperFactory) {
+		DEFAULT_OBJECT_MAPPER_FACTORY = objectMapperFactory;
+	}
+	
+	
 	private final static String ALL_DOCS_VIEW_NAME = "_all_docs";
 	private final static int NOT_SET = -1;
 
 	private final Map<String, String> queryParams = new TreeMap<String, String>();
 
-	private ObjectMapper mapper;
+	private final ObjectMapper mapper;
 
 	private String dbPath;
 	private String designDocId;
@@ -120,7 +127,7 @@ public class ViewQuery {
 	private String listName;
 
 	public ViewQuery() {
-		mapper = DEFAULT_MAPPER;
+		this(DEFAULT_OBJECT_MAPPER_FACTORY.createObjectMapper());
 	}
 	/**
 	 * Bring your own ObjectMapper.
@@ -747,8 +754,7 @@ public class ViewQuery {
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SA_FIELD_SELF_ASSIGNMENT", "CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"})
 	public ViewQuery clone() {
-		ViewQuery copy = new ViewQuery();
-		copy.mapper = mapper;
+		ViewQuery copy = new ViewQuery(mapper);
 		copy.cacheOk = cacheOk;
 		copy.dbPath = dbPath;
 		copy.descending = descending;
@@ -989,7 +995,7 @@ public class ViewQuery {
 		}
 
 		public String toJson() {
-			return toJson(DEFAULT_MAPPER);
+			return toJson(DEFAULT_OBJECT_MAPPER_FACTORY.createObjectMapper());
 		}
 
 		public String toJson(ObjectMapper mapper) {

@@ -4,7 +4,7 @@
     <artifactId>org.ektorp.parent</artifactId>
     <packaging>pom</packaging>
     <name>Ektorp Parent</name>
-    <version>1.4.5-SNAPSHOT</version>
+    <version>1.5.1-SNAPSHOT</version>
     <description>a Java CouchDB persistence library</description>
     <scm>
         <connection>scm:git:git@github.com:helun/Ektorp.git</connection>
@@ -53,9 +53,10 @@
         <slf4j.version>1.6.4</slf4j.version>
         <log4j.version>1.2.13</log4j.version>
         <mockito.version>1.8.5</mockito.version>
+        <mockito.version>1.8.5</mockito.version>
         <junit.version>4.8.2</junit.version>
         <joda.time.version>2.3</joda.time.version>
-        <jackson.version>2.3.3</jackson.version>
+        <jackson.version>2.6.7</jackson.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <commons.io.version>2.0.1</commons.io.version>
         <httpclient.version>4.3</httpclient.version>
@@ -218,7 +219,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.4</version>
                 <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <additionalparam>${javadoc.opts}</additionalparam>
                 </configuration>
                 <executions>
                     <execution>
@@ -357,6 +358,15 @@
             </activation>
             <properties>
                 <findbugs.plugin.version>3.0.0</findbugs.plugin.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>doclint-java8-disable</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <properties>
+                <javadoc.opts>-Xdoclint:none</javadoc.opts>
             </properties>
         </profile>
     </profiles>
