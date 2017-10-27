@@ -219,7 +219,15 @@ public class ViewQueryTest {
                         .buildQuery();
                 assertTrue(contains(url, "?update_seq=true"));
         }
-	
+
+	@Test
+	public void conflicts_parameter_added() {
+		String url = query
+				.conflicts(true)
+				.buildQuery();
+		assertTrue(contains(url, "?conflicts=true"));
+	}
+
 	@Test
 	public void stale_ok_parameter_added() {
 		String url = query

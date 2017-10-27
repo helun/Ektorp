@@ -119,6 +119,7 @@ public class ViewQuery {
 	private boolean inclusiveEnd = true;
 	private boolean ignoreNotFound = false;
 	private boolean updateSeq = false;
+	private boolean conflicts = false;
 
 	private boolean cacheOk = false;
 
@@ -197,6 +198,10 @@ public class ViewQuery {
     public boolean isUpdateSeq() {
         return updateSeq;
     }
+
+	public boolean isConflicts() {
+		return conflicts;
+	}
 
     public ViewQuery dbPath(String s) {
 		reset();
@@ -615,6 +620,17 @@ public class ViewQuery {
 		return this;
 	}
 
+	/**
+	 * The conflicts option will include the conflicting revisions for each document.
+	 * @param b the conflicts flag
+	 * @return the view query for chained calls
+	 */
+	public ViewQuery conflicts(boolean b) {
+		reset();
+		conflicts = b;
+		return this;
+	}
+
 	public ViewQuery queryParam(String name, String value) {
 		queryParams.put(name, value);
 		return this;
@@ -728,6 +744,11 @@ public class ViewQuery {
 		if(updateSeq) {
 			query.param("update_seq", "true");
 		}
+
+		if (conflicts) {
+			query.param("conflicts", "true");
+		}
+
 		return query;
 	}
 
@@ -758,6 +779,7 @@ public class ViewQuery {
 		copy.startDocId = startDocId;
 		startKey.copyTo(copy.startKey);
 		copy.updateSeq = updateSeq;
+		copy.conflicts = conflicts;
 		copy.viewName = viewName;
 		return copy;
 	}
@@ -819,6 +841,7 @@ public class ViewQuery {
 		result = prime * result + (includeDocs ? 1231 : 1237);
 		result = prime * result + (inclusiveEnd ? 1231 : 1237);
 		result = prime * result + (updateSeq ? 1231 : 1237);
+		result = prime * result + (conflicts ? 1231 : 1237);
 		result = prime * result + ((key == null) ? 0 : key.hashCode());
 		result = prime * result + limit;
 		result = prime * result
@@ -883,6 +906,8 @@ public class ViewQuery {
 		if (inclusiveEnd != other.inclusiveEnd)
 			return false;
 		if (updateSeq != other.updateSeq)
+			return false;
+		if (conflicts != other.conflicts)
 			return false;
 		if (key == null) {
 			if (other.key != null)
