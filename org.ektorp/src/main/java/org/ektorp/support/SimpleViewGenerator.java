@@ -26,7 +26,7 @@ public class SimpleViewGenerator {
 	private final static String ITERABLE_PROPERTY_BODY = "for (var i in doc.%s) {emit(doc.%s[i], doc._id);}";
 	private final static String REFERING_CHILDREN_AS_SET_W_ORDER_BY = "function(doc) { if(%s) { emit([doc.%s, '%s', doc.%s], null); } }";
 	private final static String REFERING_CHILDREN_AS_SET = "function(doc) { if(%s) { emit([doc.%s, '%s'], null); } }";
-	private final static String LINE_ENDING = String.format("%n");
+	private final static String LINE_ENDING = "[\\n\\r]+";
 
 	private SoftReference<ObjectMapper> mapperRef;
 
@@ -243,7 +243,7 @@ public class SimpleViewGenerator {
 		if (shouldLoadFunctionFromClassPath(mapPath)) {
 			map = loadResourceFromClasspath(repositoryClass, mapPath.substring(10));
 		} else {
-			map = mapPath;
+			map = mapPath.replaceAll(LINE_ENDING, "");
 		}
 
 		String reducePath = input.reduce();
@@ -251,7 +251,7 @@ public class SimpleViewGenerator {
 		if (shouldLoadFunctionFromClassPath(reducePath)) {
 			reduce = loadResourceFromClasspath(repositoryClass, reducePath.substring(10));
 		} else {
-			reduce = reducePath.length() > 0 ? reducePath : null;
+			reduce = reducePath.length() > 0 ? reducePath.replaceAll(LINE_ENDING, "") : null;
 		}
 		return new DesignDocument.View(map, reduce);
 	}
