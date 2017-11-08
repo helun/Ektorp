@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -165,6 +166,20 @@ public class SimpleViewGeneratorTest {
 		DiscriminatingRepo repo = new DiscriminatingRepo(db);
 		Map<String, DesignDocument.View> result = gen.generateViews(repo);
 		assertEquals(expectedDocrefsFunctionWhereChildHasDiscriminator, result.get("ektorp_docrefs_children").getMap());
+	}
+
+	@Test
+	public void given_json_view_file_with_unix_line_endings_then_should_parse_successfully() throws IOException {
+		SimpleViewGenerator generator = new SimpleViewGenerator();
+		DesignDocument.View view = generator.loadViewFromString(new ObjectMapper(), " {\"map\":\"function(doc) {\n  emit(doc._id, doc);\n  }\n\"}");
+		assertEquals("function(doc) {  emit(doc._id, doc);  }", view.getMap());
+	}
+
+	@Test
+	public void given_json_view_file_with_dos_line_endings_then_should_parse_successfully() throws IOException {
+		SimpleViewGenerator generator = new SimpleViewGenerator();
+		DesignDocument.View view = generator.loadViewFromString(new ObjectMapper(), " {\"map\":\"function(doc) {\r\n  emit(doc._id, doc);\r\n  }\r\n\"}");
+		assertEquals("function(doc) {  emit(doc._id, doc);  }", view.getMap());
 	}
 	
 // ******************************* S U P P O R T   T Y P E S   B E L O W ********************************* //
