@@ -49,21 +49,33 @@ public class PageResponseHandler<T> extends StdResponseHandler<Page<T>> {
 		
 		int rowsSize = rows.size();
 		LOG.debug("got {} rows", rowsSize);
+		String nextId = null;
+		JsonNode nextKey = null;
+		String firstId = null;
+		JsonNode firstKey = null;
+
 		if (pageRequest.isBack()) {
 			Collections.reverse(rows);
+			//since rows are now reversed
+			nextId = parser.getFirstId();
+			nextKey = parser.getFirstKey();
+			firstId = parser.getLastId();
+			firstKey = parser.getLastKey();
+		}else {
+			nextId = parser.getLastId();
+			nextKey = parser.getLastKey();
+			firstId = parser.getFirstId();
+			firstKey = parser.getFirstKey();
 		}
 		int offset = pageRequest.isBack() ? 1 : 1;
 		
-		String nextId = parser.getLastId();
-		JsonNode nextKey = parser.getLastKey();
+		PageRequest.Builder nextRequestBuilder = pageRequest.nextRequest(nextKey, nextId).back(false);
+		PageRequest.Builder prevRequestBuilder = pageRequest.nextRequest(firstKey, firstId).back(true);
+		int currentPage = pageRequest.getPageNo();
 		
-		
-		PageRequest.Builder b = pageRequest.nextRequest(nextKey, nextId);
-		int currentPage = b.getPageNo();
-		
-		PageRequest nextRequest = b.page(currentPage + 1).build();
+		PageRequest nextRequest = nextRequestBuilder.page(currentPage + 1).build();
 		PageRequest previousRequest = currentPage == 1 ? PageRequest.firstPage(pageRequest.getPageSize()) :
-															b.back(true).page(currentPage - 1).build();
+														prevRequestBuilder.page(currentPage - 1).build();
 		
 		boolean hasMore = rowsSize == pageRequest.getPageSize() + offset;
 		if (hasMore) {	
