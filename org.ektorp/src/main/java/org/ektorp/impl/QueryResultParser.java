@@ -32,7 +32,7 @@ public class QueryResultParser<T> {
     private static final String OFFSET_FIELD_NAME = "offset";
     private static final String UPDATE_SEQUENCE_NAME = "update_seq";
 
-    private int totalRows = -1;
+    private long totalRows = -1;
     private long offset = -1;
     private List<T> rows;
     private Long updateSequence;
@@ -74,7 +74,7 @@ public class QueryResultParser<T> {
             if (OFFSET_FIELD_NAME.equals(currentName)) {
                 offset = jp.getLongValue();
             } else if (TOTAL_ROWS_FIELD_NAME.equals(currentName)) {
-                totalRows = jp.getIntValue();
+                totalRows = jp.getLongValue();
             } else if (ROWS_FIELD_NAME.equals(currentName)) {
                 rows = new ArrayList<T>();
                 parseRows(jp);
@@ -165,7 +165,7 @@ public class QueryResultParser<T> {
         return ignoreNotFound && NOT_FOUND_ERROR.equals(error);
     }
 
-    public int getTotalRows() {
+    public long getTotalRows() {
         return totalRows;
     }
 
