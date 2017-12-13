@@ -110,6 +110,9 @@ public class StreamingViewResult implements Serializable, Iterable<Row>, Closeab
 			    JsonNode node;
 			    do {
     				String doc = reader.readLine();
+    				while (doc != null && doc.isEmpty()) {
+    					doc = reader.readLine();
+    				}
     				if (doc == null || doc.equals("]}")) {
     					reader.close();
 					closed = true;
