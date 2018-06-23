@@ -68,10 +68,17 @@ public class StdResponseHandler<T> implements ResponseCallback<T> {
 		return mapper.readTree(inputStream);
 	}
 
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+		    value="NP_LOAD_OF_KNOWN_NULL_VALUE", 
+		    justification="The response should be null only if it is not a valid OK message. "
+		    		+ "In that case, it is safe to die. In any case, this method should be owerwritten if the class is extended.")
 	protected static <T> T checkResponseBodyOkAndReturnDefaultValue(HttpResponse hr, T defaultValue, ObjectMapper mapper) throws IOException {
-		InputStream content = hr.getContent();
+		InputStream content = null;
 		try {
 			content = hr.getContent();
+			if(content == null){
+				return defaultValue;
+			}
 			JsonNode body = responseBodyAsNode(content, MAPPER);
 			JsonNode okNode = body.get("ok");
 			if (okNode != null) {
@@ -90,7 +97,7 @@ public class StdResponseHandler<T> implements ResponseCallback<T> {
 	public T error(HttpResponse hr) {
 		throw StdResponseHandler.createDbAccessException(hr);
 	}
-
+	
 	public T success(HttpResponse hr) throws Exception {
 		return checkResponseBodyOkAndReturnDefaultValue(hr, null, MAPPER);
 	}
