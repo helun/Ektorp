@@ -333,7 +333,7 @@ public class StdHttpClient implements HttpClient {
 			if (enableSSL) {
 				try {
 					if (sslSocketFactory == null) {
-						SSLContext context = SSLContext.getInstance("TLS");
+						SSLContext context = SSLContext.getInstance("TLSv1.2");
 
 						if (relaxedSSLSettings) {
 							context.init(
