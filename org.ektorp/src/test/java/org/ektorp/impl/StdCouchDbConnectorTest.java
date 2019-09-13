@@ -539,7 +539,7 @@ public class StdCouchDbConnectorTest {
         assertEquals(1, info.getDocCount());
         assertEquals(1, info.getDocDelCount());
         assertEquals(5, info.getDiskFormatVersion());
-        assertEquals(1, info.getPurgeSeq());
+        assertEquals("1", info.getPurgeSeq());
         assertEquals(4, info.getUpdateSeq());
     }
 
