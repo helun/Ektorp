@@ -82,7 +82,7 @@ public class DbInfo implements Serializable {
 	/**
 	 * @return Number of purge operations
 	 */
-	public int getPurgeSeq() {
+	public String getPurgeSeq() {
 		return purgeSeq;
 	}
 	/**
