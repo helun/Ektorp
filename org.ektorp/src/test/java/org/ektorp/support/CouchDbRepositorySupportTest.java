@@ -85,6 +85,7 @@ public class CouchDbRepositorySupportTest {
 			.dbPath("test")
 			.designDocId("_design/TestDoc")
 			.includeDocs(true)
+			.reduce(false)
 			.viewName("all");
 
 		ViewQuery created = ac.getValue();

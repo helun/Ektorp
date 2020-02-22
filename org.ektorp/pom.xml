@@ -4,12 +4,12 @@
 	<artifactId>org.ektorp</artifactId>
 	<packaging>jar</packaging>
 	<name>Ektorp</name>
-	<version>1.5.1-SNAPSHOT</version>
+	<version>1.5.1-RC1</version>
 	<description>a Java CouchDB persistence library</description>
 	<parent>
 		<artifactId>org.ektorp.parent</artifactId>
 		<groupId>org.ektorp</groupId>
-		<version>1.5.1-SNAPSHOT</version>
+		<version>1.5.1-RC1</version>
 	</parent>
 
 	<dependencies>
@@ -93,4 +93,15 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 	</dependencies>
+  
+   <distributionManagement>
+      <repository>
+        <id>nexus-releases</id>
+        <url>http://nexus.dream-world.in/content/repositories/releases</url>
+      </repository>
+      <snapshotRepository>
+        <id>nexus-snapshots</id>
+        <url>http://nexus.dream-world.in/content/repositories/snapshots</url>
+      </snapshotRepository>
+     </distributionManagement>
 </project>
