@@ -94,14 +94,14 @@
 		</dependency>
 	</dependencies>
   
-  <distributionManagement>
-    <repository>
-      <id>nexus3-releases</id>
-      <url>http://nexus3.dreamworld.solutions:8081/repository/maven-releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>nexus3-snapshots</id>
-      <url>http://nexus3.dreamworld.solutions:8081/repository/maven-snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
+   <distributionManagement>
+      <repository>
+        <id>nexus-releases</id>
+        <url>http://nexus.dream-world.in/content/repositories/releases</url>
+      </repository>
+      <snapshotRepository>
+        <id>nexus-snapshots</id>
+        <url>http://nexus.dream-world.in/content/repositories/snapshots</url>
+      </snapshotRepository>
+     </distributionManagement>
 </project>
