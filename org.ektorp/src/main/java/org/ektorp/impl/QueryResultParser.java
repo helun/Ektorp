@@ -72,14 +72,14 @@ public class QueryResultParser<T> {
         while (jp.nextValue() != JsonToken.END_OBJECT) {
             String currentName = jp.getCurrentName();
             if (OFFSET_FIELD_NAME.equals(currentName)) {
-                offset = jp.getLongValue();
+                offset = jp.getValueAsLong();
             } else if (TOTAL_ROWS_FIELD_NAME.equals(currentName)) {
-                totalRows = jp.getIntValue();
+                totalRows = jp.getValueAsInt();
             } else if (ROWS_FIELD_NAME.equals(currentName)) {
                 rows = new ArrayList<T>();
                 parseRows(jp);
             } else if (UPDATE_SEQUENCE_NAME.equals(currentName)) {
-                updateSequence = jp.getLongValue();
+                updateSequence = jp.getValueAsLong();
             } else {
                 // Handle cloudant errors.
                 errorFields.put(jp.getCurrentName(), jp.getText());
@@ -122,8 +122,9 @@ public class QueryResultParser<T> {
         // dataField (all rows were error),
         // or we point at an END_OBJECT (end of a row) and have determined which
         // data field to use.
-        if (dataField == null)
+        if (dataField == null) {
             return;
+        }
 
         // Parse all the remaining rows; jp points at START_OBJECT except after
         // the last row
