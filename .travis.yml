@@ -18,3 +18,7 @@ env:
     - JACKSON_VERSION=2.3.0
 script:
   - mvn clean install -Djackson.version=$JACKSON_VERSION
+
+cache:
+  directories:
+  - $HOME/.m2
