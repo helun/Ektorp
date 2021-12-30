@@ -10,27 +10,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author henrik
  *
  */
-public class Revisions implements Serializable {
+public class Revisions extends com.dw.couchdb.dto.Revisions implements Serializable {
 
 	private static final long serialVersionUID = -4563658160451114070L;
-	private final long start;
-	private final List<String> ids;
 
 	@JsonCreator
 	public Revisions(@JsonProperty("start") long start, @JsonProperty("ids") List<String> ids) {
-		this.start = start;
-		this.ids = ids;
-	}
-	/**
-	 * @return A list of valid revision IDs, in reverse order (latest first)
-	 */
-	public List<String> getIds() {
-		return ids;
-	}
-	/**
-	 * @return Prefix number for the latest revision
-	 */
-	public long getStart() {
-		return start;
+		super(start, ids);
 	}
 }

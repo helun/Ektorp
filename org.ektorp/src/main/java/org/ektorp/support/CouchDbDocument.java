@@ -10,13 +10,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ektorp.*;
 import org.ektorp.util.*;
 
+import com.dw.couchdb.dto.CouchdbDocument;
+import com.dw.couchdb.dto.Revisions;
 /**
  *
  * @author henrik lundgren
  *
  */
 @JsonInclude(Include.NON_NULL)
-public class CouchDbDocument implements Serializable {
+public class CouchDbDocument extends CouchdbDocument implements Serializable {
 
     public static final String ATTACHMENTS_NAME = "_attachments";
 
@@ -74,22 +76,8 @@ public class CouchDbDocument implements Serializable {
 	}
 
 	@JsonProperty("_conflicts")
-	void setConflicts(List<String> conflicts) {
+	public void setConflicts(List<String> conflicts) {
 		this.conflicts = conflicts;
-	}
-
-	@JsonProperty("_revisions")
-	void setRevisions(Revisions r) {
-		this.revisions = r;
-	}
-
-	/**
-	 * Note: Will only be populated if this document has been loaded with the revisions option = true.
-	 * @return
-	 */
-	@JsonIgnore
-	public Revisions getRevisions() {
-		return revisions;
 	}
 
 	/**
@@ -122,5 +110,15 @@ public class CouchDbDocument implements Serializable {
 		}
 		attachments.put(a.getId(), a);
 	}
+	
+	@JsonIgnore
+	  public Revisions getRevisions() {
+	    return revisions;
+	  }
+
+	  @JsonProperty("_revisions")
+	  public void setRevisions(Revisions allRevisions) {
+	    this.revisions = allRevisions;
+	  }
 
 }

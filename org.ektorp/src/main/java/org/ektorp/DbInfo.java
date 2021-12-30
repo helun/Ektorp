@@ -31,7 +31,7 @@ public class DbInfo implements Serializable {
 	@JsonProperty("instance_start_time")
 	long instanceStartTime;
 	@JsonProperty("purge_seq")
-	int purgeSeq;
+	String purgeSeq;
 	@JsonProperty("update_seq")
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SE_BAD_FIELD")
 	JsonNode updateSeq;
@@ -82,7 +82,7 @@ public class DbInfo implements Serializable {
 	/**
 	 * @return Number of purge operations
 	 */
-	public int getPurgeSeq() {
+	public String getPurgeSeq() {
 		return purgeSeq;
 	}
 	/**
