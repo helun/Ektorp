@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.junit.*;
 
+import com.dw.couchdb.dto.Revisions;
+
 import java.io.InputStream;
 
 public class CouchDbDocumentTest {
