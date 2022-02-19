@@ -1,9 +1,6 @@
 package org.ektorp.support;
 
-import java.util.*;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.Map;
 
 /**
  * Provides convenience field and methods for holding unmapped fields in JSON serialization / deserialization.
@@ -17,34 +14,11 @@ public class OpenCouchDbDocument extends CouchDbDocument {
 
 	private static final long serialVersionUID = 4252717502666745598L;
 
-	private Map<String, Object> anonymous;
-
 	/**
 	 * @return a Map containing fields that did not map to any other field in the class during object deserializarion from a JSON document.
 	 */
-	@JsonAnyGetter
 	public Map<String, Object> getAnonymous() {
-		return anonymous();
-	}
-
-	/**
-	 *
-	 * @param key
-	 * @param value
-	 */
-	@JsonAnySetter
-	public void setAnonymous(String key, Object value) {
-		anonymous().put(key, value);
-	}
-	/**
-	 * Provides lay init for the anonymous Map
-	 * @return
-	 */
-	private Map<String, Object> anonymous() {
-		if (anonymous == null) {
-			anonymous = new HashMap<String, Object>();
-		}
-		return anonymous;
+		return super.extraFields();
 	}
 
 }

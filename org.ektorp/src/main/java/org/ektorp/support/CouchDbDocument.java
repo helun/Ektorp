@@ -10,19 +10,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ektorp.*;
 import org.ektorp.util.*;
 
+import com.dw.couchdb.dto.CouchdbDocument;
+import com.dw.couchdb.dto.Revisions;
 /**
  *
  * @author henrik lundgren
  *
  */
 @JsonInclude(Include.NON_NULL)
-public class CouchDbDocument implements Serializable {
+public class CouchDbDocument extends CouchdbDocument implements Serializable {
 
     public static final String ATTACHMENTS_NAME = "_attachments";
 
 	private static final long serialVersionUID = 1L;
 	private String id;
-	private String revision;
 	private Map<String, Attachment> attachments;
 	private List<String> conflicts;
 	private Revisions revisions;
@@ -45,22 +46,20 @@ public class CouchDbDocument implements Serializable {
 	}
 
 
+	@Deprecated
 	@JsonProperty("_rev")
 	public String getRevision() {
-		return revision;
+		return super.getRev();
 	}
 
+	@Deprecated
 	@JsonProperty("_rev")
 	public void setRevision(String s) {
-		// no empty strings thanks
-		if (s != null && s.length() == 0) {
-			return;
-		}
-		this.revision = s;
+		super.setRev(s);
 	}
 	@JsonIgnore
 	public boolean isNew() {
-		return revision == null;
+		return super.getRev() == null;
 	}
 	
 	@JsonProperty(ATTACHMENTS_NAME)
@@ -74,22 +73,8 @@ public class CouchDbDocument implements Serializable {
 	}
 
 	@JsonProperty("_conflicts")
-	void setConflicts(List<String> conflicts) {
+	public void setConflicts(List<String> conflicts) {
 		this.conflicts = conflicts;
-	}
-
-	@JsonProperty("_revisions")
-	void setRevisions(Revisions r) {
-		this.revisions = r;
-	}
-
-	/**
-	 * Note: Will only be populated if this document has been loaded with the revisions option = true.
-	 * @return
-	 */
-	@JsonIgnore
-	public Revisions getRevisions() {
-		return revisions;
 	}
 
 	/**
@@ -122,5 +107,15 @@ public class CouchDbDocument implements Serializable {
 		}
 		attachments.put(a.getId(), a);
 	}
+	
+	@JsonIgnore
+	  public Revisions getRevisions() {
+	    return revisions;
+	  }
+
+	  @JsonProperty("_revisions")
+	  public void setRevisions(Revisions allRevisions) {
+	    this.revisions = allRevisions;
+	  }
 
 }
